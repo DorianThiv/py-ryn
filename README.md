@@ -1,23 +1,18 @@
-SERVER PROTOTYPE :
-
-Layers template : 
-
-core > loaders > managers > registries > providers > filters > binders <-- rawdata
-
 # SERVER PROTOTYPE
 
 This server is a prototype to manage differents data with generic managers. The server load that managers as a module.
 
 ## Getting Started
 
-Command : ./your-core.py
+Layers template : 
+core > loaders > managers > registries > providers > filters > binders <-- rawdata
 
 ### Prerequisites
 
 What things you need to install the software and how to install them
 
 ```
-Give examples
+Execute : ./your-core.py
 ```
 
 ### Installing
