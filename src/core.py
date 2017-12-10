@@ -4,25 +4,28 @@
 import os
 import sys
 
-import interfaces
+from bases import BaseCore
 
-from interfaces import ICore
 from loader import Loader
 
-class Core(ICore):
+class Core(BaseCore):
 
-    def __init__(self):
-        pass
+    def __init__(self, ref, name):
+        super().__init__(ref, name)
 
     def __repr__(self):
         pass
 
     def __str__(self):
-        return "[SERVER]"
+        return "__CORE__ = (ref : {}, name : {}".format(self.ref, self.name)
+
+    def load(self):
+        pass
 
     def start(self):
         managers = ["mdlcmd", "mdltest"]
         self.loader = Loader(managers)
+        print(self)
         print(self.loader)
 
     def pause(self):
@@ -32,7 +35,7 @@ class Core(ICore):
         pass
 
 def main():
-    core = Core()
+    core = Core("000-012", "core")
     core.start()
 
 if __name__ == "__main__":
