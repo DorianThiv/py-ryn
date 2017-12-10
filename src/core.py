@@ -37,6 +37,7 @@ class Core(BaseCore):
 def main():
     core = Core("000-012", "core")
     core.start()
+    print(core.__dict__)
 
 if __name__ == "__main__":
     main()
