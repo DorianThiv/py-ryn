@@ -1,7 +1,8 @@
 # Base Manager 
 
-from SATObjects import ISATObject
-from IManager import IManager
+import interfaces
+from interfaces.imanager import IManager
+from interfaces.isatobject import ISATObject
 
 class BaseManager(ISATObject, IManager):
 
