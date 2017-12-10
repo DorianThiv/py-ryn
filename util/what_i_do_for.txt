@@ -1,0 +1,5 @@
+WHAT I DO FOR ...
+
+* For up and down data give frame with [emetter, dest, action(up, down), payload, timestamp, crc] :
+    - using Observer.
+    - using Chain of Responsability.
