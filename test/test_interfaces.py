@@ -7,16 +7,22 @@ class Imanager:
 
     @abstractmethod
     def loadProviders(self):
-        print("Load Providers")
+        pass
     
     @abstractmethod
     def loadRegistry(self):
-        print("Load Registry")
+        pass
 
 class FileManager(Imanager):
 
     def __init__(self):
         pass
+
+    def loadProviders(self):
+        print("Load Providers")
+
+    def loadRegistry(self):
+        print("Load Registry")
 
 if __name__ == "__main__":
     fm = FileManager()
