@@ -1,0 +1,17 @@
+Service State :
+    * Started
+    * Stopped
+    * Suspended
+Service Strat Mode :
+    * Automatic
+    * Manually
+    * Disabled
+
+Manager : 
+    * backup-manager
+    * file-manager
+    * webservice-manager
+    * monitoring-manager
+    * git-manager (ouuf)
+    * user-manager
+    * mysql-manager
