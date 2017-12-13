@@ -12,7 +12,7 @@ class ISATObject:
     def load(self):
         pass
 
-# ICore
+
 class ICore:
     __metaclass__ = ABCMeta
 
@@ -31,8 +31,14 @@ class ICore:
         """ Stop the core """ 
         pass
 
+class ILoader:
+    __metaclass__ = ABCMeta
 
-# IManager
+    @abstractmethod
+    def reload(self):
+        """ Reload Managers """ 
+        pass
+
 class IManager:
     __metaclass__ = ABCMeta
 
@@ -40,7 +46,6 @@ class IManager:
     def debug(self):
         pass
 
-#IProvider
 class IProvider:
     __metaclass__ = ABCMeta
 
@@ -48,7 +53,6 @@ class IProvider:
     def provide(self):
         pass
 
-#IRegistry
 class IRegistry:
     __metaclass__ = ABCMeta
 
@@ -56,7 +60,6 @@ class IRegistry:
     def operate(self):
         pass
 
-# IOperator
 class IOperator:
     __metaclass__ = ABCMeta
 
@@ -68,8 +71,17 @@ class IOperator:
     def up_operate(self):
         pass
 
-# --- Pattern Interfaces :
-# IObserver
+class IBinder:
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def read(self):
+        pass
+
+    @abstractmethod
+    def write(self):
+        pass
+    
 class IObserver:
     __metaclass__ = ABCMeta
 
@@ -77,7 +89,6 @@ class IObserver:
     def update(self):
         pass
 
-# IObservable
 class IObservable:
     __metaclass__ = ABCMeta
 

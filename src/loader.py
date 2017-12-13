@@ -1,4 +1,6 @@
 
+from bases import BaseLoader 
+
 class ManagerFactory:
     
     @staticmethod
@@ -10,22 +12,25 @@ class ManagerFactory:
                 return m                
             except:
                 print("Except : ErrorLoadModule : {}".format(name)) 
-        if name == "mdltest":
+        if name == "mdlconf":
             try:
-                from mdltest.managers import TestManager
-                m = TestManager("111-111", name)
+                from mdlconf.managers import ConfigurationManager
+                m = ConfigurationManager("111-001", name)
                 return m                
             except:
                 print("Except : ErrorLoadModule : {}".format(name)) 
 
-class Loader:
-    def __init__(self, managers):
-        self.managers = {}
-        for manager in managers:
-            self.managers[manager] = ManagerFactory.make(manager)
+class Loader(BaseLoader):
+    def __init__(self):
+        super().__init__()
     
     def __str__(self):
         ret = ""
         for manager in self.managers:
             ret += "{}\n".format(self.managers[manager])
         return ret
+
+    def load(self, managers):
+        self.managers = {}
+        for manager in managers:
+            self.managers[manager] = ManagerFactory.make(manager)

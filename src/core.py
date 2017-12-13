@@ -17,14 +17,15 @@ class Core(BaseCore):
         pass
 
     def __str__(self):
-        return "__CORE__ = (ref : {}, name : {}".format(self.ref, self.name)
+        return "__CORE__ = (ref : {}, name : {})".format(self.ref, self.name)
 
     def load(self):
         pass
 
     def start(self):
-        managers = ["mdlcmd", "mdltest"]
-        self.loader = Loader(managers)
+        managers = ["mdlcmd", "mdlconf"]
+        self.loader = Loader()
+        self.loader.load(managers)
         print(self)
         print(self.loader)
 
@@ -37,7 +38,6 @@ class Core(BaseCore):
 def main():
     core = Core("000-012", "core")
     core.start()
-    print(core.__dict__)
 
 if __name__ == "__main__":
     main()
