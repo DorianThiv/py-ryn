@@ -5,7 +5,6 @@ import os
 import sys
 
 from bases import BaseCore
-
 from loader import Loader
 
 class Core(BaseCore):
