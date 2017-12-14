@@ -9,9 +9,6 @@ class ConfigurationManager(BaseManager):
 
 	def __init__(self, ref, name):
 		super().__init__(ref, name)
-		self.providers = {}
-		self.registries = {}
-		self.binders = {}
 		self.load()
 
 	def __str__(self):
@@ -30,4 +27,5 @@ class ConfigurationManager(BaseManager):
 		self.providers[p.name] = p
 		self.registries["conf-registry"].register(p)
 		self.binders["conf-binder"] = ConfigurationBinder("123-154", "conf-binder", self.registries["conf-registry"])
+		self.binders["conf-binder"].read()
 		

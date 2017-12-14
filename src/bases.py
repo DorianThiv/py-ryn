@@ -47,6 +47,9 @@ class BaseManager(ISATObject, IManager):
     def __init__(self, ref, name):
         self.ref = ref
         self.name = name
+        self.providers = {}
+        self.registries = {}
+        self.binders = {}
 
     def load(self):
         pass
@@ -74,6 +77,7 @@ class BaseRegistry(ISATObject, IRegistry, IObservable):
     def __init__(self, ref, name):
         self.ref = ref
         self.name = name
+        self.observers = []
 
     def load(self):
         pass

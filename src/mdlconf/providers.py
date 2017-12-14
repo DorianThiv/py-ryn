@@ -14,7 +14,9 @@ class ConfigurationProvider(BaseProvider):
         
 
     def provide(self):
+        """  """
         pass
 
-    def update(self):
+    def update(self, frame):
+        """ Update to notify the manager """
         pass

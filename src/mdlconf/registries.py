@@ -7,17 +7,19 @@ class ConfigurationRegistry(BaseRegistry):
     def __init__(self, ref, name):
         super().__init__(ref, name)
 
+
     def __str__(self):
         return "__CONFIGREGISTRY__ = (ref : {}, name : {})\n".format(self.ref, self.name)
 
-    def load(self):
-        pass
-
+    def load(self, providers):
+        for provider in providers:
+            self.observers.append(provider)
+            
     def operate(self):
         pass
 
     def register(self, observer):
-        pass
+        self.observers.append(observer)
     
     def unregister(self, observer):
         pass
@@ -25,5 +27,6 @@ class ConfigurationRegistry(BaseRegistry):
     def unregister_all(self):
         pass
 
-    def observers_update(self):
-        pass
+    def observers_update(self, emitter, data):
+        for observer in self.observers:
+            observer.update(data)
