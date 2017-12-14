@@ -1,5 +1,5 @@
 
-from interfaces import *
+from interfaces import ISATObject, ICore, ILoader, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable 
 
 class BaseCore(ISATObject, ICore):
     def __init__(self, ref, name):
@@ -25,6 +25,7 @@ class BaseCore(ISATObject, ICore):
         pass
 
 class BaseLoader(ISATObject, ILoader):
+    
     def __init__(self, ref, name):
         self.ref = ref
         self.name = name
@@ -36,13 +37,13 @@ class BaseLoader(ISATObject, ILoader):
         return "__BASELOADER__"
 
     def load(self):
-        pass 
+        pass
 
     def reload(self):
-        pass 
+        pass
 
 class BaseManager(ISATObject, IManager):
-    
+
     def __init__(self, ref, name):
         self.ref = ref
         self.name = name
@@ -54,7 +55,7 @@ class BaseManager(ISATObject, IManager):
         pass
 
 class BaseProvider(ISATObject, IProvider, IObserver):
-    
+
     def __init__(self, ref, name):
         self.ref = ref
         self.name = name
@@ -68,11 +69,51 @@ class BaseProvider(ISATObject, IProvider, IObserver):
     def update(self):
         pass
 
-class BaseBinder(ISATObject, IBinder):
+class BaseRegistry(ISATObject, IRegistry, IObservable):
+
+    def __init__(self, ref, name):
+        self.ref = ref
+        self.name = name
+
+    def load(self):
+        pass
+
+    def operate(self):
+        pass
+
+    def register(self):
+        pass
+    
+    def unregister(self):
+        pass
+
+    def unregister_all(self):
+        pass
+
+    def observers_update(self):
+        pass
+
+class BaseOperator(ISATObject, IOperator):
     
     def __init__(self, ref, name):
         self.ref = ref
         self.name = name
+
+    def load(self):
+        pass
+
+    def serialize(self):
+        pass
+
+    def deserialize(self):
+        pass
+
+class BaseBinder(ISATObject, IBinder):
+    
+    def __init__(self, ref, name, observable):
+        self.ref = ref
+        self.name = name
+        self.observable = observable
 
     def load(self):
         pass

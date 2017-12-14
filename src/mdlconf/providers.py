@@ -1,7 +1,7 @@
 
 from bases import BaseProvider
 
-class CmdProvider(BaseProvider):
+class ConfigurationProvider(BaseProvider):
 
     def __init__(self, ref, name):
         self.ref = ref
@@ -14,4 +14,4 @@ class CmdProvider(BaseProvider):
         pass
 
     def update(self):
-        pass    
+        pass

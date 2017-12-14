@@ -12,7 +12,6 @@ class ISATObject:
     def load(self):
         pass
 
-
 class ICore:
     __metaclass__ = ABCMeta
 
@@ -64,11 +63,11 @@ class IOperator:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def down_operate(self):
+    def serialize(self):
         pass
 
     @abstractmethod
-    def up_operate(self):
+    def deserialize(self):
         pass
 
 class IBinder:

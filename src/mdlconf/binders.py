@@ -1,11 +1,12 @@
 
+from bases import BaseBinder
 
 class ConfigurationBinder(BaseBinder):
     
-    def __init__(self, ref, name):
-        super().__init__(ref, name)
+    def __init__(self, ref, name, observable):
+        super().__init__(ref, name, observable)
 
-    def load(self):
+    def load(self, observable):
         pass
 
     def read(self, path):

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 ###############################################
 # Observable is the Registry. The Observable
 # contain one or many observer (Providers).
@@ -72,12 +73,11 @@ class Binder(object):
         self.registry.update_observers('Market Rally', something='Hello World') # update all when data is coming
 
 # app.py
- 
 if __name__ == "__main__":
-    
+
     observable = Observable()
-    
-    american_observer = ProviderAmericanStockMarket() 
+
+    american_observer = ProviderAmericanStockMarket()
     observable.register(american_observer)
     european_observer = ProviderEuropeanStockMarket()
     observable.register(european_observer)

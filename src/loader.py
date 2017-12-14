@@ -21,8 +21,8 @@ class ManagerFactory:
                 print("Except : ErrorLoadModule : {}".format(name)) 
 
 class Loader(BaseLoader):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, ref, name):
+        super().__init__(ref, name)
     
     def __str__(self):
         ret = ""
@@ -34,3 +34,6 @@ class Loader(BaseLoader):
         self.managers = {}
         for manager in managers:
             self.managers[manager] = ManagerFactory.make(manager)
+
+    def reload(self):
+        pass
