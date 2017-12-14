@@ -8,7 +8,7 @@ class ConfigurationRegistry(BaseRegistry):
         super().__init__(ref, name)
 
     def __str__(self):
-        return "__CONFIGREGISTRY__ = (ref : {}, name : {})".format(self.ref, self.name)
+        return "__CONFIGREGISTRY__ = (ref : {}, name : {})\n".format(self.ref, self.name)
 
     def load(self):
         pass
@@ -16,10 +16,10 @@ class ConfigurationRegistry(BaseRegistry):
     def operate(self):
         pass
 
-    def register(self):
+    def register(self, observer):
         pass
     
-    def unregister(self):
+    def unregister(self, observer):
         pass
 
     def unregister_all(self):

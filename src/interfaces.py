@@ -92,11 +92,11 @@ class IObservable:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def register(self):
+    def register(self, observer):
         pass
     
     @abstractmethod
-    def unregister(self):
+    def unregister(self, observer):
         pass
 
     @abstractmethod

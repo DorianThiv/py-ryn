@@ -7,7 +7,7 @@ class ConfigurationBinder(BaseBinder):
         super().__init__(ref, name, observable)
 
     def __str__(self):
-        return "__CONFIGBINDER__ = (ref : {}, name : {})".format(self.ref, self.name)
+        return "__CONFIGBINDER__ = (ref : {}, name : {})\n".format(self.ref, self.name)
 
     def load(self, observable):
         pass
@@ -16,7 +16,7 @@ class ConfigurationBinder(BaseBinder):
         import sys
         with open(path, 'r') as f:
             contents = f.read()
-        print contents
+        print(contents)
 
     def write(self):
         pass

@@ -81,10 +81,10 @@ class BaseRegistry(ISATObject, IRegistry, IObservable):
     def operate(self):
         pass
 
-    def register(self):
+    def register(self, observer):
         pass
     
-    def unregister(self):
+    def unregister(self, observer):
         pass
 
     def unregister_all(self):

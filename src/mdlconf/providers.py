@@ -7,10 +7,11 @@ class ConfigurationProvider(BaseProvider):
         super().__init__(ref, name)
     
     def __str__(self):
-        return "__CONFIGPROVIDER__ = (ref : {}, name : {})".format(self.ref, self.name)
+        return "__CONFIGPROVIDER__ = (ref : {}, name : {})\n".format(self.ref, self.name)
 
     def load(self):
         pass
+        
 
     def provide(self):
         pass
