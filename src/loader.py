@@ -1,4 +1,6 @@
 
+from error import ErrorLoadModule
+
 from bases import BaseLoader 
 
 class ManagerFactory:
@@ -10,15 +12,16 @@ class ManagerFactory:
 				from mdlcmd.managers import CmdManager
 				m = CmdManager("111-111", name)
 				return m
-			except:
-				print("Except : ErrorLoadModule : {}".format(name))
+			except Exception as e:
+				raise ErrorLoadModule(e)
 		if name == "mdlconf":
-			from mdlconf.managers import ConfigurationManager
-			m = ConfigurationManager("111-001", name)
-			return m
-			#try:
-			#except:
-				#print("Except : ErrorLoadModule : {}".format(name)) 
+			try:
+				from mdlconf.managers import ConfigurationManager
+				m = ConfigurationManager("111-001", name)
+				return m
+			except Exception as e:
+				raise ErrorLoadModule(e)
+
 
 class Loader(BaseLoader):
 	
