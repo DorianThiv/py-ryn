@@ -22,7 +22,7 @@ class Core(BaseCore):
         pass
 
     def start(self):
-        managers = ["mdlcmd", "mdlconf"]
+        managers = ["mdlcmd", "mdlconf", "mdlbase"]
         self.loader = Loader("000-412", "loader")
         self.loader.load(managers)
         print(self)
