@@ -38,6 +38,24 @@ class ILoader:
         """ Reload Managers """ 
         pass
 
+class IDealer:
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def add(self, manager):
+        """ Add Manager """ 
+        pass
+
+    @abstractmethod
+    def remove(self, mname):
+        """ Remove Manager """ 
+        pass
+
+    @abstractmethod
+    def find(self, mname):
+        """ Find a manager in manager dict """ 
+        pass
+
 class IManager:
     __metaclass__ = ABCMeta
 

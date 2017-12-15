@@ -1,4 +1,6 @@
 
+from dealer import Dealer
+
 from error import ErrorLoadModule
 
 from bases import BaseLoader 
@@ -25,19 +27,25 @@ class ManagerFactory:
 
 class Loader(BaseLoader):
 	
-	def __init__(self, ref, name):
-		super().__init__(ref, name)
+	def __init__(self, ref, name, dealer=None):
+		super().__init__(ref, name, dealer)
 
 	def __str__(self):
-		ret = ""
-		for manager in self.managers:
-			ret += "{}\n".format(self.managers[manager])
-		return ret
+		return "{}".format(self.dealer)
 
 	def load(self, managers):
+		""" 
+			Load all managers in a list. 
+			Create managers with the ManagerFactory and give them 
+			at the dealer to share data. 
+		"""
+		self.dealer = Dealer()
 		self.managers = {}
 		for manager in managers:
-			self.managers[manager] = ManagerFactory.make(manager)
+			m = ManagerFactory.make(manager)
+			m.register(self.dealer)
+			self.dealer.add(m)
+			m.load()
 
 	def reload(self):
 		pass

@@ -9,7 +9,6 @@ class ConfigurationManager(BaseManager):
 
 	def __init__(self, ref, name):
 		super().__init__(ref, name)
-		self.load()
 
 	def __str__(self):
 		ret = "__CONFIGMANAGER__ = (ref : {}, name : {})\n".format(self.ref, self.name)
@@ -23,9 +22,22 @@ class ConfigurationManager(BaseManager):
 
 	def load(self):
 		self.registries["conf-registry"] = ConfigurationRegistry("152-125", "conf-registry")
-		p = ConfigurationProvider("000-498", "conf-provider1")
+		p = ConfigurationProvider("000-498", "conf-provider1", self)
 		self.providers[p.name] = p
 		self.registries["conf-registry"].register(p)
 		self.binders["conf-binder"] = ConfigurationBinder("123-154", "conf-binder", self.registries["conf-registry"])
 		self.binders["conf-binder"].read()
+
+	def register(self, loader):
+		self.observers.append(loader)
+    
+	def unregister(self, observer):
+		pass
+
+	def unregister_all(self):
+		pass
+
+	def observers_update(self, frame):
+		for observer in self.observers:
+			observer.update(frame) 
 		

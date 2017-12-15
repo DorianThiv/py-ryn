@@ -1,5 +1,5 @@
 
-from interfaces import ISATObject, ICore, ILoader, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable 
+from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable 
 
 class BaseCore(ISATObject, ICore):
     def __init__(self, ref, name):
@@ -26,9 +26,10 @@ class BaseCore(ISATObject, ICore):
 
 class BaseLoader(ISATObject, ILoader):
     
-    def __init__(self, ref, name):
+    def __init__(self, ref, name, dealer):
         self.ref = ref
         self.name = name
+        self.managers = {}
 
     def __repr__(self):
         pass
@@ -42,11 +43,38 @@ class BaseLoader(ISATObject, ILoader):
     def reload(self):
         pass
 
-class BaseManager(ISATObject, IManager):
+    def update(self):
+        pass
+
+class BaseDealer(IDealer, IObserver):
+
+    def __init__(self, managers={}):
+        self.managers = managers
+
+    def __repr__(self):
+        pass
+
+    def __str__(self):
+        return "__BASEDEALER__"
+
+    def add(self, manager):
+        pass
+
+    def remove(self, mname):
+        pass
+
+    def find(self, mname):
+        pass
+
+    def update(self, frame):
+        pass
+
+class BaseManager(ISATObject, IManager, IObservable):
 
     def __init__(self, ref, name):
         self.ref = ref
         self.name = name
+        self.observers = []
         self.providers = {}
         self.registries = {}
         self.binders = {}
@@ -57,11 +85,24 @@ class BaseManager(ISATObject, IManager):
     def debug(self):
         pass
 
+    def register(self, observer):
+        pass
+    
+    def unregister(self, observer):
+        pass
+
+    def unregister_all(self):
+        pass
+
+    def observers_update(self, frame):
+        pass
+
 class BaseProvider(ISATObject, IProvider, IObserver):
 
-    def __init__(self, ref, name):
+    def __init__(self, ref, name, observable):
         self.ref = ref
         self.name = name
+        self.observable = observable
 
     def load(self):
         pass
