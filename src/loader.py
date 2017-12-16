@@ -23,6 +23,13 @@ class ManagerFactory:
 				return m
 			except Exception as e:
 				raise ErrorLoadModule(e)
+		if name == "mdlbase":
+			try:
+				from mdlbase.managers import MdlBaseManager
+				m = MdlBaseManager("111-001", name)
+				return m
+			except Exception as e:
+				raise ErrorLoadModule(e)
 
 
 class Loader(BaseLoader):
