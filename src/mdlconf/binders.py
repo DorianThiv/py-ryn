@@ -12,7 +12,7 @@ class ConfigurationBinder(BaseBinder):
     def load(self, observable):
         pass
 
-    def read(self, filename="managers.py"):
+    def read(self, filename="config.json"):
         import sys
         import os
         with open(os.path.dirname(__file__) + "/" + filename, 'r') as f:

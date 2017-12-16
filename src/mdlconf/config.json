@@ -1,0 +1,14 @@
+// Configuration file for exemple
+
+[{
+    "start": [{
+        "config": {
+            "user": "Dorian",
+            "modules": ["mdlbase", "mdlcmd"]
+        }
+    }] 
+}, {
+    "running": {}
+}, {
+    "stop": {}
+}]

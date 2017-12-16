@@ -5,10 +5,13 @@ from mdlconf.registries import ConfigurationRegistry
 from mdlconf.providers import ConfigurationProvider
 from mdlconf.binders import ConfigurationBinder
 
+from mdlbase.managers import MdlBaseManager
+
 class ConfigurationManager(BaseManager):
 
 	def __init__(self, ref, name):
 		super().__init__(ref, name)
+		print(MdlBaseManager("ref", "name"))
 
 	def __str__(self):
 		ret = "__CONFIGMANAGER__ = (ref : {}, name : {})\n".format(self.ref, self.name)

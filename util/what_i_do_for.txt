@@ -5,3 +5,6 @@ WHAT I DO FOR ...
     - using Chain of Responsability.
 
 * For payload in frame test object.__dict__ to json()
+
+* For call a module in another :
+    *   For exemple : In module "Configuration" call : "from mdlbase.managers import MdlBaseManager"

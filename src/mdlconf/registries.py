@@ -27,5 +27,7 @@ class ConfigurationRegistry(BaseRegistry):
     # def unregister_all(self):
         # pass
 
+    # TODO: Give frame at super :)
     # def observers_update(self, emitter, receptor, action, data, timestamp, crc):
-        # super().observers_update(emitter, receptor, action, data, timestamp, crc)
+    #     frame = self.operate(emitter, receptor, action, data, timestamp, crc)
+    #     super().observers_update(frame)
