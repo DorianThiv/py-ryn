@@ -28,16 +28,16 @@ class ConfigurationManager(BaseManager):
 		self.binders["conf-binder"] = ConfigurationBinder("123-154", "conf-binder", self.registries["conf-registry"])
 		self.binders["conf-binder"].read()
 
-	def register(self, loader):
-		self.observers.append(loader)
+	# def register(self, loader):
+		# self.observers.append(loader)
     
-	def unregister(self, observer):
-		pass
+	# def unregister(self, observer):
+		# pass
 
-	def unregister_all(self):
-		pass
+	# def unregister_all(self):
+		# pass
 
-	def observers_update(self, frame):
-		for observer in self.observers:
-			observer.update(frame) 
+	# def observers_update(self, frame):
+		# for observer in self.observers:
+			# observer.update(frame) 
 		

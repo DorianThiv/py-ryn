@@ -17,7 +17,7 @@ class ConfigurationBinder(BaseBinder):
         import os
         with open(os.path.dirname(__file__) + "/" + filename, 'r') as f:
             contents = f.read()
-        self.observable.observers_update(self.name, contents)
+        self.observable.observers_update(emitter=self.name, data=contents)
 
     def write(self):
         pass

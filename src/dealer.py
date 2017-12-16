@@ -6,14 +6,14 @@ class Dealer(BaseDealer):
         super().__init__(managers)
 
     def __str__(self):
-        ret = "__DEALER__ : \n"
+        ret = "__DEALER__ : (Echangeur)\n"
         for manager in self.managers:
-            ret += "{}\n".format(self.managers[manager])
+            ret += "= module : {}\n".format(self.managers[manager])
         return ret
 
     def add(self, manager):
         """ Add a module module in the managers dict """
-        self.managers[manager.name] = manager
+        super().add(manager)
 
     def remove(self, mname):
         """ Remove a module module from the managers dict """
@@ -24,4 +24,6 @@ class Dealer(BaseDealer):
         pass
 
     def update(self, frame):
-        print("DEALER RECEIVE : ============= \n{}".format(frame))
+        """ Notification from a module """
+        # print("DEALER RECEIVE : ============= \n{}".format(frame))
+        pass

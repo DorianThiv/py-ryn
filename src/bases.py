@@ -1,6 +1,24 @@
 
 from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable 
 
+class BaseObservable(IObservable):
+    
+    def __init__(self):
+        self.observers = []
+    
+    def register(self, observer):
+        self.observers.append(observer)
+    
+    def unregister(self, observer):
+        pass
+
+    def unregister_all(self):
+        pass
+
+    def observers_update(self, emitter=None, receptor=None, action=None, data=None, timestamp=None, crc=None):
+        for observer in self.observers:
+            observer.update(data)
+
 class BaseCore(ISATObject, ICore):
     def __init__(self, ref, name):
         self.ref = ref
@@ -58,7 +76,7 @@ class BaseDealer(IDealer, IObserver):
         return "__BASEDEALER__"
 
     def add(self, manager):
-        pass
+        self.managers[manager.name] = manager
 
     def remove(self, mname):
         pass
@@ -69,15 +87,15 @@ class BaseDealer(IDealer, IObserver):
     def update(self, frame):
         pass
 
-class BaseManager(ISATObject, IManager, IObservable):
+class BaseManager(ISATObject, IManager, BaseObservable):
 
     def __init__(self, ref, name):
         self.ref = ref
         self.name = name
-        self.observers = []
         self.providers = {}
         self.registries = {}
         self.binders = {}
+        super().__init__()
 
     def load(self):
         pass
@@ -86,7 +104,7 @@ class BaseManager(ISATObject, IManager, IObservable):
         pass
 
     def register(self, observer):
-        pass
+        super().register(observer)
     
     def unregister(self, observer):
         pass
@@ -94,8 +112,8 @@ class BaseManager(ISATObject, IManager, IObservable):
     def unregister_all(self):
         pass
 
-    def observers_update(self, frame):
-        pass
+    def observers_update(self, emitter=None, receptor=None, action=None, data=None, timestamp=None, crc=None):
+        super().register(emitter, receptor, action, data, timestamp, crc)
 
 class BaseProvider(ISATObject, IProvider, IObserver):
 
@@ -113,12 +131,12 @@ class BaseProvider(ISATObject, IProvider, IObserver):
     def update(self):
         pass
 
-class BaseRegistry(ISATObject, IRegistry, IObservable):
+class BaseRegistry(ISATObject, IRegistry, BaseObservable):
 
     def __init__(self, ref, name):
         self.ref = ref
         self.name = name
-        self.observers = []
+        super().__init__()
 
     def load(self):
         pass
@@ -127,7 +145,7 @@ class BaseRegistry(ISATObject, IRegistry, IObservable):
         pass
 
     def register(self, observer):
-        pass
+        super().register(observer)
     
     def unregister(self, observer):
         pass
@@ -135,8 +153,8 @@ class BaseRegistry(ISATObject, IRegistry, IObservable):
     def unregister_all(self):
         pass
 
-    def observers_update(self):
-        pass
+    def observers_update(self, emitter=None, receptor=None, action=None, data=None, timestamp=None, crc=None):
+        super().register(emitter=emitter, receptor=receptor, action=action, data=data, timestamp=timestamp, crc=crc)
 
 class BaseOperator(ISATObject, IOperator):
     

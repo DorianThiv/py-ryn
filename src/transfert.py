@@ -8,8 +8,8 @@ class FrameDecoder:
 
 class FrameTransfert:
 
-    def __init__(self, emmiter, receptor, action, payload, timestamp, crc):
-        self.emmiter = emmiter
+    def __init__(self, emitter=None, receptor=None, action=None, payload=None, timestamp=None, crc=None):
+        self.emitter = emitter
         self.receptor = receptor
         self.action = action
         self.payload = payload
