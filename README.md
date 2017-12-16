@@ -12,7 +12,7 @@ core > loaders > managers > registries > providers > filters > binders <-- rawda
 What things you need to install the software and how to install them
 
 ```
-Execute : ./your-core.py
+Execute : ./core.py
 ```
 
 ### Installing
