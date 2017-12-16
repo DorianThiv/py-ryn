@@ -18,15 +18,15 @@ class MdlBaseRegistry(BaseRegistry):
     def operate(self):
         pass
 
-    def register(self, observer):
-        self.observers.append(observer)
-    
-    def unregister(self, observer):
-        pass
-
-    def unregister_all(self):
-        pass
-
-    def observers_update(self, emitter, data):
-        for observer in self.observers:
-            observer.update(data)
+    # def register(self, observer):
+    #     self.observers.append(observer)
+    # 
+    # def unregister(self, observer):
+    #     pass
+    # 
+    # def unregister_all(self):
+    #     pass
+    # 
+    # def observers_update(self, emitter, data):
+    #     for observer in self.observers:
+    #         observer.update(data)

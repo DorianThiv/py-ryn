@@ -1,10 +1,11 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 # coding: utf-8
 
 import os
 import sys
 
 from bases import BaseCore
+
 from loader import Loader
 
 class Core(BaseCore):
@@ -16,14 +17,14 @@ class Core(BaseCore):
         pass
 
     def __str__(self):
-        return "__CORE__ = (ref : {}, name : {})".format(self.ref, self.name)
+        return "__CORE__ = (ref : {}, name : {}".format(self.ref, self.name)
 
     def load(self):
         pass
 
     def start(self):
-        managers = ["mdlcmd", "mdlconf", "mdlbase"]
-        self.loader = Loader("000-412", "loader")
+        managers = ["mdlbase", "mdlconf"]
+        self.loader = Loader("122-042", "loader")
         self.loader.load(managers)
         print(self)
         print(self.loader)

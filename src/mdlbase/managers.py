@@ -27,17 +27,17 @@ class MdlBaseManager(BaseManager):
 		self.registries["base-registry"].register(p)
 		self.binders["base-binder"] = MdlBaseBinder("123-154", "base-binder", self.registries["base-registry"])
 		self.binders["base-binder"].read()
-
-	def register(self, loader):
-		self.observers.append(loader)
-    
-	def unregister(self, observer):
-		pass
-
-	def unregister_all(self):
-		pass
-
-	def observers_update(self, frame):
-		for observer in self.observers:
-			observer.update(frame) 
-		
+	#
+	# def register(self, loader):
+	# 	self.observers.append(loader)
+    # 
+	# def unregister(self, observer):
+	# 	pass
+    # 
+	# def unregister_all(self):
+	# 	pass
+	# 
+	# def observers_update(self, frame):
+	# 	for observer in self.observers:
+	# 		observer.update(frame) 
+	#	

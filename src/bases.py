@@ -113,7 +113,7 @@ class BaseManager(ISATObject, IManager, BaseObservable):
         pass
 
     def observers_update(self, emitter=None, receptor=None, action=None, data=None, timestamp=None, crc=None):
-        super().register(emitter, receptor, action, data, timestamp, crc)
+        super().observers_update(emitter, receptor, action, data, timestamp, crc)
 
 class BaseProvider(ISATObject, IProvider, IObserver):
 
@@ -154,7 +154,7 @@ class BaseRegistry(ISATObject, IRegistry, BaseObservable):
         pass
 
     def observers_update(self, emitter=None, receptor=None, action=None, data=None, timestamp=None, crc=None):
-        super().register(emitter=emitter, receptor=receptor, action=action, data=data, timestamp=timestamp, crc=crc)
+        super().observers_update(emitter, receptor, action, data, timestamp, crc)
 
 class BaseOperator(ISATObject, IOperator):
     

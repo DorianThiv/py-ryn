@@ -26,4 +26,4 @@ class FrameTransfert:
             payload : {}, 
             timestamp : {}, 
             crc : {}
-            )""".format(self.emmiter, self.receptor, self.action, self.payload, self.timestamp, self.crc)
+            )""".format(self.emitter, self.receptor, self.action, self.payload, self.timestamp, self.crc)
