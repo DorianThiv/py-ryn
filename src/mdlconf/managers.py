@@ -33,6 +33,7 @@ class ConfigurationManager(BaseManager):
 		super().__init__(name, prefixs, minprefix)
 
 	def __str__(self):
+		""" Display Debug """
 		ret = "__CONFIGMANAGER__ = (name : {})\n".format(self.name)
 		i = 0
 		j = 0
@@ -50,7 +51,9 @@ class ConfigurationManager(BaseManager):
 		for c in self.classes["registries"]:
 			self.registries.append({"name": c["name"], "instance": c["class"](c["name"])})
 		for c in self.classes["providers"]:
-			self.providers.append({"name": c["name"], "instance": c["class"](c["name"], self)})
+			p = c["class"](c["name"], self)
+			self.providers.append({"name": c["name"], "instance": p})
+			self.registries[0]["instance"].register(p)
 		for c in self.classes["binders"]:
 			self.binders.append({"name": c["name"], "instance": c["class"](c["name"], self.registries[0]["instance"])})
 		self._reading_all()

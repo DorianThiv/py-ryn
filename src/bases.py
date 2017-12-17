@@ -117,7 +117,7 @@ class BaseManager(BaseSATObject, IManager, IObservable):
     def unregister_all(self):
         pass
 
-    def observers_update(self, frame=None):
+    def observers_update(self, frame):
         for observer in self.observers:
             observer.update(frame)
 
@@ -146,7 +146,7 @@ class BaseRegistry(BaseSATObject, IRegistry, IObservable):
         pass
 
     def operate(self, data):
-        pass
+        return data
 
     def register(self, observer):
         self.observers.append(observer)
@@ -157,7 +157,7 @@ class BaseRegistry(BaseSATObject, IRegistry, IObservable):
     def unregister_all(self):
         pass
 
-    def observers_update(self, data=None):
+    def observers_update(self, data):
         frame = self.operate(data=data)
         for observer in self.observers:
             observer.update(frame)

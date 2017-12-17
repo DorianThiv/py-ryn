@@ -8,7 +8,6 @@ class ConfigurationBinder(BaseBinder):
 
     def __str__(self):
         return "__CONFIGBINDER__ = (name : {}, observable : {})\n".format(self.name, self.observable.name)
-        # return "__CONFIGBINDER__ = (name : {}, observable : )\n".format(self.name)
 
     def load(self, observable):
         pass

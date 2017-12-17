@@ -14,9 +14,6 @@ class ConfigurationRegistry(BaseRegistry):
     def load(self, providers):
         for provider in providers:
             self.observers.append(provider)
-    
-    def operate(self, data):
-    	pass
 
     # def register(self, observer):
        # self.observers.append(observer)
