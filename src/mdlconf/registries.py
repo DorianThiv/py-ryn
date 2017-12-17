@@ -4,18 +4,18 @@ from bases import BaseRegistry
 
 class ConfigurationRegistry(BaseRegistry):
 
-    def __init__(self, ref, name):
-        super().__init__(ref, name)
+    def __init__(self, name):
+        super().__init__(name)
         
     
     def __str__(self):
-        return "__CONFIGREGISTRY__ = (ref : {}, name : {})\n".format(self.ref, self.name)
+        return "__CONFIGREGISTRY__ = (name : {})\n".format(self.name)
 
     def load(self, providers):
         for provider in providers:
             self.observers.append(provider)
     
-    def operate(self, emitter, data):
+    def operate(self, data):
     	pass
 
     # def register(self, observer):

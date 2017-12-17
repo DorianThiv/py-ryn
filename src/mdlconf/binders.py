@@ -3,11 +3,12 @@ from bases import BaseBinder
 
 class ConfigurationBinder(BaseBinder):
     
-    def __init__(self, ref, name, observable=None):
-        super().__init__(ref, name, observable)
+    def __init__(self, name, observable=None):
+        super().__init__(name, observable)
 
     def __str__(self):
-        return "__CONFIGBINDER__ = (ref : {}, name : {}, observable : {})\n".format(self.ref, self.name, self.observable.name)
+        return "__CONFIGBINDER__ = (name : {}, observable : {})\n".format(self.name, self.observable.name)
+        # return "__CONFIGBINDER__ = (name : {}, observable : )\n".format(self.name)
 
     def load(self, observable):
         pass
@@ -17,7 +18,7 @@ class ConfigurationBinder(BaseBinder):
         import os
         with open(os.path.dirname(__file__) + "/" + filename, 'r') as f:
             contents = f.read()
-        self.observable.observers_update(emitter=self.name, data=contents)
+        self.observable.observers_update(data=contents)
 
     def write(self):
         pass

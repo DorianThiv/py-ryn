@@ -1,28 +1,25 @@
 
 from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable 
 
-class BaseObservable(IObservable):
-    
-    def __init__(self):
-        self.observers = []
-    
-    def register(self, observer):
-        self.observers.append(observer)
-    
-    def unregister(self, observer):
-        pass
+class BaseSATObject(ISATObject): 
 
-    def unregister_all(self):
-        pass
-
-    def observers_update(self, emitter=None, receptor=None, action=None, data=None, timestamp=None, crc=None):
-        for observer in self.observers:
-            observer.update(data)
-
-class BaseCore(ISATObject, ICore):
-    def __init__(self, ref, name):
-        self.ref = ref
+    def __init__(self, name):
         self.name = name
+
+    def __repr__(self):
+        pass
+
+    def __str__(self):
+        return "__BASECORE__"
+
+    def load(self):
+        pass
+
+
+class BaseCore(BaseSATObject, ICore):
+    
+    def __init__(self, name):
+        super().__init__(name)
 
     def __repr__(self):
         pass
@@ -42,11 +39,10 @@ class BaseCore(ISATObject, ICore):
     def stop(self):
         pass
 
-class BaseLoader(ISATObject, ILoader):
+class BaseLoader(BaseSATObject, ILoader):
     
-    def __init__(self, ref, name, dealer):
-        self.ref = ref
-        self.name = name
+    def __init__(self, name, dealer):
+        super().__init__(name)
         self.managers = {}
 
     def __repr__(self):
@@ -87,24 +83,33 @@ class BaseDealer(IDealer, IObserver):
     def update(self, frame):
         pass
 
-class BaseManager(ISATObject, IManager, BaseObservable):
+class BaseManager(BaseSATObject, IManager, IObservable):
 
-    def __init__(self, ref, name):
-        self.ref = ref
-        self.name = name
-        self.providers = {}
-        self.registries = {}
-        self.binders = {}
-        super().__init__()
+    def __init__(self, name, prefixs="", minprefix=""):
+        super().__init__(name)
+        self.minprefix = minprefix
+        self.modules = {
+			"{}.providers".format(name): ["{}Provider".format(pr) for pr in prefixs],
+			"{}.registries".format(name): ["{}Registry".format(pr) for pr in prefixs],
+			"{}.operators".format(name): ["{}Operator".format(pr) for pr in prefixs],
+			"{}.binders".format(name): ["{}Binder".format(pr) for pr in prefixs]
+		}
+        self.classes = {}
+        self.providers = []
+        self.registries = []
+        self.binders = []
+        self.observers = []
 
     def load(self):
         pass
 
-    def debug(self):
-        pass
+    def _reading_all(self):
+        i=0
+        for i in range(len(self.binders)):
+            self.binders[i]["instance"].read()
 
     def register(self, observer):
-        super().register(observer)
+        self.observers.append(observer)
     
     def unregister(self, observer):
         pass
@@ -112,14 +117,14 @@ class BaseManager(ISATObject, IManager, BaseObservable):
     def unregister_all(self):
         pass
 
-    def observers_update(self, emitter=None, receptor=None, action=None, data=None, timestamp=None, crc=None):
-        super().observers_update(emitter, receptor, action, data, timestamp, crc)
+    def observers_update(self, frame=None):
+        for observer in self.observers:
+            observer.update(frame)
 
-class BaseProvider(ISATObject, IProvider, IObserver):
+class BaseProvider(BaseSATObject, IProvider, IObserver):
 
-    def __init__(self, ref, name, observable):
-        self.ref = ref
-        self.name = name
+    def __init__(self, name, observable=None):
+        super().__init__(name)
         self.observable = observable
 
     def load(self):
@@ -128,24 +133,23 @@ class BaseProvider(ISATObject, IProvider, IObserver):
     def provide(self):
         pass
 
-    def update(self):
+    def update(self, frame):
         pass
 
-class BaseRegistry(ISATObject, IRegistry, BaseObservable):
+class BaseRegistry(BaseSATObject, IRegistry, IObservable):
 
-    def __init__(self, ref, name):
-        self.ref = ref
-        self.name = name
-        super().__init__()
+    def __init__(self, name):
+        super().__init__(name)
+        self.observers = []
 
     def load(self):
         pass
 
-    def operate(self):
+    def operate(self, data):
         pass
 
     def register(self, observer):
-        super().register(observer)
+        self.observers.append(observer)
     
     def unregister(self, observer):
         pass
@@ -153,14 +157,15 @@ class BaseRegistry(ISATObject, IRegistry, BaseObservable):
     def unregister_all(self):
         pass
 
-    def observers_update(self, emitter=None, receptor=None, action=None, data=None, timestamp=None, crc=None):
-        super().observers_update(emitter, receptor, action, data, timestamp, crc)
+    def observers_update(self, data=None):
+        frame = self.operate(data=data)
+        for observer in self.observers:
+            observer.update(frame)
 
-class BaseOperator(ISATObject, IOperator):
+class BaseOperator(BaseSATObject, IOperator):
     
-    def __init__(self, ref, name):
-        self.ref = ref
-        self.name = name
+    def __init__(self, name):
+        super().__init__(name)
 
     def load(self):
         pass
@@ -171,11 +176,10 @@ class BaseOperator(ISATObject, IOperator):
     def deserialize(self):
         pass
 
-class BaseBinder(ISATObject, IBinder):
+class BaseBinder(BaseSATObject, IBinder):
     
-    def __init__(self, ref, name, observable):
-        self.ref = ref
-        self.name = name
+    def __init__(self, name, observable=None):
+        super().__init__(name)
         self.observable = observable
 
     def load(self):

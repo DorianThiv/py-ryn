@@ -5,7 +5,6 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 class ISATObject:
     __metaclass__ = ABCMeta
 
-    ref = None
     name = None
 
     @abstractmethod
@@ -60,7 +59,7 @@ class IManager:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def debug(self):
+    def _reading_all(self):
         pass
 
 class IProvider:
@@ -74,7 +73,7 @@ class IRegistry:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def operate(self):
+    def operate(self, data):
         pass
 
 class IOperator:

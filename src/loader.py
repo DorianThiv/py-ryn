@@ -9,33 +9,33 @@ class ManagerFactory:
 	
 	@staticmethod
 	def make(name):
-		if name == "mdlcmd":
-			try:
-				from mdlcmd.managers import CmdManager
-				m = CmdManager("111-111", name)
-				return m
-			except Exception as e:
-				raise ErrorLoadModule(e)
+		# if name == "mdlcmd":
+		# 	try:
+		# 		from mdlcmd.managers import CmdManager
+		# 		m = CmdManager(name)
+		# 		return m
+		# 	except Exception as e:
+		# 		raise ErrorLoadModule(e)
 		if name == "mdlconf":
 			try:
 				from mdlconf.managers import ConfigurationManager
-				m = ConfigurationManager("111-001", name)
+				m = ConfigurationManager(name)
 				return m
 			except Exception as e:
 				raise ErrorLoadModule(e)
-		if name == "mdlbase":
-			try:
-				from mdlbase.managers import MdlBaseManager
-				m = MdlBaseManager("111-001", name)
-				return m
-			except Exception as e:
-				raise ErrorLoadModule(e)
+		# if name == "mdlbase":
+		# 	try:
+		# 		from mdlbase.managers import MdlBaseManager
+		# 		m = MdlBaseManager(name)
+		# 		return m
+		# 	except Exception as e:
+		# 		raise ErrorLoadModule(e)
 
 
 class Loader(BaseLoader):
 	
-	def __init__(self, ref, name, dealer=None):
-		super().__init__(ref, name, dealer)
+	def __init__(self, name, dealer=None):
+		super().__init__(name, dealer)
 
 	def __str__(self):
 		return "{}".format(self.dealer)
