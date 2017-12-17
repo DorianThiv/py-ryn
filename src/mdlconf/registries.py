@@ -1,12 +1,12 @@
 
-from transfert import FrameTransfert
 from bases import BaseRegistry
+
+from mdlconf.operators import ConfigurationOperator
 
 class ConfigurationRegistry(BaseRegistry):
 
     def __init__(self, name):
-        super().__init__(name)
-        
+        super().__init__(name, ConfigurationOperator("conf-operator"))
     
     def __str__(self):
         return "__CONFIGREGISTRY__ = (name : {})\n".format(self.name)

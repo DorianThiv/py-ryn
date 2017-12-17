@@ -138,15 +138,16 @@ class BaseProvider(BaseSATObject, IProvider, IObserver):
 
 class BaseRegistry(BaseSATObject, IRegistry, IObservable):
 
-    def __init__(self, name):
+    def __init__(self, name, operator):
         super().__init__(name)
+        self.operator = operator
         self.observers = []
 
     def load(self):
         pass
 
     def operate(self, data):
-        return data
+        return self.operator.encapsulate(data)
 
     def register(self, observer):
         self.observers.append(observer)
@@ -170,10 +171,10 @@ class BaseOperator(BaseSATObject, IOperator):
     def load(self):
         pass
 
-    def serialize(self):
+    def encapsulate(self, data):
         pass
 
-    def deserialize(self):
+    def decapsulate(self):
         pass
 
 class BaseBinder(BaseSATObject, IBinder):

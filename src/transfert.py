@@ -29,6 +29,4 @@ class FrameTransfert:
         self.crc = crc
 
     def __str__(self):
-        return """
-        __FRAME__ = 
-            (|em : {} | re : {} | act: {} | payload : {} | timestamp : {} | crc : {}|)""".format(self.emitter, self.receptor, self.action, self.payload, self.timestamp, self.crc)
+        return "__FRAME__ = (|em : {} | re : {} | act: {} | payload : {} | timestamp : {} | crc : {}|)".format(self.emitter, self.receptor, self.action, self.payload, self.timestamp, self.crc)

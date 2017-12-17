@@ -80,11 +80,11 @@ class IOperator:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def serialize(self):
+    def encapsulate(self, data):
         pass
 
     @abstractmethod
-    def deserialize(self):
+    def decapsulate(self, frame):
         pass
 
 class IBinder:

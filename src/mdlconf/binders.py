@@ -1,4 +1,5 @@
 
+import json
 from bases import BaseBinder
 
 class ConfigurationBinder(BaseBinder):
@@ -16,8 +17,8 @@ class ConfigurationBinder(BaseBinder):
         import sys
         import os
         with open(os.path.dirname(__file__) + "/" + filename, 'r') as f:
-            contents = f.read()
-        self.observable.observers_update(data=contents)
+            data = json.load(f)
+        self.observable.observers_update(data)
 
     def write(self):
         pass
