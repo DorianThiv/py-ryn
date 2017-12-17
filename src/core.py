@@ -36,6 +36,7 @@ class Core(BaseCore):
         pass
 
 def main():
+    """ Main method to start server """
     core = Core("core")
     core.start()
 
