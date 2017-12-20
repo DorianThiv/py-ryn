@@ -2,9 +2,9 @@
 from bases import BaseManager
 from factories import ModuleFactory
 		
-class ModbusManager(BaseManager):
+class ExempleManager(BaseManager):
 
 	def __init__(self, name):
-		minprefix = "modbus"
-		package = "mdlmodbus"
+		package = "mdlexemple"
+		minprefix = "exemple"
 		super().__init__(name, package, minprefix)

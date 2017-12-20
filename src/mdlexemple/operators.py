@@ -4,7 +4,7 @@ import time
 from bases import BaseOperator
 from transfert import FrameTransfert
 
-class MdlBaseOperator(BaseOperator):
+class ExempleOperator(BaseOperator):
     
     def __init__(self, name):
         self.name = name
@@ -14,7 +14,7 @@ class MdlBaseOperator(BaseOperator):
 
     def encapsulate(self, data):
         ts = time.time()
-        return FrameTransfert("mdlbase", "mdlbase", "read", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
+        return FrameTransfert("mdlexemple", "mdlexemple", "read", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
 
     def decapsulate(self, frame):
         pass

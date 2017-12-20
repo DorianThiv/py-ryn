@@ -17,13 +17,13 @@ class Loader(BaseLoader):
 		"""
 		self.dealer.add(self)
 		for manager in managers:
-			self.__reload_once(manager)
+			self.__load_once(manager)
 
-	def reload(self, payload):
-		for mdl in payload["config"]["modules"]:
-			self.__reload_once(mdl["name"])
+	def reload(self, frame):
+		for mdl in frame.payload["config"]["modules"]:
+			self.__load_once(mdl["name"])
 
-	def __reload_once(self, manager):
+	def __load_once(self, manager):
 		m = PackageFactory.make(manager)
 		m.register(self.dealer)
 		self.dealer.add(m)

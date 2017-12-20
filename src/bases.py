@@ -15,8 +15,8 @@ class BaseSATObject(ISATObject):
     def load(self):
         pass
 
-    def reload(self, payload):
-        print(payload)
+    def reload(self, frame):
+        print(frame)
 
 
 class BaseCore(BaseSATObject, ICore):
@@ -99,15 +99,10 @@ class BaseDealer(IDealer, IObserver):
 
 class BaseManager(BaseSATObject, IManager, IObservable):
 
-    def __init__(self, name, prefixs="", minprefix=""):
+    def __init__(self, name, package, minprefix=""):
         super().__init__(name)
         self.minprefix = minprefix
-        self.modules = {
-			"{}.providers".format(name): ["{}Provider".format(pr) for pr in prefixs],
-			"{}.registries".format(name): ["{}Registry".format(pr) for pr in prefixs],
-			"{}.operators".format(name): ["{}Operator".format(pr) for pr in prefixs],
-			"{}.binders".format(name): ["{}Binder".format(pr) for pr in prefixs]
-		}
+        self.package = package
         self.classes = {}
         self.providers = []
         self.registries = []
@@ -129,7 +124,24 @@ class BaseManager(BaseSATObject, IManager, IObservable):
         return ret
 
     def load(self):
-        pass
+        from factories import ModuleFactory
+        self.classes = ModuleFactory.make(self.minprefix, self.package)
+        for c in self.classes["registries"]:
+            self.registries.append({"name": self.__class_name_to_name(c["class"]), "instance": c["class"](self.__class_name_to_name(c["class"]))})
+        for c in self.classes["providers"]:
+            p = c["class"](self.__class_name_to_name(c["class"]), self)
+            self.providers.append({"name": self.__class_name_to_name(c["class"]), "instance": p})
+            self.registries[0]["instance"].register(p)
+        for c in self.classes["binders"]:
+            self.binders.append({"name": self.__class_name_to_name(c["class"]), "instance": c["class"](self.__class_name_to_name(c["class"]), self.registries[0]["instance"])})
+        self._reading_all()
+    
+    def __class_name_to_name(self, classname):
+        import re
+        ret = self.minprefix + "-"
+        fracts = (lambda ns: re.findall("[A-Z][^A-Z]*", ns))(classname.__name__)
+        for w in fracts[1:len(fracts)]: ret += w.lower() + "-"
+        return ret[0:len(ret)-1]
 
     def _reading_all(self):
         i=0

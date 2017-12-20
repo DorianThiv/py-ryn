@@ -7,4 +7,4 @@ class Dealer(BaseDealer):
 
     def update(self, frame):
         """ Notification from a module """
-        self.managers[frame.receptor].reload(frame.payload)
+        self.managers[frame.receptor].reload(frame)

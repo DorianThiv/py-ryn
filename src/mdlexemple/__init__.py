@@ -3,11 +3,11 @@ import os
 import sys
 import inspect
 
-from mdlmodbus.providers import *
-from mdlmodbus.registries import *
-from mdlmodbus.binders import *
+from mdlexemple.providers import *
+from mdlexemple.registries import *
+from mdlexemple.binders import *
 
-package = "mdlmodbus"
+package = "mdlexemple"
 
 def __getclasses():
     ret = []
