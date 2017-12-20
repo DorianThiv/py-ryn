@@ -2,18 +2,16 @@ from bases import BaseDealer
 
 class Dealer(BaseDealer):
 
-    def __init__(self, managers=[]):
+    def __init__(self, managers={}):
         super().__init__(managers)
 
     def __str__(self):
         ret = "__DEALER__ : (Echangeur)\n"
         for manager in self.managers:
-            if manager.name != "mdlloader":
-                ret += "= module : {}\n".format(manager)
+            if manager != "mdlloader":
+                ret += "= module : {}\n".format(self.managers[manager])
         return ret
 
     def update(self, frame):
         """ Notification from a module """
-        for manager in self.managers:
-            if frame.receptor == manager.name:
-                manager.reload(frame.payload)
+        self.managers[frame.receptor].reload(frame.payload)

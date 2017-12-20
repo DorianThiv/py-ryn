@@ -6,8 +6,6 @@
         "totalConnection": 5,
         "modules": [{
             "name": "mdlbase"
-        }, {
-            "name": "mdlconf"
         }]
     }
 }

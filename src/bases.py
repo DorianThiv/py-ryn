@@ -15,8 +15,8 @@ class BaseSATObject(ISATObject):
     def load(self):
         pass
 
-    def reload(self):
-        pass
+    def reload(self, payload):
+        print(payload)
 
 
 class BaseCore(BaseSATObject, ICore):
@@ -76,7 +76,7 @@ class BaseDealer(IDealer, IObserver):
 
     def add(self, manager):
         """ Add a module module in the managers dict """
-        self.managers.append(manager)
+        self.managers[manager.name] = manager
 
     def remove(self, mname):
         """ Remove a module module from the managers dict """

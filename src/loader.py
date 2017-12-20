@@ -1,36 +1,8 @@
 
+from factories import PackageFactory
 from dealer import Dealer
-
 from error import ErrorLoadModule
-
 from bases import BaseLoader 
-
-class ManagerFactory:
-	
-	@staticmethod
-	def make(name):
-		# if name == "mdlcmd":
-		# 	try:
-		# 		from mdlcmd.managers import CmdManager
-		# 		m = CmdManager(name)
-		# 		return m
-		# 	except Exception as e:
-		# 		raise ErrorLoadModule(e)
-		if name == "mdlconf":
-			try:
-				from mdlconf.managers import ConfigurationManager
-				m = ConfigurationManager(name)
-				return m
-			except Exception as e:
-				raise ErrorLoadModule(e)
-		# if name == "mdlbase":
-		# 	try:
-		# 		from mdlbase.managers import MdlBaseManager
-		# 		m = MdlBaseManager(name)
-		# 		return m
-		# 	except Exception as e:
-		# 		raise ErrorLoadModule(e)
-
 
 class Loader(BaseLoader):
 	
@@ -56,7 +28,7 @@ class Loader(BaseLoader):
 			self.__reload_once(mdl["name"])
 
 	def __reload_once(self, manager):
-		m = ManagerFactory.make(manager)
+		m = PackageFactory.make(manager)
 		m.register(self.dealer)
 		self.dealer.add(m)
 		m.load()
