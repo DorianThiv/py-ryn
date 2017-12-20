@@ -7,14 +7,15 @@ from mdlconf.providers import *
 from mdlconf.registries import *
 from mdlconf.binders import *
 
-package = "mdlconf"
+packages = ["mdlconf.providers", "mdlconf.registries", "mdlconf.binders"]
 
 def __getclasses():
     ret = []
     clss = inspect.getmembers(sys.modules[__name__], inspect.isclass)
     for c in clss:
-        if c[1].__module__.split(".")[0] == package:
-            ret.append(c[1])
+        for package in packages:
+            if c[1].__module__ == package:
+                ret.append(c[1])
     return ret
 
 classes = __getclasses()

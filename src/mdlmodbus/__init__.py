@@ -7,14 +7,15 @@ from mdlmodbus.providers import *
 from mdlmodbus.registries import *
 from mdlmodbus.binders import *
 
-package = "mdlmodbus"
+packages = ["mdlmodbus.providers", "mdlmodbus.registries", "mdlmodbus.binders"]
 
 def __getclasses():
     ret = []
     clss = inspect.getmembers(sys.modules[__name__], inspect.isclass)
     for c in clss:
-        if c[1].__module__.split(".")[0] == package:
-            ret.append(c[1])
+        for package in packages:
+            if c[1].__module__ == package:
+                ret.append(c[1])
     return ret
 
 classes = __getclasses()

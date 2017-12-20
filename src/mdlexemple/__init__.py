@@ -34,11 +34,7 @@ Todo:
 
 """
 
-# package name important to found right classes
-package = "mdlexemple"
-
-"""int: Module level variable documented inline.
-"""
+""" imports """
 
 import os
 import sys
@@ -47,6 +43,11 @@ import inspect
 from mdlexemple.providers import *
 from mdlexemple.registries import *
 from mdlexemple.binders import *
+
+""" Modules loaded """
+
+# package name important to found right classes
+packages = ["mdlexemple.providers", "mdlexemple.registries", "mdlexemple.binders"]
 
 
 def __getclasses():
@@ -61,8 +62,9 @@ def __getclasses():
     ret = []
     clss = inspect.getmembers(sys.modules[__name__], inspect.isclass)
     for c in clss:
-        if c[1].__module__.split(".")[0] == package:
-            ret.append(c[1])
+        for package in packages:
+            if c[1].__module__ == package:
+                ret.append(c[1])
     return ret
 
 classes = __getclasses()
