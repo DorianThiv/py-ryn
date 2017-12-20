@@ -15,6 +15,9 @@ class BaseSATObject(ISATObject):
     def load(self):
         pass
 
+    def reload(self):
+        pass
+
 
 class BaseCore(BaseSATObject, ICore):
     
@@ -72,16 +75,22 @@ class BaseDealer(IDealer, IObserver):
         return "__BASEDEALER__"
 
     def add(self, manager):
-        self.managers[manager.name] = manager
+        """ Add a module module in the managers dict """
+        self.managers.append(manager)
 
     def remove(self, mname):
+        """ Remove a module module from the managers dict """
         pass
 
     def find(self, mname):
+        """ Find another module to send the received frame """
         pass
 
     def update(self, frame):
-        pass
+        """ Notification from a module """
+        for manager in self.managers:
+            if frame.receptor == manager:
+                print("{}".format(frame))
 
 class BaseManager(BaseSATObject, IManager, IObservable):
 

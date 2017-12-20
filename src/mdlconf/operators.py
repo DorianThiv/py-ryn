@@ -17,7 +17,7 @@ class ConfigurationOperator(BaseOperator):
 
     def encapsulate(self, data):
         ts = time.time()
-        return FrameTransfert("mdlconf", "mdl???", "read", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
+        return FrameTransfert("mdlconf", "mdlloader", "read", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
 
     def decapsulate(self, frame):
         pass

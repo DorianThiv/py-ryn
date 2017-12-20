@@ -47,12 +47,18 @@ class Loader(BaseLoader):
 			at the dealer to share data. 
 		"""
 		self.dealer = Dealer()
-		self.managers = {}
+		self.dealer.add(self)
 		for manager in managers:
-			m = ManagerFactory.make(manager)
-			m.register(self.dealer)
-			self.dealer.add(m)
-			m.load()
+			self.__reload_once(manager)
 
-	def reload(self):
-		pass
+	def reload(self, payload):
+		for mdl in payload["config"]["modules"]:
+			self.__reload_once(mdl["name"])
+
+	def __reload_once(self, manager):
+		m = ManagerFactory.make(manager)
+		m.register(self.dealer)
+		self.dealer.add(m)
+		m.load()
+
+	

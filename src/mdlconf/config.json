@@ -1,10 +1,13 @@
 {
-    "start": [{
-        "config": {
-            "user": "Dorian",
-            "modules": ["mdlbase", "mdlcmd"]
-        }
-    }], 
-    "running": {},
-    "stop": {}
+    "config": {
+        "serverName": "SAT",
+        "privateAccess": true, 
+        "asService": true,
+        "totalConnection": 5,
+        "modules": [{
+            "name": "mdlbase"
+        }, {
+            "name": "mdlconf"
+        }]
+    }
 }

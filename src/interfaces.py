@@ -11,12 +11,21 @@ class ISATObject:
     def load(self):
         pass
 
+    @abstractmethod
+    def reload(self):
+        pass
+
 class ICore:
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def start(self):
         """ Start the core """ 
+        pass
+
+    @abstractmethod
+    def run(self):
+        """ Run the core """ 
         pass
 
     @abstractmethod

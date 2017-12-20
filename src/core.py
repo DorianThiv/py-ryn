@@ -24,10 +24,13 @@ class Core(BaseCore):
 
     def start(self):
         managers = ["mdlconf"]
-        self.loader = Loader("loader")
+        self.loader = Loader("mdlloader")
         self.loader.load(managers)
         print(self)
         print(self.loader)
+
+    def run(self):
+        pass
 
     def pause(self):
         pass
