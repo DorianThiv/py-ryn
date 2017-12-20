@@ -15,20 +15,6 @@ a | 1 | 0 | 1 |
 
 Pour que c = 1 il faut a = 1 & b = 1 
 
-* Exemple : 
-a = 92      # 01011100
-b = 21      # 00010101
-c = a & b   # 00010100
-
-Exemple test bits :
-
-* Voir si le 4ième bit en partant de droite est égale à 1 ou 0 : '00001000':
-    a = 92    # 01011100
-    print bool(int('00001000',2) & a)
-    out = True
-    print bool((1<<(4-1)) & a)
-    out = True
-
 '|' operator (ou) : 
 ===================
 
@@ -55,6 +41,49 @@ a | 0 | 0 | 1 |
   | 1 | 1 | 0 |
 ------------------
 
+'<<' '>>' operators :
+=====================
+
+"(1 << (4-1))" :
+
+1 = 0x00 (1 octet)
+<< = décalage de gauche à droite
+4 = 4ième octet
+-1 = 76543210 (index) --> 87654321 
+
+* Exemple : 
+a = 92      # 01011100
+b = 21      # 00010101
+c = a & b   # 00010100
+
+Exemple test bits :
+
+* Voir si le 4ième bit en partant de droite est égale à 1 ou 0 : '00001000':
+    a = 92    # 01011100
+    print bool(int('00001000',2) & a)
+    out = True
+    print bool((1<<(4-1)) & a)
+    out = True
+
+Fonctions exemples :
+
+* Rotation à droite de 1 bit:
+  * rotd = lambda b, n=8: ((b>>1)|(b<<(n-1)))&((1<<n)-1)
+
+* Rotation à droite de k bits (valable pour k de 0 à n, bornes incluses):
+  * rotd = lambda b, k=1, n=8: ((b>>k)|(b<<(n-k)))&((1<<n)-1)
+
+* Simplification pour 8 bits (valable pour k de 0 à 8, bornes incluses):
+  * rotd = lambda b, k=1: ((b>>k)|(b<<(8-k)))&0xFF
+
+* Rotation à gauche de 1 bit:
+  * rotg = lambda b, n=8: ((b<<1)|(b>>(n-1)))&((1<<n)-1)
+
+* Rotation à gauche de k bits (valable pour k de 0 à n, bornes incluses):
+  * rotg = lambda b, k=1, n=8: ((b<<k)|(b>>(n-k)))&((1<<n)-1)
+
+* Simplification pour 8 bits (valable pour k de 0 à 8, bornes incluses)
+  * rotg = lambda b, k=1: ((b<<k)|(b>>(8-k)))&0xFF
 
 
 
