@@ -2,11 +2,11 @@
 from bases import BaseManager
 from factories import ModuleFactory
 		
-class MdlBaseManager(BaseManager):
+class ModbusManager(BaseManager):
 
 	def __init__(self, name):
-		minprefix = "base"
-		prefixs = ["MdlBase"]
+		minprefix = "modbus"
+		prefixs = ["Modbus"]
 		super().__init__(name, prefixs, minprefix)
 
 	def load(self):

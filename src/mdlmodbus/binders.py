@@ -2,7 +2,7 @@
 import json
 from bases import BaseBinder
 
-class MdlBaseBinder(BaseBinder):
+class ModbusBinder(BaseBinder):
     
     def __init__(self, name, observable=None):
         super().__init__(name, observable)

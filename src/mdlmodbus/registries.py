@@ -1,12 +1,12 @@
 
 from bases import BaseRegistry
 
-from mdlbase.operators import MdlBaseOperator
+from mdlmodbus.operators import ModbusOperator
 
-class MdlBaseRegistry(BaseRegistry):
+class ModbusRegistry(BaseRegistry):
 
     def __init__(self, name):
-        super().__init__(name, MdlBaseOperator("base-operator"))
+        super().__init__(name, ModbusOperator("modbus-operator"))
 
     def load(self, providers):
         for provider in providers:

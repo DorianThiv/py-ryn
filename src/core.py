@@ -16,9 +16,6 @@ class Core(BaseCore):
     def __repr__(self):
         pass
 
-    def __str__(self):
-        return "__CORE__ = (name : {}".format(self.name)
-
     def load(self):
         pass
 

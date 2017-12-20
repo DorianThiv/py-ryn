@@ -28,7 +28,7 @@ class BaseCore(BaseSATObject, ICore):
         pass
 
     def __str__(self):
-        return "__BASECORE__"
+        return "__CORE__ = (name : {}".format(self.name)
 
     def load(self):
         pass
@@ -44,15 +44,16 @@ class BaseCore(BaseSATObject, ICore):
 
 class BaseLoader(BaseSATObject, ILoader):
     
-    def __init__(self, name, dealer):
+    def __init__(self, name, dealer=None):
         super().__init__(name)
+        self.dealer = dealer
         self.managers = {}
 
     def __repr__(self):
         pass
 
     def __str__(self):
-        return "__BASELOADER__"
+        return "{}".format(self.dealer)
 
     def load(self):
         pass
@@ -72,7 +73,11 @@ class BaseDealer(IDealer, IObserver):
         pass
 
     def __str__(self):
-        return "__BASEDEALER__"
+        ret = "__DEALER__ : (Echangeur)\n"
+        for manager in self.managers:
+            if manager != "mdlloader":
+                ret += "= module : {}\n".format(self.managers[manager])
+        return ret
 
     def add(self, manager):
         """ Add a module module in the managers dict """
@@ -108,6 +113,20 @@ class BaseManager(BaseSATObject, IManager, IObservable):
         self.registries = []
         self.binders = []
         self.observers = []
+    
+    def __str__(self):
+        """ Display Debug """
+        ret = "__BASEMANAGER__ = (name : {})\n".format(self.name)
+        i = 0
+        j = 0
+        k = 0
+        for i in range(len(self.providers)):
+            ret += "\t{}".format(self.providers[i]["instance"])
+            for j in range(len(self.registries)):
+                ret += "\t\t{}".format(self.registries[j]["instance"])
+                for k in range(len(self.binders)):
+                    ret += "\t\t\t{}".format(self.binders[k]["instance"])
+        return ret
 
     def load(self):
         pass
@@ -136,6 +155,9 @@ class BaseProvider(BaseSATObject, IProvider, IObserver):
         super().__init__(name)
         self.observable = observable
 
+    def __str__(self):
+        return "__BASEPROVIDER__ = (name : {})\n".format(self.name)
+
     def load(self):
         pass
 
@@ -151,6 +173,9 @@ class BaseRegistry(BaseSATObject, IRegistry, IObservable):
         super().__init__(name)
         self.operator = operator
         self.observers = []
+
+    def __str__(self):
+        return "__BASEREGISTRY__ = (name : {})\n".format(self.name)
 
     def load(self):
         pass
@@ -177,6 +202,9 @@ class BaseOperator(BaseSATObject, IOperator):
     def __init__(self, name):
         super().__init__(name)
 
+    def __str__(self):
+        return "__BASEOPERATOR__ = (name : {})".format(self.name)
+
     def load(self):
         pass
 
@@ -191,6 +219,9 @@ class BaseBinder(BaseSATObject, IBinder):
     def __init__(self, name, observable=None):
         super().__init__(name)
         self.observable = observable
+
+    def __str__(self):
+        return "__BASEGBINDER__ = (name : {}, observable : {})\n".format(self.name, self.observable.name)
 
     def load(self):
         pass

@@ -7,9 +7,6 @@ class ConfigurationRegistry(BaseRegistry):
 
     def __init__(self, name):
         super().__init__(name, ConfigurationOperator("conf-operator"))
-    
-    def __str__(self):
-        return "__CONFIGREGISTRY__ = (name : {})\n".format(self.name)
 
     def load(self, providers):
         for provider in providers:

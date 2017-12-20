@@ -4,7 +4,7 @@ import time
 from bases import BaseOperator
 from transfert import FrameTransfert
 
-class MdlBaseOperator(BaseOperator):
+class ModbusOperator(BaseOperator):
     
     def __init__(self, name):
         self.name = name

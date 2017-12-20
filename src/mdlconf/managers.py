@@ -31,21 +31,7 @@ class ConfigurationManager(BaseManager):
 		minprefix = "conf"
 		prefixs = ["Configuration"]
 		super().__init__(name, prefixs, minprefix)
-
-	def __str__(self):
-		""" Display Debug """
-		ret = "__CONFIGMANAGER__ = (name : {})\n".format(self.name)
-		i = 0
-		j = 0
-		k = 0
-		for i in range(len(self.providers)):
-			ret += "\t{}".format(self.providers[i]["instance"])
-			for j in range(len(self.registries)):
-				ret += "\t\t{}".format(self.registries[j]["instance"])
-				for k in range(len(self.binders)):
-					ret += "\t\t\t{}".format(self.binders[k]["instance"])
-		return ret
-
+		
 	def load(self):
 		self.classes = ModuleFactory.make(self.minprefix, self.modules)
 		for c in self.classes["registries"]:
