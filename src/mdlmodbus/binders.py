@@ -26,7 +26,7 @@
         * CRC : 0x0000
         * End : silence
 """
-
+import sys
 import socket
 from mdlmodbus.templates import ModbusFrame
 from bases import BaseBinder
@@ -40,14 +40,18 @@ class ModbusTcpBinder(BaseBinder):
     def load(self, observable):
         pass
 
+    # 01 2C 00 00 00 06 01 06 00 06 00 2B
     def read(self):
         try:
+            # mdbf = ModbusFrame("01", "05", "2B", )
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect(("192.168.1.34", 502))
+            s.connect(("192.168.1.16", 502))
             print("Connection on {}".format(502))
-            s.send("010302".encode())
+            # msg = ModbusTcpBinder.list2str(frame)
+            msg = "00 00 00 00 00 06 03 03 00 6B 00 02"
+            s.send(msg.encode())
         except Exception as e:
-            print("ErrorModbus : {}".format(e)) 
+            print("ErrorModbus : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
         data = "Modbus TCP Binder"
         self.observable.observers_update(data)
 
@@ -65,6 +69,10 @@ class ModbusRtuBinder(BaseBinder):
 
     def read(self):
         data = "Modbus RTU Binder"
+        # crc = ModbusTcpBinder.crc16(frame)
+        # print(crc)
+        # frame.append(str(ModbusTcpBinder.high_byte(crc)))
+        # frame.append(str(ModbusTcpBinder.low_byte(crc)))
         self.observable.observers_update(data)
 
     def write(self):

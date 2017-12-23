@@ -1,5 +1,5 @@
 
-from error import ErrorLoadModule
+from exceptions import ErrorLoadModule
 
 class PackageFactory:
 
