@@ -1,12 +1,21 @@
 
 
 import sys
-from bases import BaseThreadRead, BaseThreadWrite
+from bases import BaseThreadClient, BaseThreadRead, BaseThreadWrite
+from mdlterminal.exceptions import ErrorTerminalClientDisconnect
 
-class TerminalThreadClient(BaseThreadRead):
+class TerminalThreadClient(BaseThreadClient):
 
-    def __init__(self, socket, callback):
-        super().__init__(socket, callback)
+    def __init__(self, connection, callback):
+        super().__init__(connection, callback)
+
+    def run(self):
+        self.isRunning = True
+        while self.isRunning:
+            msg = self.connection.recv(BaseThreadRead.PACKET_SIZE).decode()
+            if msg == "":
+                raise ErrorTerminalClientDisconnect("Client Terminal was disconnected")
+            self.callback(msg)
 
 class TerminalThreadRead(BaseThreadRead):
 
@@ -19,7 +28,7 @@ class TerminalThreadRead(BaseThreadRead):
             self.isRunning = True
             while self.isRunning:
                 connection, addr = self.socket.accept()
-                termThC = TerminalThreadClient(self.socket, self.callback)
+                termThC = TerminalThreadClient(connection, self.callback)
                 termThC.start()
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))

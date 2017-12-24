@@ -306,3 +306,23 @@ class BaseThreadWrite(threading.Thread):
     def run(self):
         self.socket.send(self.data.encode())
 
+class BaseThreadClient(threading.Thread):
+
+    PACKET_SIZE = 1024
+
+    def __init__(self, connection, callback):
+        super().__init__()
+        self.connection = connection
+        self.callback = callback
+        self.name = self.getName()
+        self.isRunning = False
+
+    def run(self):
+        self.isRunning = True
+        while self.isRunning:
+            msg = self.connection.recv(BaseThreadRead.PACKET_SIZE)
+            print(msg)
+            self.callback(msg)
+    
+    def stop(self):
+        self.isRunning = False
