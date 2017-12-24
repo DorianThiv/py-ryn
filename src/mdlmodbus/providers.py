@@ -15,5 +15,8 @@ class ModbusProvider(BaseProvider):
         pass
 
     def update(self, frame):
-        """ Update to notify the manager with a frame instance """
+        """ Update to notify the manager with a frame instance 
+            The provider will apply a new operation and provide 
+            functionality at the frame level. 
+        """
         self.observable.observers_update(frame)

@@ -1,4 +1,5 @@
 
+import threading
 from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable 
 
 class BaseSATObject(ISATObject): 
@@ -21,8 +22,18 @@ class BaseSATObject(ISATObject):
 
 class BaseCore(BaseSATObject, ICore):
     
+    STATE_SHUTDOWN = 0
+    STATE_LOAD = 1
+    STATE_START = 2
+    STATE_RUN = 3
+    STATE_RESUME = 4
+    STATE_PAUSE = 5
+    STATE_STOP = 6
+
     def __init__(self, name):
         super().__init__(name)
+        self.state = BaseCore.STATE_SHUTDOWN
+        self.isRunning = False
 
     def __repr__(self):
         pass
@@ -31,16 +42,25 @@ class BaseCore(BaseSATObject, ICore):
         return "__CORE__ = (name : {}".format(self.name)
 
     def load(self):
-        pass
+        self.state = BaseCore.STATE_LOAD
 
     def start(self):
-        pass
+        self.state = BaseCore.STATE_START
+
+    def run(self):
+        self.state = BaseCore.STATE_RUN
+        self.isRunning = True
+        while self.isRunning:
+            pass
+
+    def resume(self):
+        self.state = BaseCore.STATE_RUN
 
     def pause(self):
-        pass
+        self.state = BaseCore.STATE_PAUSE
 
     def stop(self):
-        pass
+        self.state = BaseCore.STATE_STOP
 
 class BaseLoader(BaseSATObject, ILoader):
     
@@ -134,7 +154,6 @@ class BaseManager(BaseSATObject, IManager, IObservable):
             self.registries[0]["instance"].register(p)
         for c in self.classes["binders"]:
             self.binders.append({"name": self.__class_name_to_name(c["class"]), "instance": c["class"](self.__class_name_to_name(c["class"]), self.registries[0]["instance"])})
-        self._reading_all()
     
     def __class_name_to_name(self, classname):
         import re
@@ -243,3 +262,39 @@ class BaseBinder(BaseSATObject, IBinder):
 
     def write(self):
         pass
+
+    def _get_event(self, data):
+        self.observable.observers_update(data)
+
+class BaseThreadRead(threading.Thread):
+
+    PACKET_SIZE = 1024
+
+    def __init__(self, socket, callback):
+        super().__init__()
+        self.socket = socket
+        self.callback = callback
+        self.name = self.getName()
+        self.isRunning = False
+
+    def run(self):
+        self.isRunning = True
+        while self.isRunning:
+            msg = self.socket.recv(BaseThreadRead.PACKET_SIZE)
+            print(msg)
+    
+    def stop(self):
+        self.isRunning = False
+        self.socket.close()
+
+class BaseThreadWrite(threading.Thread):
+
+    def __init__(self, socket, data):
+        super().__init__()
+        self.socket = socket
+        self.data = data
+        self.name = self.getName()
+
+    def run(self):
+        self.socket.send(self.data.encode())
+

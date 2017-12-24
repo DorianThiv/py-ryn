@@ -18,7 +18,7 @@
         * RS-422
         * TCP/IP (Modbus Ethernet)
 
-    MODBUS FRAME :
+    MODBUS FRAME RTU :
         * Start : silence
         * Slave adress : 0x00
         * Code function : 0x00
@@ -28,7 +28,9 @@
 """
 import sys
 import socket
-from mdlmodbus.templates import ModbusFrame
+import mdlmodbus.exceptions
+
+from mdlmodbus.templates import ModbusTCPFrame, ModbusRTUFrame, ModbusThreadRead, ModbusThreadWrite
 from bases import BaseBinder
 
 # Ayncronous modbus : TCP/IP (Modbus Ethernet)
@@ -36,27 +38,30 @@ class ModbusTcpBinder(BaseBinder):
     
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
+        print("__init__")
+        self.load()
 
-    def load(self, observable):
-        pass
+    def load(self):
+        print("load")
+        try:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.connect(("192.168.1.16", 502))
+            print("Connection on {}".format(502))
+            self.write()
+            self.read()
+        except Exception as e:
+            print("ErrorModbus : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
+            self.socket.close()
 
     # 01 2C 00 00 00 06 01 06 00 06 00 2B
     def read(self):
-        try:
-            # mdbf = ModbusFrame("01", "05", "2B", )
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect(("192.168.1.16", 502))
-            print("Connection on {}".format(502))
-            # msg = ModbusTcpBinder.list2str(frame)
-            msg = "00 00 00 00 00 06 03 03 00 6B 00 02"
-            s.send(msg.encode())
-        except Exception as e:
-            print("ErrorModbus : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
-        data = "Modbus TCP Binder"
-        self.observable.observers_update(data)
+        self.thMdbR = ModbusThreadRead(self.socket, self._get_event)
+        self.thMdbR.start()
 
     def write(self):
-        pass
+        data = "88 01 93 00 00 00 06 01 06 00 0A 01 64"
+        self.thMdbW = ModbusThreadWrite(self.socket, data)
+        self.thMdbW.start()
 
 # Syncronous modbus : RS-485
 class ModbusRtuBinder(BaseBinder):

@@ -3,9 +3,9 @@
 
 import os
 import sys
+import threading
 
 from bases import BaseCore
-
 from loader import Loader
 
 class Core(BaseCore):
@@ -23,11 +23,6 @@ class Core(BaseCore):
         managers = ["mdlconf"]
         self.loader = Loader("mdlloader")
         self.loader.load(managers)
-        print(self)
-        print(self.loader)
-
-    def run(self):
-        pass
 
     def pause(self):
         pass
@@ -38,7 +33,9 @@ class Core(BaseCore):
 def main():
     """ Main method to start server """
     core = Core("core")
-    core.start()
+    th = threading.Thread(target=core.start())
+    th.start()
+    th.join()
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,7 @@
 
+import threading
+
+from bases import BaseThreadRead, BaseThreadWrite
 from util import bytes2int
 
 INITIAL_MODBUS = 0xFFFF
@@ -44,3 +47,13 @@ class ModbusRTUFrame:
                     crc = crc >> 1 
         swap = ((crc << 8) & 0xff00) | ((crc >> 8) & 0x00ff)
         return swap
+
+class ModbusThreadRead(BaseThreadRead):
+
+    def __init__(self, socket, callback):
+        super().__init__(socket, callback)
+
+class ModbusThreadWrite(BaseThreadWrite):
+
+    def __init__(self, socket, data):
+        super().__init__(socket, data)

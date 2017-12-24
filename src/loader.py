@@ -1,7 +1,6 @@
 
 from factories import PackageFactory
 from dealer import Dealer
-from error import ErrorLoadModule
 from bases import BaseLoader 
 
 class Loader(BaseLoader):
