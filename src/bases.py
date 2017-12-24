@@ -1,5 +1,6 @@
 
 import threading
+from util import *
 from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable 
 
 class BaseSATObject(ISATObject): 
@@ -155,18 +156,7 @@ class BaseManager(BaseSATObject, IManager, IObservable):
         for c in self.classes["binders"]:
             self.binders.append({"name": self.__class_name_to_name(c["class"]), "instance": c["class"](self.__class_name_to_name(c["class"]), self.registries[0]["instance"])})
     
-    def __class_name_to_name(self, classname):
-        import re
-        ret = self.minprefix + "-"
-        fracts = (lambda ns: re.findall("[A-Z][^A-Z]*", ns))(classname.__name__)
-        for w in fracts[1:len(fracts)]: ret += w.lower() + "-"
-        return ret[0:len(ret)-1]
-
-    def _reading_all(self):
-        i=0
-        for i in range(len(self.binders)):
-            self.binders[i]["instance"].read()
-
+    
     def register(self, observer):
         self.observers.append(observer)
     
@@ -179,6 +169,24 @@ class BaseManager(BaseSATObject, IManager, IObservable):
     def observers_update(self, frame):
         for observer in self.observers:
             observer.update(frame)
+
+    def action(self, frame):
+        act0 = 0
+        act1 = 1
+        frame["action"]
+        pass
+
+    def __class_name_to_name(self, classname):
+        import re
+        ret = self.minprefix + "-"
+        fracts = (lambda ns: re.findall("[A-Z][^A-Z]*", ns))(classname.__name__)
+        for w in fracts[1:len(fracts)]: ret += w.lower() + "-"
+        return ret[0:len(ret)-1]
+
+    def _reading_all(self):
+        i=0
+        for i in range(len(self.binders)):
+            self.binders[i]["instance"].read()
 
 class BaseProvider(BaseSATObject, IProvider, IObserver):
 
@@ -292,7 +300,7 @@ class BaseThreadWrite(threading.Thread):
     def __init__(self, socket, data):
         super().__init__()
         self.socket = socket
-        self.data = data
+        self.data = list2str([chr(d) for d in self.data])
         self.name = self.getName()
 
     def run(self):

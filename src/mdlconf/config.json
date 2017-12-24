@@ -5,9 +5,8 @@
         "asService": true,
         "totalConnection": 5,
         "modules": [{
-            "name": "mdlexemple"
-        }, {
-            "name": "mdlmodbus"
+            "name": "mdlexemple",
+            "asynchronous": false
         }]
     }
 }

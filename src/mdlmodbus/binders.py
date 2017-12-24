@@ -1,31 +1,4 @@
-""" 
-    MODBUS protocol
-    
-    Modbus RTU (Remote Terminal Unit)
-    Only one master.
-    [START|B0|B1|B2|B3|B4|B5|B6|B7|STOP|STOP]
-    [START|B0|B1|B2|B3|B4|B5|B6|B7|PARITE|STOP]
-    PARITE : Pair (even) or Impair (odd)
 
-    Modbus TCP allow the multi-masters
-
-    CRC (Cyclical Redundancy Check) - test de refondance cyclique
-    The crc is on 16 bits / 0x0000
-
-    Proctocol PHY modbus:
-        * RS-232
-        * RS-485
-        * RS-422
-        * TCP/IP (Modbus Ethernet)
-
-    MODBUS FRAME RTU :
-        * Start : silence
-        * Slave adress : 0x00
-        * Code function : 0x00
-        * Data : 0xn...
-        * CRC : 0x0000
-        * End : silence
-"""
 import sys
 import socket
 import mdlmodbus.exceptions
@@ -38,11 +11,9 @@ class ModbusTcpBinder(BaseBinder):
     
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
-        print("__init__")
         self.load()
 
     def load(self):
-        print("load")
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect(("192.168.1.16", 502))
@@ -53,13 +24,13 @@ class ModbusTcpBinder(BaseBinder):
             print("ErrorModbus : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
             self.socket.close()
 
-    # 01 2C 00 00 00 06 01 06 00 06 00 2B
     def read(self):
         self.thMdbR = ModbusThreadRead(self.socket, self._get_event)
         self.thMdbR.start()
+        self.thMdbR.join()
 
     def write(self):
-        data = "88 01 93 00 00 00 06 01 06 00 0A 01 64"
+        data = [0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x01, 0x06, 0x00, 0x0B, 0x07, 0x9A]
         self.thMdbW = ModbusThreadWrite(self.socket, data)
         self.thMdbW.start()
 

@@ -1,11 +1,45 @@
 
+""" 
+    MODBUS protocol
+    
+    Modbus RTU (Remote Terminal Unit)
+    Only one master.
+    [START|B0|B1|B2|B3|B4|B5|B6|B7|STOP|STOP]
+    [START|B0|B1|B2|B3|B4|B5|B6|B7|PARITE|STOP]
+    PARITE : Pair (even) or Impair (odd)
+
+    Modbus TCP allow the multi-masters
+
+    CRC (Cyclical Redundancy Check) - test de refondance cyclique
+    The crc is on 16 bits / 0x0000
+
+    Proctocol PHY modbus:
+        * RS-232
+        * RS-485
+        * RS-422
+        * TCP/IP (Modbus Ethernet)
+
+    MODBUS FRAME RTU :
+        * Start : silence
+        * Slave adress : 0x00
+        * Code function : 0x00
+        * Data : 0xn...
+        * CRC : 0x0000
+        * End : silence
+"""
+
 import threading
 
 from bases import BaseThreadRead, BaseThreadWrite
-from util import bytes2int
+from mdlmodbus.exceptions import *
+from util import bytes2int, list2str
 
+""" CRC 16 CALCULATION """
 INITIAL_MODBUS = 0xFFFF
 INITIAL_POLY = 0xA001
+
+""" TCP/IP ERRORS """
+ERROR_CODES = {"0x01": ErrorModbusTcp0x01, "0x02": ErrorModbusTcp0x02 , "0x03": ErrorModbusTcp0x03, "0x06": ErrorModbusTcp0x06, "0x0B": ErrorModbusTcp0x0B}
 
 class MBAPHeader:
 
@@ -52,8 +86,32 @@ class ModbusThreadRead(BaseThreadRead):
 
     def __init__(self, socket, callback):
         super().__init__(socket, callback)
+        self.treat = ModbusTreatResponse()
+
+    def run(self):
+        self.isRunning = True
+        while self.isRunning:
+            msg = self.socket.recv(BaseThreadRead.PACKET_SIZE)
+            self.treat._decode_mdbs_response(msg)
+            self.callback(msg)
 
 class ModbusThreadWrite(BaseThreadWrite):
 
     def __init__(self, socket, data):
         super().__init__(socket, data)
+
+    def run(self):
+        self.socket.send(str.encode(self.data))
+
+class ModbusTreatResponse:
+
+    def __init__(self):
+        pass
+
+    def _decode_mdbs_response(self, resp):
+        for code in ERROR_CODES:
+            if resp[len(resp)-1] == int(code, 16):
+                raise ERROR_CODES[code]()
+        for c in resp:
+            print("|{}".format(c ^ 0x00), end='|')
+        print()
