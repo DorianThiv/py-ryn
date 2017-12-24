@@ -36,6 +36,9 @@ def main():
     th = threading.Thread(target=core.start())
     th.start()
     th.join()
+    print("Stop")
 
 if __name__ == "__main__":
     main()
+    print("Stop")
+    

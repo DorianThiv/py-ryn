@@ -26,6 +26,13 @@ class PackageFactory:
                 return m
             except Exception as e:
                 raise ErrorLoadModule("{} : {}".format(name, e))
+        if name == "mdlterminal":
+            try:
+                from mdlterminal.managers import TerminalManager
+                m = TerminalManager(name)
+                return m
+            except Exception as e:
+                raise ErrorLoadModule("{} : {}".format(name, e))
 
 class ModuleFactory:
 

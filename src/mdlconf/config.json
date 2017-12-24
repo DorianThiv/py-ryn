@@ -7,6 +7,9 @@
         "modules": [{
             "name": "mdlexemple",
             "asynchronous": false
+        }, {
+            "name": "mdlterminal",
+            "asynchronous": false
         }]
     }
 }
