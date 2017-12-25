@@ -6,10 +6,10 @@ def bytes2int(bts):
         result = result * 256 + int(b)
     return result
 
-def low_byte(u):
+def lobyte(u):
     return (u & 0x00FF)
 
-def high_byte(u):
+def hibyte(u):
     return (u >> 8)
 
 def list2str(l):

@@ -8,7 +8,7 @@ class TerminalBinder(BaseBinder):
     
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
-        self.host = "192.168.1.16"
+        self.host = "192.168.1.17"
         self.port = 38000
         self.load()
 

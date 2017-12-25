@@ -53,7 +53,7 @@ class ModbusTCPFrame:
 
     def __init__(self, saddress, function, data):
         self.header = MBAPHeader(lendata2=0x06)
-        self.slave_address = saddress
+        self.saddress = saddress
         self.function = function
         self.payload = data
 

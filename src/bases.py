@@ -87,8 +87,12 @@ class BaseLoader(BaseSATObject, ILoader):
 
 class BaseDealer(IDealer, IObserver):
 
+    CONNECTED_MANAGERS = []
+
     def __init__(self, managers={}):
         self.managers = managers
+        for m in self.managers:
+            BaseDealer.CONNECTED_MANAGERS.append(m)
 
     def __repr__(self):
         pass
@@ -103,6 +107,7 @@ class BaseDealer(IDealer, IObserver):
     def add(self, manager):
         """ Add a module module in the managers dict """
         self.managers[manager.name] = manager
+        BaseDealer.CONNECTED_MANAGERS.append(manager.name)
 
     def remove(self, mname):
         """ Remove a module module from the managers dict """
