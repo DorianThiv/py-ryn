@@ -6,10 +6,10 @@ class ExempleBinder(BaseBinder):
     
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
-        self.load()
 
     def load(self):
-        self.read()
+        # self.read()
+        pass
 
     def read(self):
         import sys

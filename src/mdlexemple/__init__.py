@@ -40,15 +40,37 @@ import os
 import sys
 import inspect
 
+from mdlexemple.managers import *
 from mdlexemple.providers import *
 from mdlexemple.registries import *
 from mdlexemple.binders import *
 
+path = os.path.join(os.path.dirname(__file__))
+sys.path.append(path)
+
 """ Modules loaded """
+
+# manager module
+mdlmanager = "mdlexemple.managers"
+
+def __getmanager():
+    """
+    Get Manager classes in this module.
+    Args:
+        * No params
+    Returns:
+        list: array with few classes founded in modules : [managers]
+    """
+    clss = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+    for c in clss:
+        if c[1].__module__ == mdlmanager:
+                ret = c[1]
+    return ret
+
+manager = __getmanager()
 
 # package name important to found right classes
 packages = ["mdlexemple.providers", "mdlexemple.registries", "mdlexemple.binders"]
-
 
 def __getclasses():
 
@@ -67,7 +89,5 @@ def __getclasses():
                 ret.append(c[1])
     return ret
 
-classes = __getclasses()
 
-path = os.path.join(os.path.dirname(__file__))
-sys.path.append(path)
+classes = __getclasses()

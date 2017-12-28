@@ -1,5 +1,6 @@
 
 import threading
+from factories import PackageFactory
 from util import *
 from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable 
 
@@ -17,7 +18,7 @@ class BaseSATObject(ISATObject):
     def load(self):
         pass
 
-    def reload(self, frame):
+    def action(self, frame):
         print(frame)
 
 
@@ -34,7 +35,6 @@ class BaseCore(BaseSATObject, ICore):
     def __init__(self, name):
         super().__init__(name)
         self.state = BaseCore.STATE_SHUTDOWN
-        self.isRunning = False
 
     def __repr__(self):
         pass
@@ -45,14 +45,14 @@ class BaseCore(BaseSATObject, ICore):
     def load(self):
         self.state = BaseCore.STATE_LOAD
 
-    def start(self):
+    def start(self, loader, managers):
         self.state = BaseCore.STATE_START
+        self.loader = loader
+        self.loader.load(managers)
 
     def run(self):
         self.state = BaseCore.STATE_RUN
-        self.isRunning = True
-        while self.isRunning:
-            pass
+
 
     def resume(self):
         self.state = BaseCore.STATE_RUN
@@ -64,33 +64,54 @@ class BaseCore(BaseSATObject, ICore):
         self.state = BaseCore.STATE_STOP
 
 class BaseLoader(BaseSATObject, ILoader):
-    
-    def __init__(self, name, dealer=None):
+    """
+		The loader enable to load all modules and 
+		give them instances to the "Dealer"
+	"""
+    def __init__(self, name, core):
         super().__init__(name)
-        self.dealer = dealer
+        self.core = core
+        self.dealer = BaseDealer()
         self.managers = {}
+        self.dealer.add(self)
 
-    def __repr__(self):
-        pass
+    def load(self, managers):
+        """ 
+            Load all managers in a list. 
+            Create managers with the ManagerFactory and give them 
+            at the dealer to share data. 
+        """
+        for manager in list(managers):
+            """ Load differents component in function of core state """
+            self.__load_once(manager)
 
-    def __str__(self):
-        return "{}".format(self.dealer)
+    def action(self, frame):
+        """ 
+            TODO: Call LoaderTreatAction class. it will
+            contains all treatment actions.
+            Will reaload module name by name.
+            To reload the loader give ["config"]["module"]
+        """
+        if frame.emitter == "mdlconf":
+            mdls = []
+            for mdl in frame.payload["config"]["modules"]:
+                mdls.append(mdl['name'])
+            self.load(mdls)
 
-    def load(self):
-        pass
-
-    def reload(self):
-        pass
-
-    def update(self):
-        pass
+    def __load_once(self, manager):
+        m = PackageFactory.make(manager)
+        m.register(self.dealer)
+        self.dealer.add(m)
+        m.load()
 
 class BaseDealer(IDealer, IObserver):
 
+    PRINCIPALS_MANAGERS = []
     CONNECTED_MANAGERS = []
 
-    def __init__(self, managers={}):
-        self.managers = managers
+    def __init__(self):
+        self.principals_managers = {}
+        self.managers = {}
         for m in self.managers:
             BaseDealer.CONNECTED_MANAGERS.append(m)
 
@@ -106,8 +127,13 @@ class BaseDealer(IDealer, IObserver):
 
     def add(self, manager):
         """ Add a module module in the managers dict """
-        self.managers[manager.name] = manager
         BaseDealer.CONNECTED_MANAGERS.append(manager.name)
+        self.managers[manager.name] = manager
+
+    def add_principal(self, manager):
+        """ Add a module module in the managers dict """
+        BaseDealer.PRINCIPALS_MANAGERS.append(manager.name)
+        self.principals_managers[manager.name] = manager
 
     def remove(self, mname):
         """ Remove a module module from the managers dict """
@@ -118,13 +144,14 @@ class BaseDealer(IDealer, IObserver):
         pass
 
     def update(self, frame):
-        """ Notification from a module """
-        for manager in self.managers:
-            if frame.receptor == manager:
-                print("{}".format(frame))
+        """ Notification from a module 
+            Keyword list() force to make a copy of 
+            dictionnary keys. 
+        """
+        self.managers[frame.receiver].action(frame)
 
 class BaseManager(BaseSATObject, IManager, IObservable):
-
+    """ Manager load all components in this his module """
     def __init__(self, name, package, minprefix=""):
         super().__init__(name)
         self.minprefix = minprefix
@@ -152,15 +179,15 @@ class BaseManager(BaseSATObject, IManager, IObservable):
     def load(self):
         from factories import ModuleFactory
         self.classes = ModuleFactory.make(self.minprefix, self.package)
-        for c in self.classes["registries"]:
-            self.registries.append({"name": self.__class_name_to_name(c["class"]), "instance": c["class"](self.__class_name_to_name(c["class"]))})
         for c in self.classes["providers"]:
-            p = c["class"](self.__class_name_to_name(c["class"]), self)
-            self.providers.append({"name": self.__class_name_to_name(c["class"]), "instance": p})
-            self.registries[0]["instance"].register(p)
-        for c in self.classes["binders"]:
-            self.binders.append({"name": self.__class_name_to_name(c["class"]), "instance": c["class"](self.__class_name_to_name(c["class"]), self.registries[0]["instance"])})
+            p = c["class"](class_name_gen(self.minprefix, c["class"]), self)
+            p.load(self.minprefix, self.classes)
+            self.providers.append({"name": class_name_gen(self.minprefix, c["class"]), "instance": p})
     
+    def action(self, frame):
+        print(frame)
+        for p in self.providers:
+            print(p)
     
     def register(self, observer):
         self.observers.append(observer)
@@ -175,41 +202,35 @@ class BaseManager(BaseSATObject, IManager, IObservable):
         for observer in self.observers:
             observer.update(frame)
 
-    def action(self, frame):
-        act0 = 0
-        act1 = 1
-        frame["action"]
-        pass
-
-    def __class_name_to_name(self, classname):
-        import re
-        ret = self.minprefix + "-"
-        fracts = (lambda ns: re.findall("[A-Z][^A-Z]*", ns))(classname.__name__)
-        for w in fracts[1:len(fracts)]: ret += w.lower() + "-"
-        return ret[0:len(ret)-1]
-
-    def _reading_all(self):
-        i=0
-        for i in range(len(self.binders)):
-            self.binders[i]["instance"].read()
-
 class BaseProvider(BaseSATObject, IProvider, IObserver):
 
     def __init__(self, name, observable=None):
         super().__init__(name)
         self.observable = observable
+        self.registries = []
+        self.binders = {}
 
     def __str__(self):
         return "__BASEPROVIDER__ = (name : {})\n".format(self.name)
 
-    def load(self):
-        pass
+    def load(self, minprefix, classes):
+        for c in classes["registries"]:
+            name = class_name_gen(minprefix, c["class"])
+            instance = c["class"](class_name_gen(minprefix, c["class"]))
+            instance.register(self)
+            self.registries.append({"name": name, "instance": instance})
+        for c in classes["binders"]:
+            name = class_name_gen(minprefix, c["class"])
+            instance = c["class"](class_name_gen(minprefix, c["class"]), self.registries[0]["instance"])
+            self.binders[name] = instance
+            self.binders[name].load()
 
-    def provide(self):
+    def action(self, frame):
         pass
 
     def update(self, frame):
-        pass
+        """ Update to notify the manager with a frame instance """
+        self.observable.observers_update(frame)
 
 class BaseRegistry(BaseSATObject, IRegistry, IObservable):
 
@@ -263,6 +284,9 @@ class BaseBinder(BaseSATObject, IBinder):
     def __init__(self, name, observable=None):
         super().__init__(name)
         self.observable = observable
+
+    def __repr__(self):
+        return "__BASEGBINDER__ = (name : {}, observable : {})\n".format(self.name, self.observable.name)
 
     def __str__(self):
         return "__BASEGBINDER__ = (name : {}, observable : {})\n".format(self.name, self.observable.name)

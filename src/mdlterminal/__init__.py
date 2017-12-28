@@ -40,15 +40,37 @@ import os
 import sys
 import inspect
 
+from mdlterminal.managers import *
 from mdlterminal.providers import *
 from mdlterminal.registries import *
 from mdlterminal.binders import *
 
 """ Modules loaded """
 
+# manager module
+mdlmanager = "mdlterminal.managers"
+
+def __getmanager():
+    """
+    Get Manager classes in this module.
+    Args:
+        * No params
+    Returns:
+        list: array with few classes founded in modules : [managers]
+    """
+    clss = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+    for c in clss:
+        if c[1].__module__ == mdlmanager:
+                ret = c[1]
+    return ret
+
+manager = __getmanager()
+
 # package name important to found right classes
 packages = ["mdlterminal.providers", "mdlterminal.registries", "mdlterminal.binders"]
 
+def __getmanager():
+    pass
 
 def __getclasses():
 

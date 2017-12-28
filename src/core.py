@@ -5,38 +5,15 @@ import os
 import sys
 import threading
 
-from bases import BaseCore
-from loader import Loader
-
-class Core(BaseCore):
-
-    def __init__(self, name):
-        super().__init__(name)
-
-    def __repr__(self):
-        pass
-
-    def load(self):
-        pass
-
-    def start(self):
-        managers = ["mdlconf"]
-        self.loader = Loader("mdlloader")
-        self.loader.load(managers)
-
-    def pause(self):
-        pass
-
-    def stop(self):
-        pass
+from bases import BaseCore, BaseLoader
 
 def main():
     """ Main method to start server """
-    core = Core("core")
-    th = threading.Thread(target=core.start())
-    th.start()
-    th.join()
-    print("Stop")
+    managers = ["mdlconf"]
+    core = BaseCore("core")
+    core.start(BaseLoader("mdlloader", core), managers)
+    core.run() 
+    print("[PROCESS - TERMINATED] : Core stopped.")
 
 if __name__ == "__main__":
     main()

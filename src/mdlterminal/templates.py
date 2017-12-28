@@ -14,13 +14,23 @@ class TerminalThreadClient(BaseThreadClient):
         try:
             self.isRunning = True
             while self.isRunning:
-                msg = self.connection.recv(BaseThreadRead.PACKET_SIZE).decode()
-                if msg == "":
-                    raise ErrorTerminalClientDisconnect("Client Terminal was disconnected : {}".format(self.connection))
-                else:
-                    self.callback(self.treat.treat(msg))
+                rawmsg = self.connection.recv(BaseThreadRead.PACKET_SIZE)
+                if self.__check_raw_line(rawmsg) == True:
+                    msg = rawmsg.decode()
+                    if msg == "":
+                        raise ErrorTerminalClientDisconnect("Client Terminal was disconnected : {}".format(self.connection))
+                    else:
+                        self.callback(self.treat.treat(msg))
         except ErrorTerminalClientDisconnect as e:
             print("{}".format(e))
+        except UnicodeDecodeError as e:
+            print("Ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
+
+    def __check_raw_line(self, raw):
+        flg = False
+        if "\r" not in raw.decode():
+            flg = True
+        return flg
 
 class TerminalThreadRead(BaseThreadRead):
 
@@ -50,40 +60,52 @@ class TerminalTreatResponse:
     def treat(self, msg):
         """
             * Command :
-            Module : [..., ..., ..., ...]
-            Provider : [tcp, rtu, ...]
-            Binder : [-w | -r] (read | write)
-            Data : [n, .......]
+            type : 0 | 1 | ...
+            src : ["binder", "registry", "operator", "provider", "module"]
+            dest-module : [..., ..., ..., ...]
+            dest-provider | binder : [tcp, rtu, ...]
+            dest-binder : [-w | -r] (read | write)
+            data : [n, .......]
         """
-        splitted = msg.split(" ")
         data = {}
-        if self.__check_module_request(splitted[0]):
+        if self.__check_module_request(msg):
+            print("module request")
+            splitted = msg.split(" ")
             data = self.__module_request(splitted)
         else:
-            data = self.__unknown_request(splitted)
+            data = self.__unknown_request(msg)
         return data
     
-    def __check_module_request(self, module):
+    def __check_module_request(self, msg):
         flg = False
+        splitted = msg.split(" ")
         for name in BaseDealer.CONNECTED_MANAGERS:
-            if module == name:
+            if splitted[0] == name:
                 flg = True
         return flg
+
+    def __check_integtity_cmd(self, splitted):
+        if splitted[1] == "-r" or splitted[1] == "-w":
+            return True
+        elif splitted[1] == "--read" or splitted[1] == "--write":
+            return True
+        else:
+            return False
 
     def __module_request(self, splitted):
         data = {}
         try:
+            self.__check_integtity_cmd(splitted)
             data["type"] = TerminalTreatResponse.MODULE_REQUEST
-            data["module"] = splitted[0]
-            data["provider"] = splitted[1]
-            data["binder"] = splitted[2]
+            data["dest-module"] = splitted[0]
+            data["dest-action"] = splitted[1]
             data["data"] = splitted[2:len(splitted)-1]
         except Exception as e:
             print("[WARNING] Ligne {} : {}".format(sys.exc_info()[-1].tb_lineno, WarningTerminalWrongRequestModule(e, splitted[0])))
         return data
 
-    def __unknown_request(self, splitted):
+    def __unknown_request(self, msg):
         data = {}
         data["type"] = TerminalTreatResponse.UNKNOWN_REQUEST
-        data["data"] = splitted[0:len(splitted)-1]
+        data["data"] = msg
         return data

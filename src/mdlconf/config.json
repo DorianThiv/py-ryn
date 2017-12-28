@@ -10,6 +10,9 @@
         }, {
             "name": "mdlterminal",
             "asynchronous": false
+        }, {
+            "name": "mdlmodbus",
+            "asynchronous": false
         }]
     }
 }

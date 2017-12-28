@@ -17,3 +17,10 @@ def list2str(l):
     for o in l:
         ret += o
     return ret
+
+def class_name_gen(minprefix, classname):
+        import re
+        ret = minprefix + "-"
+        fracts = (lambda ns: re.findall("[A-Z][^A-Z]*", ns))(classname.__name__)
+        for w in fracts[1:len(fracts)]: ret += w.lower() + "-"
+        return ret[0:len(ret)-1]

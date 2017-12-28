@@ -48,7 +48,7 @@ class WarningTerminalWrongRequestModule(Exception):
     def __mdlmodbus(self):
         """
         Modbus Command:
-            * [mdlmodbus] -[(tcp|rtu)] -[(r|w)] {[-d 0 -r 0 -v 0]}
+            * [mdlmodbus] -[(r|w)] -[(tcp|rtu)] {[-d 0 -r 0 -v 0]}
                 - tcp : TCP connection on modbus
                 - rtu : RTU connection on modbus
                 - r | w : read | write
@@ -71,7 +71,7 @@ class WarningTerminalWrongRequestModule(Exception):
         elif self.module == "mdlmodbus":
             return "{}\n{}{}".format(self.message, self.__doc__, self.__mdlmodbus.__doc__)
         else:
-            mods = ""
+            mods = "\t"
             for name in BaseDealer.CONNECTED_MANAGERS:
-                mods += "* " + name + "\n"
+                mods += "* " + name + "\n\t"
             return "{}\n{}{}".format(self.message, self.__doc__, mods)

@@ -1,38 +1,18 @@
 
+import sys
 from exceptions import ErrorLoadModule
 
 class PackageFactory:
 
     @staticmethod
     def make(name):
-        if name == "mdlconf":
-            try:
-                from mdlconf.managers import ConfigurationManager
-                m = ConfigurationManager(name)
-                return m
-            except Exception as e:
-                raise ErrorLoadModule("{} : {}".format(name, e))
-        if name == "mdlexemple":
-            try:
-                from mdlexemple.managers import ExempleManager
-                m = ExempleManager(name)
-                return m
-            except Exception as e:
-                raise ErrorLoadModule("{} : {}".format(name, e))
-        if name == "mdlmodbus":
-            try:
-                from mdlmodbus.managers import ModbusManager
-                m = ModbusManager(name)
-                return m
-            except Exception as e:
-                raise ErrorLoadModule("{} : {}".format(name, e))
-        if name == "mdlterminal":
-            try:
-                from mdlterminal.managers import TerminalManager
-                m = TerminalManager(name)
-                return m
-            except Exception as e:
-                raise ErrorLoadModule("{} : {}".format(name, e))
+        try:
+            mod = __import__(name)
+            c = mod.manager
+            m = c(name)
+            return m
+        except Exception as e:
+            raise ErrorLoadModule("Ligne : {}, {} : {}".format(sys.exc_info()[-1].tb_lineno, name, e))
 
 class ModuleFactory:
 
