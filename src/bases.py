@@ -45,10 +45,9 @@ class BaseCore(BaseSATObject, ICore):
     def load(self):
         self.state = BaseCore.STATE_LOAD
 
-    def start(self, loader, managers):
+    def start(self, loader):
         self.state = BaseCore.STATE_START
         self.loader = loader
-        self.loader.load(managers)
 
     def run(self):
         self.state = BaseCore.STATE_RUN
@@ -68,12 +67,17 @@ class BaseLoader(BaseSATObject, ILoader):
 		The loader enable to load all modules and 
 		give them instances to the "Dealer"
 	"""
-    def __init__(self, name, core):
+    def __init__(self, name, core, pmanagers):
         super().__init__(name)
         self.core = core
         self.dealer = BaseDealer()
+        self.pmanagers = []
+        self.pmanagers.append(self.name)
+        for m in pmanagers:
+            self.pmanagers.append(m)
         self.managers = {}
         self.dealer.add(self)
+        self.load(pmanagers)
 
     def load(self, managers):
         """ 
@@ -81,7 +85,7 @@ class BaseLoader(BaseSATObject, ILoader):
             Create managers with the ManagerFactory and give them 
             at the dealer to share data. 
         """
-        for manager in list(managers):
+        for manager in managers:
             """ Load differents component in function of core state """
             self.__load_once(manager)
 
@@ -101,6 +105,9 @@ class BaseLoader(BaseSATObject, ILoader):
     def __load_once(self, manager):
         m = PackageFactory.make(manager)
         m.register(self.dealer)
+        for pr in self.pmanagers:
+            if pr == manager:
+                self.dealer.add_principal(m.name)
         self.dealer.add(m)
         m.load()
 
@@ -132,8 +139,7 @@ class BaseDealer(IDealer, IObserver):
 
     def add_principal(self, manager):
         """ Add a module module in the managers dict """
-        BaseDealer.PRINCIPALS_MANAGERS.append(manager.name)
-        self.principals_managers[manager.name] = manager
+        BaseDealer.PRINCIPALS_MANAGERS.append(manager)
 
     def remove(self, mname):
         """ Remove a module module from the managers dict """

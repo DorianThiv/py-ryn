@@ -17,7 +17,6 @@ class TerminalBinder(BaseBinder):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.bind((self.host, self.port))
             print("Connection at : {} on port {}".format(self.host, self.port))
-            # self.read()
         except Exception as e:
             print("ErrorTerminal : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
             self.socket.close()

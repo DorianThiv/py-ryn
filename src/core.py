@@ -11,7 +11,7 @@ def main():
     """ Main method to start server """
     managers = ["mdlconf"]
     core = BaseCore("core")
-    core.start(BaseLoader("mdlloader", core), managers)
+    core.start(BaseLoader("mdlloader", core, managers))
     core.run() 
     print("[PROCESS - TERMINATED] : Core stopped.")
 
