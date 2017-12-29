@@ -82,7 +82,7 @@ class IRegistry:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def operate(self, data):
+    def action(self, data):
         pass
 
 class IOperator:
@@ -133,4 +133,11 @@ class IObservable:
     def observers_update(self):
         pass
 
-__all__ = ('ISATObject', 'ICore', 'IManager', 'IProvider', 'IRegistry', 'IOperator', 'IObserver')
+class IAction:
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def treat(self):
+        pass
+
+__all__ = ('ISATObject', 'ICore', 'IManager', 'IProvider', 'IRegistry', 'IOperator', 'IObserver', 'IObservable', 'IAction')

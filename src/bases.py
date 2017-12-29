@@ -1,8 +1,10 @@
 
+import sys
 import threading
+from transfert import FrameTransfert
 from factories import PackageFactory
 from util import *
-from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable 
+from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, IAction
 
 class BaseSATObject(ISATObject): 
 
@@ -19,7 +21,15 @@ class BaseSATObject(ISATObject):
         pass
 
     def action(self, frame):
+        """ 
+            TODO: Call LoaderTreatAction class. it will
+            contains all treatment actions.
+            Will reaload module name by name.
+            To reload the loader give ["config"]["module"]
+        """
         print(frame)
+        action = BaseAction(self, frame)
+        action.treat()
 
 
 class BaseCore(BaseSATObject, ICore):
@@ -51,7 +61,7 @@ class BaseCore(BaseSATObject, ICore):
 
     def run(self):
         self.state = BaseCore.STATE_RUN
-
+        self.loader.action("all")
 
     def resume(self):
         self.state = BaseCore.STATE_RUN
@@ -76,7 +86,7 @@ class BaseLoader(BaseSATObject, ILoader):
         for m in pmanagers:
             self.pmanagers.append(m)
         self.managers = {}
-        self.dealer.add(self)
+        self.dealer.add_principal(self)
         self.load(pmanagers)
 
     def load(self, managers):
@@ -89,26 +99,13 @@ class BaseLoader(BaseSATObject, ILoader):
             """ Load differents component in function of core state """
             self.__load_once(manager)
 
-    def action(self, frame):
-        """ 
-            TODO: Call LoaderTreatAction class. it will
-            contains all treatment actions.
-            Will reaload module name by name.
-            To reload the loader give ["config"]["module"]
-        """
-        if frame.emitter == "mdlconf":
-            mdls = []
-            for mdl in frame.payload["config"]["modules"]:
-                mdls.append(mdl['name'])
-            self.load(mdls)
-
     def __load_once(self, manager):
         m = PackageFactory.make(manager)
         m.register(self.dealer)
-        for pr in self.pmanagers:
-            if pr == manager:
-                self.dealer.add_principal(m.name)
-        self.dealer.add(m)
+        if manager not in list(self.pmanagers):
+            self.dealer.add(m)
+        else:
+            self.dealer.add_principal(m)
         m.load()
 
 class BaseDealer(IDealer, IObserver):
@@ -139,7 +136,8 @@ class BaseDealer(IDealer, IObserver):
 
     def add_principal(self, manager):
         """ Add a module module in the managers dict """
-        BaseDealer.PRINCIPALS_MANAGERS.append(manager)
+        BaseDealer.PRINCIPALS_MANAGERS.append(manager.name)
+        self.principals_managers[manager.name] = manager
 
     def remove(self, mname):
         """ Remove a module module from the managers dict """
@@ -154,7 +152,10 @@ class BaseDealer(IDealer, IObserver):
             Keyword list() force to make a copy of 
             dictionnary keys. 
         """
-        self.managers[frame.receiver].action(frame)
+        if frame.receiver not in list(self.managers):
+            self.principals_managers[frame.receiver].action(frame)
+        else:
+            self.managers[frame.receiver].action(frame)
 
 class BaseManager(BaseSATObject, IManager, IObservable):
     """ Manager load all components in this his module """
@@ -163,7 +164,7 @@ class BaseManager(BaseSATObject, IManager, IObservable):
         self.minprefix = minprefix
         self.package = package
         self.classes = {}
-        self.providers = []
+        self.providers = {}
         self.registries = []
         self.binders = []
         self.observers = []
@@ -171,29 +172,25 @@ class BaseManager(BaseSATObject, IManager, IObservable):
     def __str__(self):
         """ Display Debug """
         ret = "__BASEMANAGER__ = (name : {})\n".format(self.name)
-        i = 0
-        j = 0
-        k = 0
-        for i in range(len(self.providers)):
-            ret += "\t{}".format(self.providers[i]["instance"])
-            for j in range(len(self.registries)):
-                ret += "\t\t{}".format(self.registries[j]["instance"])
-                for k in range(len(self.binders)):
-                    ret += "\t\t\t{}".format(self.binders[k]["instance"])
+        # i = 0
+        # j = 0
+        # k = 0
+        # for i in range(len(self.providers)):
+        #     ret += "\t{}".format(self.providers[i]["instance"])
+        #     for j in range(len(self.registries)):
+        #         ret += "\t\t{}".format(self.registries[j]["instance"])
+        #         for k in range(len(self.binders)):
+        #             ret += "\t\t\t{}".format(self.binders[k]["instance"])
         return ret
 
     def load(self):
         from factories import ModuleFactory
         self.classes = ModuleFactory.make(self.minprefix, self.package)
         for c in self.classes["providers"]:
-            p = c["class"](class_name_gen(self.minprefix, c["class"]), self)
-            p.load(self.minprefix, self.classes)
-            self.providers.append({"name": class_name_gen(self.minprefix, c["class"]), "instance": p})
-    
-    def action(self, frame):
-        print(frame)
-        for p in self.providers:
-            print(p)
+            name = class_name_gen(self.minprefix, c["class"])
+            instance = c["class"](class_name_gen(self.minprefix, c["class"]), self)
+            self.providers[name] = instance
+            self.providers[name].load(self.minprefix, self.classes)
     
     def register(self, observer):
         self.observers.append(observer)
@@ -229,10 +226,7 @@ class BaseProvider(BaseSATObject, IProvider, IObserver):
             name = class_name_gen(minprefix, c["class"])
             instance = c["class"](class_name_gen(minprefix, c["class"]), self.registries[0]["instance"])
             self.binders[name] = instance
-            self.binders[name].load()
-
-    def action(self, frame):
-        pass
+            threading.Thread(target=self.binders[name].load()).start()
 
     def update(self, frame):
         """ Update to notify the manager with a frame instance """
@@ -251,7 +245,7 @@ class BaseRegistry(BaseSATObject, IRegistry, IObservable):
     def load(self):
         pass
 
-    def operate(self, data):
+    def action(self, data):
         return self.operator.encapsulate(data)
 
     def register(self, observer):
@@ -264,7 +258,7 @@ class BaseRegistry(BaseSATObject, IRegistry, IObservable):
         pass
 
     def observers_update(self, data):
-        frame = self.operate(data=data)
+        frame = self.action(data=data)
         for observer in self.observers:
             observer.update(frame)
 
@@ -298,6 +292,9 @@ class BaseBinder(BaseSATObject, IBinder):
         return "__BASEGBINDER__ = (name : {}, observable : {})\n".format(self.name, self.observable.name)
 
     def load(self):
+        pass
+
+    def action(self, data):
         pass
 
     def read(self):
@@ -335,7 +332,7 @@ class BaseThreadWrite(threading.Thread):
     def __init__(self, socket, data):
         super().__init__()
         self.socket = socket
-        self.data = list2str([chr(d) for d in self.data])
+        self.data = list2str([chr(d) for d in data])
         self.name = self.getName()
 
     def run(self):
@@ -361,3 +358,76 @@ class BaseThreadClient(threading.Thread):
     
     def stop(self):
         self.isRunning = False
+
+class BaseAction(IAction):
+    """
+        Internal Actions on differents componenents
+    """
+    LAUNCH_ALL = "all"
+
+    def __init__(self, component, command):
+        self.component = component
+        self.cpttype = self.__define_component_type()
+        self.command = command
+        self.cmdtype = self.__define_command_type()
+
+    def treat(self):
+        """ Enter point of actions """
+        if self.cmdtype == 0:
+            self.__check_globals()
+        else:
+            self.__check_modules()
+
+    def __define_component_type(self):
+        if isinstance(self.component, BaseLoader):
+            return 0
+        elif isinstance(self.component, BaseManager):
+            return 1
+        elif isinstance(self.component, BaseProvider):
+            return 2
+        elif isinstance(self.component, BaseRegistry):
+            return 3
+        elif isinstance(self.component, BaseBinder):
+            return 4
+        else:
+            return None
+
+    def __define_command_type(self):
+        if isinstance(self.command, FrameTransfert):
+            return 1
+        else: 
+            return 0
+
+    def __check_globals(self):
+        """ Check for a command in the Action list """
+        try:
+            if self.command == BaseAction.LAUNCH_ALL:
+                if self.cpttype == 0: # loader
+                    for m in list(self.component.dealer.managers):
+                        self.component.dealer.managers[m].action(BaseAction.LAUNCH_ALL)
+                if self.cpttype == 1: # manager
+                    for p in list(self.component.providers):
+                        self.component.providers[p].action(BaseAction.LAUNCH_ALL)
+                if self.cpttype == 2: # provider
+                    for b in list(self.component.binders):
+                        self.component.binders[b].action(BaseAction.LAUNCH_ALL)
+                if self.cpttype == 3: # binder
+                    self.component.binders.read()
+        except Exception as e:
+            print("[ERROR] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
+    def __check_modules(self):
+        """ Check for a command line which specify a module """
+        if self.cpttype == 0:
+            if self.command.emitter == "mdlconf":
+                mdls = []
+                for mdl in self.command.payload["config"]["modules"]:
+                    mdls.append(mdl['name'])
+                self.component.load(mdls)
+        if self.cpttype == 1:
+            for p in self.component.providers:
+                p.action("all")
+        if self.cpttype == 2:
+            for p in self.component.binders:
+                p.action("all")
+        if self.cpttype == 3:
+            self.component.binders.read()

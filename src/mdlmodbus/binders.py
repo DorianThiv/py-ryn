@@ -1,28 +1,32 @@
 
 import sys
 import socket
+import threading
 import mdlmodbus.exceptions
 
 from mdlmodbus.templates import ModbusTCPFrame, ModbusRTUFrame, ModbusThreadRead, ModbusThreadWrite
 from bases import BaseBinder
+from network import *
 
 # Ayncronous modbus : TCP/IP (Modbus Ethernet) 
 class ModbusTcpBinder(BaseBinder):
     
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
+        self.host = getIpAdress()
+        self.port = 502
 
     def load(self):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            print("Modbus connection at : {} on port {} ...".format("192.168.1.17", 502))
-            self.socket.connect(("192.168.1.17", 502))
-            print("[SUCCES] : Modbus connection on port {}".format(502))
+            print("Modbus connection at : {} on port {} ...".format(self.host, self.port))
+            self.socket.connect((self.host, self.port))
+            print("[SUCCES] : Modbus connection on port {}".format(self.port))
         except Exception as e:
             print("ErrorModbus : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
             self.socket.close()
 
-    def action(self):
+    def action(self, frame):
         self.read()
         self.write()
 
@@ -31,7 +35,7 @@ class ModbusTcpBinder(BaseBinder):
         self.thMdbR.start()
 
     def write(self):
-        data = [0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x01, 0x06, 0x00, 0x0B, 0x07, 0x9A]
+        data = [0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x01, 0x06, 0x00, 0x0A, 0x07, 0x9A]
         self.thMdbW = ModbusThreadWrite(self.socket, data)
         self.thMdbW.start()
 

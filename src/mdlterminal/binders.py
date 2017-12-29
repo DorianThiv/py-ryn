@@ -24,6 +24,7 @@ class TerminalBinder(BaseBinder):
     def read(self):
         termThR = TerminalThreadRead(self.socket, self._get_event)
         termThR.start()
+        
     def write(self):
         pass
     

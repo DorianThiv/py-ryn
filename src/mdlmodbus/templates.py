@@ -100,9 +100,6 @@ class ModbusThreadWrite(BaseThreadWrite):
     def __init__(self, socket, data):
         super().__init__(socket, data)
 
-    def run(self):
-        self.socket.send(str.encode(self.data))
-
 class ModbusTreatResponse:
 
     def __init__(self):
