@@ -27,17 +27,20 @@ class ModbusTcpBinder(BaseBinder):
             self.socket.close()
 
     def action(self, frame):
-        self.read()
-        self.write()
+        if self.socket._closed != True:
+            self.read()
+            self.write()
 
     def read(self):
         self.thMdbR = ModbusThreadRead(self.socket, self._get_event)
         self.thMdbR.start()
+        self.thMdbR.join()
 
     def write(self):
         data = [0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x01, 0x06, 0x00, 0x0A, 0x07, 0x9A]
         self.thMdbW = ModbusThreadWrite(self.socket, data)
         self.thMdbW.start()
+        self.thMdbW.join()
 
 # Syncronous modbus : RS-485
 class ModbusRtuBinder(BaseBinder):

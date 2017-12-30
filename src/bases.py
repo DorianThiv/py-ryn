@@ -1,6 +1,7 @@
 
 import sys
 import threading
+from multiprocessing import Process
 from transfert import FrameTransfert
 from factories import PackageFactory
 from util import *
@@ -27,7 +28,6 @@ class BaseSATObject(ISATObject):
             Will reaload module name by name.
             To reload the loader give ["config"]["module"]
         """
-        print(frame)
         action = BaseAction(self, frame)
         action.treat()
 
@@ -294,9 +294,6 @@ class BaseBinder(BaseSATObject, IBinder):
     def load(self):
         pass
 
-    def action(self, data):
-        pass
-
     def read(self):
         pass
 
@@ -314,14 +311,16 @@ class BaseThreadRead(threading.Thread):
         super().__init__()
         self.socket = socket
         self.callback = callback
-        self.name = self.getName()
         self.isRunning = False
 
     def run(self):
         self.isRunning = True
         while self.isRunning:
-            msg = self.socket.recv(BaseThreadRead.PACKET_SIZE)
-            print(msg)
+            try:
+                msg = self.socket.recv(BaseThreadRead.PACKET_SIZE)
+                print(msg)
+            except Exception as e:
+                print("ErrorRead : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
     
     def stop(self):
         self.isRunning = False
@@ -336,7 +335,10 @@ class BaseThreadWrite(threading.Thread):
         self.name = self.getName()
 
     def run(self):
-        self.socket.send(self.data.encode())
+        try: 
+            self.socket.send(self.data.encode())
+        except Exception as e:
+            print("ErrorWrite : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
 
 class BaseThreadClient(threading.Thread):
 
@@ -404,13 +406,13 @@ class BaseAction(IAction):
             if self.command == BaseAction.LAUNCH_ALL:
                 if self.cpttype == 0: # loader
                     for m in list(self.component.dealer.managers):
-                        self.component.dealer.managers[m].action(BaseAction.LAUNCH_ALL)
+                        Process(target=self.component.dealer.managers[m].action(BaseAction.LAUNCH_ALL))
                 if self.cpttype == 1: # manager
                     for p in list(self.component.providers):
-                        self.component.providers[p].action(BaseAction.LAUNCH_ALL)
+                        Process(target=self.component.providers[p].action(BaseAction.LAUNCH_ALL))
                 if self.cpttype == 2: # provider
                     for b in list(self.component.binders):
-                        self.component.binders[b].action(BaseAction.LAUNCH_ALL)
+                        Process(target=self.component.binders[b].action(BaseAction.LAUNCH_ALL))
                 if self.cpttype == 3: # binder
                     self.component.binders.read()
         except Exception as e:

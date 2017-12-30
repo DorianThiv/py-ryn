@@ -28,6 +28,7 @@
         * End : silence
 """
 
+import sys
 import threading
 
 from bases import BaseThreadRead, BaseThreadWrite
@@ -91,9 +92,13 @@ class ModbusThreadRead(BaseThreadRead):
     def run(self):
         self.isRunning = True
         while self.isRunning:
-            msg = self.socket.recv(BaseThreadRead.PACKET_SIZE)
-            self.treat._decode_mdbs_response(msg)
-            self.callback(msg)
+            try:
+                msg = self.socket.recv(BaseThreadRead.PACKET_SIZE)
+                self.treat._decode_mdbs_response(msg)
+                self.callback(msg)
+            except Exception as e:
+                print("ErrorRead : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e))
+                self.stop()
 
 class ModbusThreadWrite(BaseThreadWrite):
 
