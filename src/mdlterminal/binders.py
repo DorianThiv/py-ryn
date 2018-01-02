@@ -16,10 +16,13 @@ class TerminalBinder(BaseBinder):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.bind((self.host, self.port))
-            print("Connection at : {} on port {}".format(self.host, self.port))
+            print("[SUCCESS - BINDER - TERMINAL] : Connection (host: {}, port: {})".format(self.host, self.port))
         except Exception as e:
             print("ErrorTerminal : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
             self.socket.close()
+
+    def action(self, data):
+        self.read()
 
     def read(self):
         termThR = TerminalThreadRead(self.socket, self._get_event)

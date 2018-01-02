@@ -12,7 +12,7 @@ def main():
     managers = ["mdlconf"]
     core = BaseCore("core")
     core.start(BaseLoader("mdlloader", core, managers))
-    threading.Thread(target=core.run()).start()
+    core.run()
     print("[PROCESS - TERMINATED] : Core stopped.")
 
 if __name__ == "__main__":

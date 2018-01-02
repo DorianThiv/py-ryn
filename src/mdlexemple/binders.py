@@ -11,6 +11,9 @@ class ExempleBinder(BaseBinder):
         # self.read()
         pass
 
+    def action(self, frame):
+        print(frame)
+
     def read(self):
         import sys
         import os

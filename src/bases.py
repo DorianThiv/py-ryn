@@ -21,7 +21,7 @@ class BaseSATObject(ISATObject):
     def load(self):
         pass
 
-    def action(self, frame):
+    def action(self, frame=None):
         """ 
             TODO: Call LoaderTreatAction class. it will
             contains all treatment actions.
@@ -152,10 +152,13 @@ class BaseDealer(IDealer, IObserver):
             Keyword list() force to make a copy of 
             dictionnary keys. 
         """
-        if frame.receiver not in list(self.managers):
-            self.principals_managers[frame.receiver].action(frame)
-        else:
-            self.managers[frame.receiver].action(frame)
+        try:
+            if frame.receiver not in list(self.managers):
+                self.principals_managers[frame.receiver].action(frame)
+            else:
+                self.managers[frame.receiver].action(frame)
+        except Exception as e:
+            print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
 
 class BaseManager(BaseSATObject, IManager, IObservable):
     """ Manager load all components in this his module """
@@ -226,7 +229,9 @@ class BaseProvider(BaseSATObject, IProvider, IObserver):
             name = class_name_gen(minprefix, c["class"])
             instance = c["class"](class_name_gen(minprefix, c["class"]), self.registries[0]["instance"])
             self.binders[name] = instance
-            threading.Thread(target=self.binders[name].load()).start()
+            t = threading.Thread(target=self.binders[name].load())
+            t.start()
+            t.join()
 
     def update(self, frame):
         """ Update to notify the manager with a frame instance """
@@ -276,7 +281,7 @@ class BaseOperator(BaseSATObject, IOperator):
     def encapsulate(self, data):
         pass
 
-    def decapsulate(self):
+    def decapsulate(self, frame):
         pass
 
 class BaseBinder(BaseSATObject, IBinder):
@@ -318,12 +323,12 @@ class BaseThreadRead(threading.Thread):
         while self.isRunning:
             try:
                 msg = self.socket.recv(BaseThreadRead.PACKET_SIZE)
-                print(msg)
+                print(msg) # Là j'écrit juste le message :)
             except Exception as e:
                 print("ErrorRead : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
     
     def stop(self):
-        self.isRunning = False
+        self.isRunning = False # Vrai ou faux tu crois quoi ??!
         self.socket.close()
 
 class BaseThreadWrite(threading.Thread):
@@ -367,6 +372,14 @@ class BaseAction(IAction):
     """
     LAUNCH_ALL = "all"
 
+    CONF_MODULE = "mdlconf"
+
+    LOADER = 0
+    MANAGER = 1
+    PROVIDER = 2
+    REGISTRY = 3
+    BINDER = 4
+
     def __init__(self, component, command):
         self.component = component
         self.cpttype = self.__define_component_type()
@@ -382,15 +395,15 @@ class BaseAction(IAction):
 
     def __define_component_type(self):
         if isinstance(self.component, BaseLoader):
-            return 0
+            return BaseAction.LOADER
         elif isinstance(self.component, BaseManager):
-            return 1
+            return BaseAction.MANAGER
         elif isinstance(self.component, BaseProvider):
-            return 2
+            return BaseAction.PROVIDER
         elif isinstance(self.component, BaseRegistry):
-            return 3
+            return BaseAction.REGISTRY
         elif isinstance(self.component, BaseBinder):
-            return 4
+            return BaseAction.BINDER
         else:
             return None
 
@@ -404,32 +417,35 @@ class BaseAction(IAction):
         """ Check for a command in the Action list """
         try:
             if self.command == BaseAction.LAUNCH_ALL:
-                if self.cpttype == 0: # loader
+                if self.cpttype == BaseAction.LOADER:
                     for m in list(self.component.dealer.managers):
-                        Process(target=self.component.dealer.managers[m].action(BaseAction.LAUNCH_ALL))
-                if self.cpttype == 1: # manager
+                        self.component.dealer.managers[m].action(BaseAction.LAUNCH_ALL)
+                if self.cpttype == BaseAction.MANAGER:
                     for p in list(self.component.providers):
-                        Process(target=self.component.providers[p].action(BaseAction.LAUNCH_ALL))
-                if self.cpttype == 2: # provider
+                        self.component.providers[p].action(BaseAction.LAUNCH_ALL)
+                if self.cpttype == BaseAction.PROVIDER:
                     for b in list(self.component.binders):
-                        Process(target=self.component.binders[b].action(BaseAction.LAUNCH_ALL))
-                if self.cpttype == 3: # binder
-                    self.component.binders.read()
+                        self.component.binders[b].action(BaseAction.LAUNCH_ALL)
+                if self.cpttype == BaseAction.REGISTRY:
+                    self.component.registries[0]["instance"].action(BaseAction.LAUNCH_ALL)
         except Exception as e:
             print("[ERROR] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
     def __check_modules(self):
         """ Check for a command line which specify a module """
-        if self.cpttype == 0:
-            if self.command.emitter == "mdlconf":
+        if self.cpttype == BaseAction.LOADER:
+            if self.command.emitter == BaseAction.CONF_MODULE:
                 mdls = []
                 for mdl in self.command.payload["config"]["modules"]:
                     mdls.append(mdl['name'])
                 self.component.load(mdls)
-        if self.cpttype == 1:
+        if self.cpttype == BaseAction.MANAGER:
             for p in self.component.providers:
-                p.action("all")
-        if self.cpttype == 2:
-            for p in self.component.binders:
-                p.action("all")
-        if self.cpttype == 3:
-            self.component.binders.read()
+                self.component.providers[p].action(self.command)
+        if self.cpttype == BaseAction.PROVIDER:
+            for b in self.component.binders:
+                self.component.binders[b].action(self.command)
+        if self.cpttype == BaseAction.REGISTRY:
+            pass
+        if self.cpttype == BaseAction.BINDER:
+            self.component.action(self.command.payload)
+

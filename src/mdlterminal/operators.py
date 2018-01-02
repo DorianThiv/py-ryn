@@ -14,7 +14,11 @@ class TerminalOperator(BaseOperator):
 
     def encapsulate(self, data):
         ts = time.time()
-        return FrameTransfert("mdlterminal", "mdlexemple", "write", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
+        if data['type'] == 0:
+            f = FrameTransfert("mdlterminal", "mdlexemple", "write", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
+        else:
+            f = FrameTransfert("mdlterminal", data["dest-module"], "write", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
+        return f
 
     def decapsulate(self, frame):
         pass
