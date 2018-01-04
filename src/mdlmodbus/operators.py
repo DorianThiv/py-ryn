@@ -17,4 +17,4 @@ class ModbusOperator(BaseOperator):
         return FrameTransfert("mdlmodbus", "mdlexemple", "read", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
 
     def decapsulate(self, frame):
-        pass
+        print(frame.payload)

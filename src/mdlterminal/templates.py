@@ -20,7 +20,9 @@ class TerminalThreadClient(BaseThreadClient):
                     if msg == "":
                         raise ErrorTerminalClientDisconnect("Client Terminal was disconnected : {}".format(self.connection))
                     else:
-                        self.callback(self.treat.treat(msg))
+                        data = self.treat.treat(msg)
+                        if data != None:
+                            self.callback(data)
         except ErrorTerminalClientDisconnect as e:
             print("{}".format(e))
         except UnicodeDecodeError as e:
@@ -95,14 +97,17 @@ class TerminalTreatResponse:
     def __module_request(self, splitted):
         data = {}
         try:
-            self.__check_integtity_cmd(splitted)
-            data["type"] = TerminalTreatResponse.MODULE_REQUEST
-            data["dest-module"] = splitted[0]
-            data["dest-action"] = splitted[1]
-            data["data"] = splitted[2:len(splitted)-1]
+            if self.__check_integtity_cmd(splitted):
+                data["type"] = TerminalTreatResponse.MODULE_REQUEST
+                data["dest-module"] = splitted[0]
+                data["dest-action"] = splitted[1]
+                data["data"] = splitted[2:len(splitted)]
+                return data
+            else:
+                return self.__unknown_request(splitted)
         except Exception as e:
             print("[WARNING] Ligne {} : {}".format(sys.exc_info()[-1].tb_lineno, WarningTerminalWrongRequestModule(e, splitted[0])))
-        return data
+        
 
     def __unknown_request(self, msg):
         data = {}

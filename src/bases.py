@@ -28,6 +28,7 @@ class BaseSATObject(ISATObject):
             Will reaload module name by name.
             To reload the loader give ["config"]["module"]
         """
+        print("Component : {}, Action :{}".format(self, frame))
         action = BaseAction(self, frame)
         action.treat()
 
@@ -140,8 +141,9 @@ class BaseDealer(IDealer, IObserver):
         self.principals_managers[manager.name] = manager
 
     def remove(self, mname):
-        """ Remove a module module from the managers dict """
-        pass
+        """ Remove a module from the managers dict """
+        BaseDealer.CONNECTED_MANAGERS.remove(mname)
+        del self.managers[mname]
 
     def find(self, mname):
         """ Find another module to send the received frame """
