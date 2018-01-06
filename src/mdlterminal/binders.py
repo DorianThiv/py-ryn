@@ -3,12 +3,13 @@ import sys
 import socket
 from bases import BaseBinder
 from network import *
-from mdlterminal.templates import TerminalThreadRead
+from mdlterminal.templates import TerminalThreadServer, TerminalThreadWrite
 
 class TerminalBinder(BaseBinder):
     
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
+        self.server = None
         self.host = getIpAdress()
         self.port = 38000
 
@@ -22,13 +23,19 @@ class TerminalBinder(BaseBinder):
             self.socket.close()
 
     def action(self, data):
-        self.read()
+        """ Interactiv with an Action derived class from BaseAction """
+        if data[1] == "all":
+            self.read()
+        else:
+            self.write(data[1])
 
     def read(self):
-        termThR = TerminalThreadRead(self.socket, self._get_event)
-        termThR.start()
-        termThR.join()
+        self.server = TerminalThreadServer(self.socket, self._get_event)
+        self.server.start()
+        self.server.join()
         
-    def write(self):
-        pass
+    def write(self, data): 
+        termThW = TerminalThreadWrite(data)
+        termThW.start()
+        termThW.join()
     

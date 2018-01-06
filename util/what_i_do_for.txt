@@ -8,3 +8,6 @@ WHAT I DO FOR ...
 
 * For call a module in another :
     *   For exemple : In module "Configuration" call : "from mdlbase.managers import MdlBaseManager"
+
+* For verify commands in the terminal.
+    *   Take a specific json file and verify the command with it. 

@@ -85,6 +85,10 @@ class IRegistry:
     def action(self, data):
         pass
 
+    @abstractmethod
+    def collect(self, data):
+        pass
+
 class IOperator:
     __metaclass__ = ABCMeta
 

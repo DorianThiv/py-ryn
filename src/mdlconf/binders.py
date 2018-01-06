@@ -13,10 +13,13 @@ class ConfigurationBinder(BaseBinder):
     def read(self, filename="config.json"):
         import sys
         import os
-        with open(os.path.dirname(__file__) + "/" + filename, 'r') as f:
-            data = json.load(f)
-        self.observable.observers_update(data)
-
+        try:
+            with open(os.path.dirname(__file__) + "/" + filename, 'r') as f:
+                data = json.load(f)
+            self.observable.observers_update(data)
+        except Exception as e:
+            print("[ERROR - CONF BINDER] : {}".format(e))
+            
     def write(self):
         pass
     

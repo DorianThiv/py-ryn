@@ -103,7 +103,7 @@ class ModbusThreadRead(BaseThreadRead):
 class ModbusThreadWrite(BaseThreadWrite):
 
     def __init__(self, socket, data):
-        super().__init__(socket, data)
+        super().__init__(socket, list2str([chr(d) for d in data]))
 
 class ModbusTreatResponse:
 

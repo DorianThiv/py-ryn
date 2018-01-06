@@ -7,11 +7,12 @@ import threading
 
 from bases import BaseCore, BaseLoader
 
+MANGERS = ["mdlconf"]
+
 def main():
     """ Main method to start server """
-    managers = ["mdlconf"]
     core = BaseCore("core")
-    core.start(BaseLoader("mdlloader", core, managers))
+    core.start(BaseLoader("mdlloader", core, MANGERS))
     core.run()
     print("[PROCESS - TERMINATED] : Core stopped.")
 

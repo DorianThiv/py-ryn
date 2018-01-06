@@ -1,8 +1,9 @@
-
+import sys
 import datetime
 import time
+
 from bases import BaseOperator
-from transfert import FrameTransfert
+from transfert import ModuleFrameTransfert, SimpleFrameTransfert
 
 class TerminalOperator(BaseOperator):
     
@@ -15,13 +16,20 @@ class TerminalOperator(BaseOperator):
     def encapsulate(self, data):
         ts = time.time()
         try:
-            if data['type'] == 0:
-                f = FrameTransfert("mdlterminal", "mdlexemple", "write", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
-            else:
-                f = FrameTransfert("mdlterminal", data["dest-module"], "write", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
+            __type = data['type']
+            if __type == 0:
+                f = data
+            elif __type == 1:
+                f = ModuleFrameTransfert("mdlterminal", "mdlexemple", "write", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
+            elif __type == 2:
+                __dest = data["dest-module"]
+                f = ModuleFrameTransfert("mdlterminal", __dest, "write", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
+            return f
         except Exception as e:
-            print("[ERROR - OPERATE - TERMINAL] : {}".format(e))
-        return f
+            print("[ERROR - ENCAPSULATE - TERMINAL] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
 
     def decapsulate(self, frame):
-        pass
+        try:
+            return (frame.direction, frame.payload)
+        except Exception as e:
+            print("[ERROR - DECAPSULATE - TERMINAL] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))

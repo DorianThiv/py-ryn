@@ -1,10 +1,12 @@
 
 
 import sys
+
+from network import *
 from bases import BaseDealer, BaseThreadClient, BaseThreadRead, BaseThreadWrite
 from mdlterminal.exceptions import *
 
-class TerminalThreadClient(BaseThreadClient):
+class TerminalThreadRead(BaseThreadClient):
 
     def __init__(self, connection, callback):
         super().__init__(connection, callback)
@@ -34,7 +36,9 @@ class TerminalThreadClient(BaseThreadClient):
             flg = True
         return flg
 
-class TerminalThreadRead(BaseThreadRead):
+class TerminalThreadServer(BaseThreadRead):
+
+    CLIENTS = {}
 
     def __init__(self, socket, callback):
         super().__init__(socket, callback)
@@ -45,16 +49,24 @@ class TerminalThreadRead(BaseThreadRead):
             self.isRunning = True
             while self.isRunning:
                 connection, addr = self.socket.accept()
-                termThC = TerminalThreadClient(connection, self.callback)
+                TerminalThreadServer.CLIENTS[addr[0]] = connection
+                termThC = TerminalThreadRead(connection, self.callback)
                 termThC.start()
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.socket.close()
+        
+
+class TerminalThreadWrite(BaseThreadWrite):
+
+    def __init__(self, data):
+        super().__init__(TerminalThreadServer.CLIENTS[getIpAdress()], data)
 
 class TerminalTreatResponse:
 
-    UNKNOWN_REQUEST = 0
-    MODULE_REQUEST = 1
+    SIMPLE_REQUEST = 0
+    UNKNOWN_REQUEST = 1
+    MODULE_REQUEST = 2
 
     def __init__(self):
         pass
@@ -70,44 +82,25 @@ class TerminalTreatResponse:
             data : [n, .......]
         """
         data = {}
-        if self.__check_module_request(msg):
+        splitted = msg.split(" ")
+        if self.__check_module_request(splitted):
             print("module request")
-            splitted = msg.split(" ")
             data = self.__module_request(splitted)
         else:
             data = self.__unknown_request(msg)
         return data
     
-    def __check_module_request(self, msg):
-        flg = False
-        splitted = msg.split(" ")
-        for name in BaseDealer.CONNECTED_MANAGERS:
-            if splitted[0] == name:
-                flg = True
-        return flg
-
-    def __check_integtity_cmd(self, splitted):
-        if splitted[1] == "-r" or splitted[1] == "-w":
-            return True
-        elif splitted[1] == "--read" or splitted[1] == "--write":
-            return True
-        else:
-            return False
+    def __check_module_request(self, splitted):
+        return True if splitted[0] in BaseDealer.CONNECTED_MANAGERS else False
 
     def __module_request(self, splitted):
         data = {}
-        try:
-            if self.__check_integtity_cmd(splitted):
-                data["type"] = TerminalTreatResponse.MODULE_REQUEST
-                data["dest-module"] = splitted[0]
-                data["dest-action"] = splitted[1]
-                data["data"] = splitted[2:len(splitted)]
-                return data
-            else:
-                return self.__unknown_request(splitted)
-        except Exception as e:
-            print("[WARNING] Ligne {} : {}".format(sys.exc_info()[-1].tb_lineno, WarningTerminalWrongRequestModule(e, splitted[0])))
-        
+        data["type"] = TerminalTreatResponse.MODULE_REQUEST
+        data["dest-module"] = splitted[0]
+        data["data"] = splitted[1:len(splitted)]
+        return data
+        # Call in a writer callback
+        # print("[WARNING] Ligne {} : {}".format(sys.exc_info()[-1].tb_lineno, WarningTerminalWrongRequestModule(e, splitted[0])))
 
     def __unknown_request(self, msg):
         data = {}
