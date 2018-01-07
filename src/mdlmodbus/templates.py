@@ -33,7 +33,7 @@ import threading
 
 from bases import BaseThreadRead, BaseThreadWrite
 from mdlmodbus.exceptions import *
-from util import bytes2int, list2str
+from util import *
 
 """ CRC 16 CALCULATION """
 INITIAL_MODBUS = 0xFFFF
@@ -44,7 +44,7 @@ ERROR_CODES = {"0x01": ErrorModbusTcp0x01, "0x02": ErrorModbusTcp0x02 , "0x03": 
 
 class MBAPHeader:
 
-    def __init__(self, num_trans=0x0000, proto=0x0000, lendata1=0x00, lendata2=0x00):
+    def __init__(self, num_trans=0, proto=0, lendata1=0, lendata2=0):
         self.num_trans = num_trans
         self.proto = proto
         self.lendata1 = lendata1
@@ -52,14 +52,33 @@ class MBAPHeader:
 
 class ModbusTCPFrame:
 
-    def __init__(self, saddress, function, data):
-        self.header = MBAPHeader(lendata2=0x06)
-        self.saddress = saddress
-        self.function = function
+    def __init__(self, data):
+        self.header = MBAPHeader()
         self.payload = data
 
     def serialize(self):
-        pass
+        print(self.payload)
+        function = int(self.payload[1]) & 0xFF
+        if function == 0x06:
+            devaddr = int(self.payload[3]) & 0xFF
+            regaddr = int(self.payload[5]) & 0xFFFF
+            value = int(self.payload[7]) & 0xFFFF 
+            frame = [
+                chr(0 & 0xFF),
+                chr(self.header.num_trans & 0xFF),
+                chr(0 & 0xFF),
+                chr(self.header.proto & 0xFF),
+                chr(self.header.lendata1 & 0xFF),
+                chr(self.header.lendata2 & 0xFF),
+                chr(devaddr & 0xFF),
+                chr(function & 0xFF),
+                chr(0 & 0xFF),
+                chr(regaddr & 0xFF),
+                chr(0 & 0xFF),
+                chr(value & 0xFF)]
+            print(frame)
+            # data = [0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x01, 0x06, 0x00, 0x05, 0x07, 0x9A]
+            return list2str([chr(d) for d in frame])
 
     def deserialize(self):
         pass
@@ -117,3 +136,13 @@ class ModbusTreatResponse:
         for c in resp:
             print("|{}".format(c ^ 0x00), end='|')
         print()
+
+class ModbusTreatRequest:
+
+    @staticmethod
+    def treat(data):
+        print(data)
+        data["func"] = chr(hex(data["func"]))
+        data["dev"] = chr(hex(data["func"]))
+        data["reg"] = chr(hex(data["func"]))
+        data["val"] = chr(hex(data["func"]))

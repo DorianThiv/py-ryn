@@ -12,5 +12,5 @@ class ModbusRegistry(BaseRegistry):
         b_type, payload = self.operator.decapsulate(frame)
         if b_type == "tcp":
             self.binders["modbus-tcp-binder"].action(payload)
-        if b_type == "rtu":
+        if b_type == "rtu": 
             self.binders["modbus-rtu-binder"].action(payload)

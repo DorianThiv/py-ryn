@@ -15,7 +15,7 @@ def main():
     core.start(BaseLoader("mdlloader", core, MANGERS))
     core.run()
     print("[PROCESS - TERMINATED] : Core stopped.")
-
+    
 if __name__ == "__main__":
     main()
 
