@@ -1,60 +1,91 @@
 
-
-class FrameEncoder:
-    pass
-
-class FrameDecoder:
-    pass
+from util import list2str
 
 class SimpleFrameTransfert:
 
     """ Serialize @param : frame to SimpleFrameTransfert :
-        Test:   [Command] => BaseCommand (actually BaseAction)
-                [Callback] => Optionnal
-                [Log] => class Logger (message, exception, comments) ???   
+        [Command] => BaseCommand (actually )
+        [Callback] => Optionnal
+        [Log] => class Logger (message, exception, comments) ???   
     """
 
-    def __init__(self, sort=0, direction=None, payload=None):
-        self.sort = sort
-        self.direction = direction
+    def __init__(self, command=None, payload=None, callback=None, log=None):
+        self.command = command
         self.payload = payload
+        self.callback = callback
+        self.log = log
 
     def __str__(self):
-        return "__FRAME__ = (|em : {} | dir: {} | payload : {})".format(self.sort, self.direction, self.payload)
+        return "__SIMPLE_FRAME__ = (|command : {} | payload: {} | callback : {} | log : {})".format(self.command, self.payload, self.callback, self.log)
 
     @staticmethod
     def serialize(frame):
         pass
 
+    @staticmethod
+    def deserialize(frame):
+        pass
+
 class ModuleFrameTransfert:
 
     """ Serialize @param : frame to SimpleFrameTransfert :
-        Test:   [Address Dest] => (M = 0x00, P = 0x00, R = 0x00, B = 0x00)
-                [Command] => BaseCommand (actually BaseAction)
-                [Payload] => Content known buy dest module
-                [Callback] => Optionnal
-                [Log] => class Logger (message, exception, comments) ???   
+        [src-addr] => (M = 0x00, P = 0x00, R = 0x00, B = 0x00)
+        [dest-addr] => (M = 0x00, P = 0x00, R = 0x00, B = 0x00)
+        [command] => BaseCommand (actually)
+        [payload] => Content known buy dest module
+        [callback] => Optionnal
+        [log] => class Logger (message, exception, timestamp)   
     """
 
-    """ This frame define the internal tranfert protocole
-        
-        Data Types : 
-        * Emitter : (id) ""
-        * Receptor : (id) ""
-        * Direction : (read | write) ""
-        * Payload : (json) ""
-        * Timestamp : (tmestamp) ""
-        * Crc : (string) "" 
-    """
-
-    def __init__(self, emitter=None, receiver=None, direction=None, payload=None, timestamp=None, crc=None):
-        self.emitter = emitter
-        self.receiver = receiver
-        self.direction = direction
+    def __init__(self, srcAddr=[], destAddr=[], command=None, payload=None, callback=None, log=None):
+        self.srcAddr = srcAddr
+        self.destAddr = destAddr
+        self.command = command
         self.payload = payload
-        self.timestamp = timestamp
-        self.crc = crc
+        self.callback = callback
+        self.log = log
 
     def __str__(self):
-        return "__FRAME__ = (|em : {} | re : {} | dir: {} | payload : {} | timestamp : {} | crc : {}|)".format(self.emitter, self.receiver, self.direction, self.payload, self.timestamp, self.crc)
+        return "__MODULE_FRAME__ = (|src : {} | dest : {} | command: {} | payload : {} | callback : {} | log : {}|)".format(self.srcAddr, self.destAddr, self.command, self.payload, self.callback, self.log)
 
+    def addToSrcAddr(self, _id):
+        pass
+    
+    def addToDestAddr(self, _id):
+        pass
+
+    def serializeSrcAddr(self):
+        """ In util.py implement JSON class to serialize and deserialize in json """
+        pass
+
+    def serializePayload(self, payload):
+        """ In util.py implement JSON class to serialize and deserialize in json """
+        pass
+
+    @staticmethod
+    def deserializePayload(payload):
+        """ In util.py implement JSON class to serialize and deserialize in json """
+        pass
+
+    def createLog(self, log):
+        pass
+
+    def serialize(self):
+        src = list2str(self.srcAddr)
+        dest = list2str(self.destAddr)
+        
+
+    @staticmethod
+    def deserialize(frame):
+        pass
+
+if __name__ == "__main__":
+    import json
+    from bases import BaseCommand
+    from modules.dhcp import DHCP
+    
+    mft = ModuleFrameTransfert([1,2,2,1], [1,2,2,1], BaseCommand.COMMAND_ALL, ["data"])
+    mft.serialize()
+    j = json.dumps(mft.__dict__)
+    # null in json = None in python
+    print(json.loads(j)["srcAddr"])

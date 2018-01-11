@@ -1,7 +1,7 @@
 
-from bases import BaseAction
+from bases import BaseCommand
 
-class TerminalAction(BaseAction):
+class TerminalCommand(BaseCommand):
 
     def __init__(self):
         pass 

@@ -1,8 +1,11 @@
 
 import sys
-from exceptions import ErrorLoadModule
+
+from exceptions import LoadModuleError
 
 class PackageFactory:
+
+    MODULES_DIRECTORY = "modules."
 
     @staticmethod
     def make(name):
@@ -10,9 +13,9 @@ class PackageFactory:
             mod = __import__(name)
             c = mod.manager
             m = c(name)
-            return m
+            return m 
         except Exception as e:
-            raise ErrorLoadModule("Ligne : {}, {} : {}".format(sys.exc_info()[-1].tb_lineno, name, e))
+            raise LoadModuleError("Ligne : {}, {} : {}".format(sys.exc_info()[-1].tb_lineno, name, e))
 
 class ModuleFactory:
 

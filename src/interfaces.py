@@ -5,14 +5,15 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 class ISATObject:
     __metaclass__ = ABCMeta
 
+    ref = 0 # 00000000 - FFFFFFFFF
     name = None
 
     @abstractmethod
-    def load(self):
+    def initialize(self):
         pass
 
     @abstractmethod
-    def reload(self):
+    def load(self):
         pass
 
 class ICore:
@@ -137,11 +138,11 @@ class IObservable:
     def observers_update(self):
         pass
 
-class IAction:
+class ICommand:
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def treat(self):
         pass
 
-__all__ = ('ISATObject', 'ICore', 'IManager', 'IProvider', 'IRegistry', 'IOperator', 'IObserver', 'IObservable', 'IAction')
+__all__ = ('ISATObject', 'ICore', 'IManager', 'IProvider', 'IRegistry', 'IOperator', 'IObserver', 'IObservable', 'ICommand')

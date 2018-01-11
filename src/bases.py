@@ -5,7 +5,7 @@ import threading
 from transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from factories import PackageFactory
 from util import *
-from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, IAction
+from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
 
 class BaseSATObject(ISATObject): 
 
@@ -29,7 +29,7 @@ class BaseSATObject(ISATObject):
             To reload the loader give ["config"]["module"]
         """
         # print("Component : {}, Action :{}".format(self, frame))
-        action = BaseAction(self, frame)
+        action = BaseCommand(self, frame)
         action.treat()
 
 
@@ -145,9 +145,15 @@ class BaseDealer(IDealer, IObserver):
         BaseDealer.CONNECTED_MANAGERS.remove(mname)
         del self.managers[mname]
 
-    def find(self, mname):
+    def find(self, mod):
         """ Find another module to send the received frame """
-        return self.managers[mname]
+        if isinstance(mod, int):
+            # find by id
+            pass
+        if isinstance(mod, str):
+            # find by name
+            pass
+        return self.managers[mod]
 
     def update(self, frame):
         """ Notification from a module 
@@ -155,10 +161,10 @@ class BaseDealer(IDealer, IObserver):
             dictionnary keys. 
         """
         try:
-            if frame.receiver not in list(self.managers):
-                self.principals_managers[frame.receiver].action(frame)
+            if frame.destAddr not in list(self.managers):
+                self.principals_managers[frame.destAddr].action(frame)
             else:
-                self.managers[frame.receiver].action(frame)
+                self.managers[frame.destAddr].action(frame)
         except Exception as e:
             print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
@@ -359,9 +365,11 @@ class BaseThreadClient(threading.Thread):
     def stop(self):
         self.isRunning = False
 
-class BaseAction(IAction):
+class BaseCommand(ICommand):
     
     """ Internal Actions on differents componenents """
+
+    COMMAND_ALL = "all"
 
     """ Direction Commands """
 
@@ -390,15 +398,15 @@ class BaseAction(IAction):
 
     def __define_component_type(self):
         if isinstance(self.component, BaseLoader):
-            return BaseAction.LOADER
+            return BaseCommand.LOADER
         elif isinstance(self.component, BaseManager):
-            return BaseAction.MANAGER
+            return BaseCommand.MANAGER
         elif isinstance(self.component, BaseProvider):
-            return BaseAction.PROVIDER
+            return BaseCommand.PROVIDER
         elif isinstance(self.component, BaseRegistry):
-            return BaseAction.REGISTRY
+            return BaseCommand.REGISTRY
         elif isinstance(self.component, BaseBinder):
-            return BaseAction.BINDER
+            return BaseCommand.BINDER
         else:
             return None
 
@@ -410,8 +418,8 @@ class BaseAction(IAction):
 
     def __send_request(self):
         """ Check for a command line which specify a module """
-        if self.cpttype == BaseAction.LOADER:
-            if self.cmdtype == 1 and self.command.emitter == BaseAction.CONF_MODULE:
+        if self.cpttype == BaseCommand.LOADER:
+            if self.cmdtype == 1 and self.command.emitter == BaseCommand.CONF_MODULE:
                 mdls = []
                 for mdl in self.command.payload["config"]["modules"]:
                     mdls.append(mdl['name'])
@@ -419,10 +427,10 @@ class BaseAction(IAction):
             elif self.cmdtype == 0:
                 for m in list(self.component.dealer.managers):
                     self.component.dealer.managers[m].action(self.command)
-        if self.cpttype == BaseAction.MANAGER:
+        if self.cpttype == BaseCommand.MANAGER:
             for p in self.component.providers:
                 self.component.providers[p].action(self.command)
-        if self.cpttype == BaseAction.PROVIDER:
+        if self.cpttype == BaseCommand.PROVIDER:
             for r in self.component.registries:
                 self.component.registries[r].action(self.command)
 
