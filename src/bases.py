@@ -268,15 +268,8 @@ class BaseCommand(ICommand):
     """ Internal Actions on differents componenents """
 
     COMMAND_ALL = "all"
-
-    """ Direction Commands """
-
-    DIRECTION_UP = 0
-    DIRECTION_DOWN = 1
     
     """ Simple Commands """
-
-    CONF_MODULE = "mdlconf"
 
     LOADER = 0
     MANAGER = 1
