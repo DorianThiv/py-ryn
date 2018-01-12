@@ -2,7 +2,7 @@
 
 import sys
 
-from network import *
+from mdlutils.network import *
 from bases import BaseDealer, BaseThreadClient, BaseThreadRead, BaseThreadWrite
 from mdlterminal.exceptions import *
 

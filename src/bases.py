@@ -4,19 +4,24 @@ import threading
 
 from transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from factories import PackageFactory
-from util import *
+from mdlutils.dhcp import *
+from mdlutils.util import *
+from mdlutils.config import *
 from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
 
 class BaseSATObject(ISATObject): 
 
-    def __init__(self, name):
+    def __init__(self, name, component_type, mdladdr=None):
         self.name = name
+        self.type = component_type
+        self.addr = DHCP.getInstance(mdladdr).discover(self)
+        print(self)
 
     def __repr__(self):
         pass
 
     def __str__(self):
-        return "__BASESATOBJECT__"
+        return "__SAT_OBJECT__ = (name : {}, addr: {})".format(self.name, self.addr)
 
     def load(self):
         pass
@@ -44,25 +49,22 @@ class BaseCore(BaseSATObject, ICore):
     STATE_STOP = 6
 
     def __init__(self, name):
-        super().__init__(name)
+        super().__init__(name, DHCP.IDX_TYPE_CORE)
         self.state = BaseCore.STATE_SHUTDOWN
 
     def __repr__(self):
         pass
 
-    def __str__(self):
-        return "__CORE__ = (name : {}".format(self.name)
-
     def load(self):
         self.state = BaseCore.STATE_LOAD
 
-    def start(self, loader):
+    def start(self):
         self.state = BaseCore.STATE_START
-        self.loader = loader
+        self.loader = BaseLoader("loader", self)
 
     def run(self):
         self.state = BaseCore.STATE_RUN
-        self.loader.action(SimpleFrameTransfert(0, 1, "all"))
+        self.loader.action(SimpleFrameTransfert(BaseCommand.COMMAND_ALL))
 
     def resume(self):
         self.state = BaseCore.STATE_RUN
@@ -78,17 +80,12 @@ class BaseLoader(BaseSATObject, ILoader):
 		The loader enable to load all modules and 
 		give them instances to the "Dealer"
 	"""
-    def __init__(self, name, core, pmanagers):
-        super().__init__(name)
+    def __init__(self, name, core):
+        super().__init__(name, DHCP.IDX_TYPE_LOADER)
         self.core = core
         self.dealer = BaseDealer()
-        self.pmanagers = []
-        self.pmanagers.append(self.name)
-        for m in pmanagers:
-            self.pmanagers.append(m)
         self.managers = {}
-        self.dealer.add_principal(self)
-        self.load(pmanagers)
+        self.load(ConfigurationModule.getModulesNames())
 
     def load(self, managers):
         """ 
@@ -103,19 +100,14 @@ class BaseLoader(BaseSATObject, ILoader):
     def __load_once(self, manager):
         m = PackageFactory.make(manager)
         m.register(self.dealer)
-        if manager not in list(self.pmanagers):
-            self.dealer.add(m)
-        else:
-            self.dealer.add_principal(m)
+        self.dealer.add(m)
         m.load()
 
 class BaseDealer(IDealer, IObserver):
 
-    PRINCIPALS_MANAGERS = []
     CONNECTED_MANAGERS = []
 
     def __init__(self):
-        self.principals_managers = {}
         self.managers = {}
         for m in self.managers:
             BaseDealer.CONNECTED_MANAGERS.append(m)
@@ -134,11 +126,6 @@ class BaseDealer(IDealer, IObserver):
         """ Add a module module in the managers dict """
         BaseDealer.CONNECTED_MANAGERS.append(manager.name)
         self.managers[manager.name] = manager
-
-    def add_principal(self, manager):
-        """ Add a module module in the managers dict """
-        BaseDealer.PRINCIPALS_MANAGERS.append(manager.name)
-        self.principals_managers[manager.name] = manager
 
     def remove(self, mname):
         """ Remove a module from the managers dict """
@@ -161,32 +148,24 @@ class BaseDealer(IDealer, IObserver):
             dictionnary keys. 
         """
         try:
-            if frame.destAddr not in list(self.managers):
-                self.principals_managers[frame.destAddr].action(frame)
-            else:
-                self.managers[frame.destAddr].action(frame)
+            self.managers[frame.destAddr].action(frame)
         except Exception as e:
             print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
 
 class BaseManager(BaseSATObject, IManager, IObservable):
     """ Manager load all components in this his module """
-    def __init__(self, name, package, minprefix=""):
-        super().__init__(name)
+    def __init__(self, name, minprefix, module):
+        super().__init__(name, DHCP.IDX_TYPE_MANAGER)
         self.minprefix = minprefix
-        self.package = package
+        self.module = module
         self.classes = {}
         self.providers = {}
         self.observers = []
-    
-    def __str__(self):
-        """ Display Debug """
-        ret = "__BASEMANAGER__ = (name : {})\n".format(self.name)
-        return ret
 
     def load(self):
         from factories import ModuleFactory
-        self.classes = ModuleFactory.make(self.minprefix, self.package)
+        self.classes = ModuleFactory.make(self.minprefix, self.module)
         for c in self.classes["providers"]:
             name = class_name_gen(self.minprefix, c["class"])
             instance = c["class"](class_name_gen(self.minprefix, c["class"]), self)
@@ -208,13 +187,10 @@ class BaseManager(BaseSATObject, IManager, IObservable):
 
 class BaseProvider(BaseSATObject, IProvider, IObserver):
 
-    def __init__(self, name, observable=None):
-        super().__init__(name)
-        self.observable = observable
+    def __init__(self, name, parent):
+        super().__init__(name, DHCP.IDX_TYPE_PROVIDER, parent.addr)
+        self.observable = parent
         self.registries = {}
-
-    def __str__(self):
-        return "__BASEPROVIDER__ = (name : {})\n".format(self.name)
 
     def load(self, minprefix, classes):
         for c in classes["registries"]:
@@ -229,15 +205,13 @@ class BaseProvider(BaseSATObject, IProvider, IObserver):
 
 class BaseRegistry(BaseSATObject, IRegistry, IObservable):
 
-    def __init__(self, name, operator, provider):
-        super().__init__(name)
+    def __init__(self, name, operator, parent):
+        super().__init__(name, DHCP.IDX_TYPE_REGISTRY, parent.observable.addr)
         self.operator = operator
         self.observers = []
+        self.parent = parent
         self.binders = {}
-        self.observers.append(provider)
-
-    def __str__(self):
-        return "__BASEREGISTRY__ = (name : {})\n".format(self.name)
+        self.observers.append(parent)
 
     def load(self, minprefix, classes):
         for c in classes["binders"]:
@@ -263,34 +237,11 @@ class BaseRegistry(BaseSATObject, IRegistry, IObservable):
         for observer in self.observers:
             observer.update(self.operator.encapsulate(data))
 
-class BaseOperator(BaseSATObject, IOperator):
-    
-    def __init__(self, name):
-        super().__init__(name)
-
-    def __str__(self):
-        return "__BASEOPERATOR__ = (name : {})".format(self.name)
-
-    def load(self):
-        pass
-
-    def encapsulate(self, data):
-        return data
-
-    def decapsulate(self, frame):
-        return (frame.direction, frame.payload)
-
 class BaseBinder(BaseSATObject, IBinder):
     
-    def __init__(self, name, observable=None):
-        super().__init__(name)
-        self.observable = observable
-
-    def __repr__(self):
-        return "__BASEGBINDER__ = (name : {}, observable : {})\n".format(self.name, self.observable.name)
-
-    def __str__(self):
-        return "__BASEGBINDER__ = (name : {}, observable : {})\n".format(self.name, self.observable.name)
+    def __init__(self, name, parent):
+        self.observable = parent
+        super().__init__(name, DHCP.IDX_TYPE_BINDER, self.observable.parent.observable.addr)
 
     def load(self):
         pass
@@ -419,18 +370,12 @@ class BaseCommand(ICommand):
     def __send_request(self):
         """ Check for a command line which specify a module """
         if self.cpttype == BaseCommand.LOADER:
-            if self.cmdtype == 1 and self.command.emitter == BaseCommand.CONF_MODULE:
-                mdls = []
-                for mdl in self.command.payload["config"]["modules"]:
-                    mdls.append(mdl['name'])
-                self.component.load(mdls)
-            elif self.cmdtype == 0:
-                for m in list(self.component.dealer.managers):
-                    self.component.dealer.managers[m].action(self.command)
+            for m in list(self.component.dealer.managers):
+                self.component.dealer.managers[m].action(self.command)
         if self.cpttype == BaseCommand.MANAGER:
             for p in self.component.providers:
                 self.component.providers[p].action(self.command)
-        if self.cpttype == BaseCommand.PROVIDER:
-            for r in self.component.registries:
-                self.component.registries[r].action(self.command)
+        # if self.cpttype == BaseCommand.PROVIDER:
+        #     for r in self.component.registries:
+        #         self.component.registries[r].action(self.command)
 

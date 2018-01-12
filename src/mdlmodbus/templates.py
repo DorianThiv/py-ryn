@@ -33,7 +33,7 @@ import threading
 
 from bases import BaseThreadRead, BaseThreadWrite
 from mdlmodbus.exceptions import *
-from util import *
+from mdlutils.util import *
 
 """ CRC 16 CALCULATION """
 INITIAL_MODBUS = 0xFFFF

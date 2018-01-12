@@ -69,9 +69,6 @@ manager = __getmanager()
 # package name important to found right classes
 packages = ["mdlterminal.providers", "mdlterminal.registries", "mdlterminal.binders"]
 
-def __getmanager():
-    pass
-
 def __getclasses():
 
     """

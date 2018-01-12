@@ -6,7 +6,7 @@ import mdlmodbus.exceptions
 
 from mdlmodbus.templates import ModbusTCPFrame, ModbusRTUFrame, ModbusThreadRead, ModbusThreadWrite
 from bases import BaseBinder
-from network import *
+from mdlutils.network import *
 
 # Ayncronous modbus : TCP/IP (Modbus Ethernet) 
 class ModbusTcpBinder(BaseBinder):

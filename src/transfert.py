@@ -1,5 +1,7 @@
 
-from util import list2str
+import datetime
+import time
+from mdlutils.util import list2str, JSON
 
 class SimpleFrameTransfert:
 
@@ -9,14 +11,15 @@ class SimpleFrameTransfert:
         [Log] => class Logger (message, exception, comments) ???   
     """
 
-    def __init__(self, command=None, payload=None, callback=None, log=None):
+    def __init__(self, command, callback=None, log=None):
+        ts = time.time()
         self.command = command
-        self.payload = payload
         self.callback = callback
+        self.timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         self.log = log
 
     def __str__(self):
-        return "__SIMPLE_FRAME__ = (|command : {} | payload: {} | callback : {} | log : {})".format(self.command, self.payload, self.callback, self.log)
+        return "__SIMPLE_FRAME__ = (|command : {} | callback : {} | timestamp : {} | log : {})".format(self.command, self.callback, self.timestamp, self.log)
 
     @staticmethod
     def serialize(frame):
@@ -37,55 +40,55 @@ class ModuleFrameTransfert:
         [log] => class Logger (message, exception, timestamp)   
     """
 
-    def __init__(self, srcAddr=[], destAddr=[], command=None, payload=None, callback=None, log=None):
+    def __init__(self, srcAddr=[], destAddr=[], command=None, payload=None, callback=None, timestamp=None, log=None):
+        ts = time.time()
         self.srcAddr = srcAddr
         self.destAddr = destAddr
         self.command = command
         self.payload = payload
         self.callback = callback
+        self.timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         self.log = log
 
     def __str__(self):
-        return "__MODULE_FRAME__ = (|src : {} | dest : {} | command: {} | payload : {} | callback : {} | log : {}|)".format(self.srcAddr, self.destAddr, self.command, self.payload, self.callback, self.log)
+        return "__MODULE_FRAME__ = (|src : {} | dest : {} | command: {} | payload : {} | callback : {} | timestamp : {} | log : {}|)".format(self.srcAddr, self.destAddr, self.command, self.payload, self.callback, self.timestamp, self.log)
 
     def addToSrcAddr(self, _id):
-        pass
+        if len(self.srcAddr) != 4:
+            self.srcAddr.append(_id)
     
     def addToDestAddr(self, _id):
-        pass
-
-    def serializeSrcAddr(self):
-        """ In util.py implement JSON class to serialize and deserialize in json """
-        pass
-
-    def serializePayload(self, payload):
-        """ In util.py implement JSON class to serialize and deserialize in json """
-        pass
-
-    @staticmethod
-    def deserializePayload(payload):
-        """ In util.py implement JSON class to serialize and deserialize in json """
-        pass
-
-    def createLog(self, log):
-        pass
+        if len(self.destAddr) != 4:
+            self.destAddr.append(_id)
 
     def serialize(self):
-        src = list2str(self.srcAddr)
-        dest = list2str(self.destAddr)
-        
+        try:
+            frame = {}
+            frame["srcAddr"] = list2str(self.srcAddr, ".")
+            frame["destAddr"] = list2str(self.destAddr, ".")
+            frame["command"] = self.command
+            frame["payload"] = self.payload
+            frame["callback"] = self.callback
+            frame["timestamp"] = self.timestamp
+            frame["log"] = self.log
+            return JSON.serialize(frame)
+        except Exception as e:
+            print(e)
 
     @staticmethod
-    def deserialize(frame):
-        pass
+    def deserialize(f_frame):
+        try:
+            frame = JSON.deserialize(f_frame)
+            src = frame["srcAddr"].split(".")
+            dest = frame["destAddr"].split(".")
+            return ModuleFrameTransfert(src, dest, frame["command"], frame["payload"], frame["callback"], frame["timestamp"], frame["log"])
+        except Exception as e:
+            print(e)
 
 if __name__ == "__main__":
-    import json
     from bases import BaseCommand
-    from modules.dhcp import DHCP
-    
-    mft = ModuleFrameTransfert([1,2,2,1], [1,2,2,1], BaseCommand.COMMAND_ALL, ["data"])
-    mft.serialize()
-    j = json.dumps(mft.__dict__)
-    # null in json = None in python
-    print(json.loads(j)["srcAddr"])
+    mft = ModuleFrameTransfert([1,2,2,1], [1,2,2,1], BaseCommand.COMMAND_ALL, [{"data": [{"choin": "hello", "choc": "olat"}]}])
+    f_mft = mft.serialize()
+    print(f_mft)
+    d_mft = ModuleFrameTransfert.deserialize(f_mft)
+    print(d_mft)

@@ -1,10 +1,8 @@
 
-import datetime
-import time
-from bases import BaseOperator
+from interfaces import IOperator
 from transfert import ModuleFrameTransfert
 
-class ExempleOperator(BaseOperator):
+class ExempleOperator(IOperator):
     
     def __init__(self, name):
         self.name = name
@@ -13,8 +11,8 @@ class ExempleOperator(BaseOperator):
         pass
 
     def encapsulate(self, data):
-        ts = time.time()
-        return ModuleFrameTransfert("mdlexemple", "mdlexemple", "read", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
+        # return ModuleFrameTransfert()
+        pass
 
     def decapsulate(self, frame):
         return frame

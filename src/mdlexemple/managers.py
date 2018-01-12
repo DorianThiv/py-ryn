@@ -8,7 +8,8 @@ class ExempleManager(BaseManager):
 		for them.
 	"""
 	
-	def __init__(self, name):
-		package = "mdlexemple"
+	def __init__(self, mod):
+		module = mod
 		minprefix = "exemple"
-		super().__init__(name, package, minprefix)
+		name = minprefix + "-manager"
+		super().__init__(name, minprefix, module)

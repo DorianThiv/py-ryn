@@ -2,7 +2,7 @@
 import sys
 import socket
 from bases import BaseBinder
-from network import *
+from mdlutils.network import *
 from mdlterminal.templates import TerminalThreadServer, TerminalThreadWrite
 
 class TerminalBinder(BaseBinder):
@@ -27,7 +27,8 @@ class TerminalBinder(BaseBinder):
         if data[1] == "all":
             self.read()
         else:
-            self.write(data[1])
+            #self.write(data[1])
+            pass
 
     def read(self):
         self.server = TerminalThreadServer(self.socket, self._get_event)

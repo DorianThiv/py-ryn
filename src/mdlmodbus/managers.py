@@ -4,7 +4,8 @@ from factories import ModuleFactory
 		
 class ModbusManager(BaseManager):
 
-	def __init__(self, name):
+	def __init__(self, mod):
+		module = mod
 		minprefix = "modbus"
-		package = "mdlmodbus"
-		super().__init__(name, package, minprefix) 
+		name = minprefix + "-manager"
+		super().__init__(name, minprefix, module) 
