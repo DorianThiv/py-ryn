@@ -2,11 +2,11 @@
 import sys
 import threading
 
+from utils import *
 from transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from factories import PackageFactory
-from mdlutils.dhcp import *
-from mdlutils.util import *
-from mdlutils.config import *
+from mdlz.dhcp import *
+from mdlz.config import *
 from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
 
 class BaseSATObject(ISATObject): 
@@ -86,6 +86,7 @@ class BaseLoader(BaseSATObject, ILoader):
         self.dealer = BaseDealer()
         self.managers = {}
         self.load(ConfigurationModule.getModulesNames())
+        print(self.dealer)
 
     def load(self, managers):
         """ 
@@ -100,8 +101,8 @@ class BaseLoader(BaseSATObject, ILoader):
     def __load_once(self, manager):
         m = PackageFactory.make(manager)
         m.register(self.dealer)
-        self.dealer.add(m)
         m.load()
+        self.dealer.add(m)
 
 class BaseDealer(IDealer, IObserver):
 
@@ -116,16 +117,19 @@ class BaseDealer(IDealer, IObserver):
         pass
 
     def __str__(self):
-        ret = "__DEALER__ : (Echangeur)\n"
+        ret = "__DEALER__ : (Exchange)\n"
         for manager in self.managers:
-            if manager != "mdlloader":
-                ret += "= module : {}\n".format(self.managers[manager])
+            if self.managers[manager].status == True:
+                ret += "= module (connected) : {}\n".format(self.managers[manager])
+            else:
+                ret += "= module (disconnected) : {}\n".format(self.managers[manager])
         return ret
 
     def add(self, manager):
         """ Add a module module in the managers dict """
-        BaseDealer.CONNECTED_MANAGERS.append(manager.name)
         self.managers[manager.name] = manager
+        if manager.status == True:
+            BaseDealer.CONNECTED_MANAGERS.append(manager.name)
 
     def remove(self, mname):
         """ Remove a module from the managers dict """
@@ -157,6 +161,7 @@ class BaseManager(BaseSATObject, IManager, IObservable):
     """ Manager load all components in this his module """
     def __init__(self, name, minprefix, module):
         super().__init__(name, DHCP.IDX_TYPE_MANAGER)
+        self.status = False
         self.minprefix = minprefix
         self.module = module
         self.classes = {}
@@ -257,64 +262,6 @@ class BaseBinder(BaseSATObject, IBinder):
 
     def _get_event(self, data):
         self.observable.observers_update(data)
-
-class BaseThreadRead(threading.Thread):
-
-    PACKET_SIZE = 1024
-
-    def __init__(self, socket, callback):
-        super().__init__()
-        self.socket = socket
-        self.callback = callback
-        self.isRunning = False
-
-    def run(self):
-        self.isRunning = True
-        while self.isRunning:
-            try:
-                msg = self.socket.recv(BaseThreadRead.PACKET_SIZE)
-                print(msg) # Là j'écrit juste le message :)
-            except Exception as e:
-                print("ErrorRead : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
-    
-    def stop(self):
-        self.isRunning = False # Vrai ou faux tu crois quoi ??!
-        self.socket.close()
-
-class BaseThreadWrite(threading.Thread):
-
-    def __init__(self, socket, data):
-        super().__init__()
-        self.socket = socket
-        self.data = str(data)
-        self.name = self.getName()
-
-    def run(self):
-        try: 
-            self.socket.send(self.data.encode())
-        except Exception as e:
-            print("ErrorWrite : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
-
-class BaseThreadClient(threading.Thread):
-
-    PACKET_SIZE = 1024
-
-    def __init__(self, connection, callback):
-        super().__init__()
-        self.connection = connection
-        self.callback = callback
-        self.name = self.getName()
-        self.isRunning = False
-
-    def run(self):
-        self.isRunning = True
-        while self.isRunning:
-            msg = self.connection.recv(BaseThreadRead.PACKET_SIZE)
-            print(msg)
-            self.callback(msg)
-    
-    def stop(self):
-        self.isRunning = False
 
 class BaseCommand(ICommand):
     

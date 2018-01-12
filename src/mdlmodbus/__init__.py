@@ -7,6 +7,8 @@ from mdlmodbus.managers import *
 from mdlmodbus.providers import *
 from mdlmodbus.registries import *
 from mdlmodbus.binders import *
+from mdlmodbus import specifics
+
 
 # manager module
 mdlmanager = "mdlmodbus.managers"

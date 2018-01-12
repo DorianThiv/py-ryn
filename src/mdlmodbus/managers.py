@@ -8,4 +8,4 @@ class ModbusManager(BaseManager):
 		module = mod
 		minprefix = "modbus"
 		name = minprefix + "-manager"
-		super().__init__(name, minprefix, module) 
+		super().__init__(name, minprefix, module)

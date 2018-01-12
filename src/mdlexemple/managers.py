@@ -13,3 +13,6 @@ class ExempleManager(BaseManager):
 		minprefix = "exemple"
 		name = minprefix + "-manager"
 		super().__init__(name, minprefix, module)
+	
+	def command(self, command):
+		""" """

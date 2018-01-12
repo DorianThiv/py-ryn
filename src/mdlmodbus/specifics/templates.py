@@ -31,15 +31,14 @@
 import sys
 import threading
 
-from bases import BaseThreadRead, BaseThreadWrite
-from mdlmodbus.exceptions import *
-from mdlutils.util import *
+from utils import *
+from mdlmodbus.specifics.exceptions import *
 
 """ CRC 16 CALCULATION """
 INITIAL_MODBUS = 0xFFFF
 INITIAL_POLY = 0xA001
 
-""" TCP/IP ERRORS """
+""" TCP/IP ERRORS """ 
 ERROR_CODES = {"0x01": ErrorModbusTcp0x01, "0x02": ErrorModbusTcp0x02 , "0x03": ErrorModbusTcp0x03, "0x06": ErrorModbusTcp0x06, "0x0B": ErrorModbusTcp0x0B}
 
 class MBAPHeader:
@@ -102,27 +101,45 @@ class ModbusRTUFrame:
         swap = ((crc << 8) & 0xff00) | ((crc >> 8) & 0x00ff)
         return swap
 
-class ModbusThreadRead(BaseThreadRead):
+class ModbusThreadRead(threading.Thread):
 
-    def __init__(self, socket, callback):
-        super().__init__(socket, callback)
+    PACKET_SIZE = 1024
+
+    def __init__(self, connection, callback):
+        super().__init__()
+        self.connection = connection
+        self.callback = callback
+        self.name = self.getName()
+        self.isRunning = False
         self.treat = ModbusTreatResponse()
 
     def run(self):
         self.isRunning = True
         while self.isRunning:
             try:
-                msg = self.socket.recv(BaseThreadRead.PACKET_SIZE)
+                msg = self.connection.recv(ModbusThreadRead.PACKET_SIZE)
                 self.treat._decode_mdbs_response(msg)
                 self.callback(msg)
             except Exception as e:
                 print("ErrorRead : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e))
                 self.stop()
 
-class ModbusThreadWrite(BaseThreadWrite):
+    def stop(self):
+        self.isRunning = False
 
-    def __init__(self, socket, data):
-        super().__init__(socket, list2str([chr(d) for d in data]))
+class ModbusThreadWrite(threading.Thread):
+
+    def __init__(self, connection, data):
+        super().__init__()
+        self.connection = connection
+        self.data = str(list2str([chr(d) for d in data]))
+        self.name = self.getName()
+
+    def run(self):
+        try: 
+            self.connection.send(self.data.encode())
+        except Exception as e:
+            print("ErrorWrite : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
 
 class ModbusTreatResponse:
 

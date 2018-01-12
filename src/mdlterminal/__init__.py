@@ -44,6 +44,7 @@ from mdlterminal.managers import *
 from mdlterminal.providers import *
 from mdlterminal.registries import *
 from mdlterminal.binders import *
+from mdlterminal.specifics import *
 
 """ Modules loaded """
 

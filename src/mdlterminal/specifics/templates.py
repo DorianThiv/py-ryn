@@ -1,22 +1,36 @@
 
 
 import sys
+import threading
 
-from mdlutils.network import *
-from bases import BaseDealer, BaseThreadClient, BaseThreadRead, BaseThreadWrite
-from mdlterminal.exceptions import *
+from mdlterminal.specifics.exceptions import *
 
-class TerminalThreadRead(BaseThreadClient):
+class TerminalClientModel:
+
+    PACKET_SIZE = 1024
+
+    def __init__(self, connection, ip, port):
+        self.connection = connection
+        self.ip = ip
+        self.port = port
+
+class TerminalThreadRead(threading.Thread):
+
+    PACKET_SIZE = 1024
 
     def __init__(self, connection, callback):
-        super().__init__(connection, callback)
+        super().__init__()
+        self.connection = connection
+        self.callback = callback
+        self.name = self.getName()
+        self.isRunning = False
         self.treat = TerminalTreatResponse()
 
     def run(self):
         try:
             self.isRunning = True
             while self.isRunning:
-                rawmsg = self.connection.recv(BaseThreadRead.PACKET_SIZE)
+                rawmsg = self.connection.recv(TerminalThreadRead.PACKET_SIZE)
                 if self.__check_raw_line(rawmsg) == True:
                     msg = rawmsg.decode()
                     if msg == "":
@@ -36,12 +50,18 @@ class TerminalThreadRead(BaseThreadClient):
             flg = True
         return flg
 
-class TerminalThreadServer(BaseThreadRead):
+    def stop(self):
+        self.isRunning = False
+
+class TerminalThreadServer(threading.Thread):
 
     CLIENTS = {}
 
     def __init__(self, socket, callback):
-        super().__init__(socket, callback)
+        super().__init__()
+        self.socket = socket
+        self.callback = callback
+        self.isRunning = False
         self.socket.listen(2)
 
     def run(self):
@@ -49,18 +69,30 @@ class TerminalThreadServer(BaseThreadRead):
             self.isRunning = True
             while self.isRunning:
                 connection, addr = self.socket.accept()
-                TerminalThreadServer.CLIENTS[addr[0]] = connection
-                termThC = TerminalThreadRead(connection, self.callback)
-                termThC.start()
+                client = TerminalClientModel(connection, addr[0], addr[1])
+                TerminalThreadServer.CLIENTS[client] = TerminalThreadRead(client.connection, self.callback)
+                TerminalThreadServer.CLIENTS[client].start()
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.socket.close()
-        
+    
+    def stop(self):
+        self.isRunning = False # Vrai ou faux ??!
+        self.socket.close()
 
-class TerminalThreadWrite(BaseThreadWrite):
+class TerminalThreadWrite(threading.Thread):
 
     def __init__(self, data):
-        super().__init__(TerminalThreadServer.CLIENTS[getIpAdress()], data)
+        super().__init__()
+        self.connection = None # find in a command the connection id or default
+        self.data = str(data)
+        self.name = self.getName()
+    
+    def run(self):
+        try: 
+            self.connection.send(self.data.encode())
+        except Exception as e:
+            print("ErrorWrite : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
 
 class TerminalTreatResponse:
 

@@ -1,11 +1,9 @@
 
 import sys
-import datetime
-import time
 
 from interfaces import IOperator
 from transfert import ModuleFrameTransfert
-from mdlmodbus.templates import ModbusTreatRequest, ModbusTCPFrame, ModbusRTUFrame
+from mdlmodbus.specifics.templates import ModbusTreatRequest, ModbusTCPFrame, ModbusRTUFrame
 
 class ModbusOperator(IOperator):
     
@@ -16,8 +14,7 @@ class ModbusOperator(IOperator):
         pass
 
     def encapsulate(self, data):
-        ts = time.time()
-        return ModuleFrameTransfert("mdlmodbus", "mdlexemple", "read", data, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'), "crc")
+        pass
 
     def decapsulate(self, frame):
         try:

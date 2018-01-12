@@ -2,8 +2,8 @@
 import sys
 import socket
 from bases import BaseBinder
-from mdlutils.network import *
-from mdlterminal.templates import TerminalThreadServer, TerminalThreadWrite
+from network import *
+from mdlterminal.specifics.templates import TerminalThreadServer, TerminalThreadWrite
 
 class TerminalBinder(BaseBinder):
     
@@ -17,6 +17,7 @@ class TerminalBinder(BaseBinder):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.bind((self.host, self.port))
+            self.observable.parent.observable.status = True
             print("[SUCCESS - BINDER - TERMINAL] : Connection (host: {}, port: {})".format(self.host, self.port))
         except Exception as e:
             print("ErrorTerminal : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 

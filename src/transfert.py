@@ -1,7 +1,7 @@
 
 import datetime
 import time
-from mdlutils.util import list2str, JSON
+from utils import list2str, JSON
 
 class SimpleFrameTransfert:
 

@@ -44,6 +44,7 @@ from mdlexemple.managers import *
 from mdlexemple.providers import *
 from mdlexemple.registries import *
 from mdlexemple.binders import *
+from mdlexemple.specifics import *
 
 path = os.path.join(os.path.dirname(__file__))
 sys.path.append(path)

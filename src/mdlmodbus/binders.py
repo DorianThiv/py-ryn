@@ -2,11 +2,10 @@
 import sys
 import socket
 import threading
-import mdlmodbus.exceptions
 
-from mdlmodbus.templates import ModbusTCPFrame, ModbusRTUFrame, ModbusThreadRead, ModbusThreadWrite
+from mdlmodbus.specifics.templates import ModbusTCPFrame, ModbusRTUFrame, ModbusThreadRead, ModbusThreadWrite
 from bases import BaseBinder
-from mdlutils.network import *
+from network import *
 
 # Ayncronous modbus : TCP/IP (Modbus Ethernet) 
 class ModbusTcpBinder(BaseBinder):
@@ -20,6 +19,7 @@ class ModbusTcpBinder(BaseBinder):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.host, self.port))
+            self.observable.parent.observable.status = True
             print("[SUCCESS - BINDER - MODBUS] : Connection (host: {}, port: {})".format(self.host, self.port))
         except Exception as e:
             print("ErrorModbus : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 

@@ -1,6 +1,4 @@
 
-import exceptions
-
 class ErrorModbus(Exception):
 
     def __init__(self, msg):
