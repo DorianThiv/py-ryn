@@ -12,6 +12,7 @@ class TerminalOperator(IOperator):
         pass
 
     def encapsulate(self, data):
+        """ TODO : Make a directory facilitator """
         try:
             __type = data['type']
             if __type == 0:
@@ -27,6 +28,6 @@ class TerminalOperator(IOperator):
 
     def decapsulate(self, frame):
         try:
-            return (frame.command, frame.payload)
+            return frame
         except Exception as e:
             print("[ERROR - DECAPSULATE - TERMINAL] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))

@@ -7,7 +7,7 @@ from transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from factories import PackageFactory
 from mdlz.dhcp import *
 from mdlz.config import *
-from interfaces import ISATObject, ICore, ILoader, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
+from interfaces import ISATObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
 
 class BaseSATObject(ISATObject): 
 
@@ -104,47 +104,85 @@ class BaseLoader(BaseSATObject, ILoader):
         m.load()
         self.dealer.add(m)
 
-class BaseDealer(IDealer, IObserver):
+class BaseDirectory(IDirectory):
 
-    CONNECTED_MANAGERS = []
+    """ TODO : Make directory facilitator """
+
+    CONNECTED_MANAGERS = {}
 
     def __init__(self):
         self.managers = {}
-        for m in self.managers:
-            BaseDealer.CONNECTED_MANAGERS.append(m)
 
     def __repr__(self):
         pass
 
     def __str__(self):
-        ret = "__DEALER__ : (Exchange)\n"
-        for manager in self.managers:
-            if self.managers[manager].status == True:
-                ret += "= module (connected) : {}\n".format(self.managers[manager])
+        ret = "__DIRECTORY__ : \n"
+        for mdladdr in self.managers:
+            if self.managers[mdladdr].status == True:
+                ret += "= module (connected) : {}\n".format(self.managers[mdladdr])
             else:
-                ret += "= module (disconnected) : {}\n".format(self.managers[manager])
+                ret += "= module (disconnected) : {}\n".format(self.managers[mdladdr])
         return ret
 
     def add(self, manager):
         """ Add a module module in the managers dict """
-        self.managers[manager.name] = manager
+        self.managers[manager.addr] = manager
         if manager.status == True:
-            BaseDealer.CONNECTED_MANAGERS.append(manager.name)
+            BaseDirectory.CONNECTED_MANAGERS[(manager.name, manager.addr)] = manager
+
+    def remove(self, addr):
+        """ Remove a module from the managers dict """
+        del self.managers[addr]
+
+    @staticmethod
+    def findAddr(idx):
+        """ Find another module to send the received frame """
+        if isinstance(idx, str):
+            return BaseDirectory.CONNECTED_MANAGERS[[0]]
+        if isinstance(idx, int):
+            return BaseDirectory.CONNECTED_MANAGERS[[1]]
+    
+    @staticmethod
+    def findName(idx):
+        """ Find another module to send the received frame """
+        if isinstance(idx, str):
+            return BaseDirectory.CONNECTED_MANAGERS[[0]]
+        if isinstance(idx, int):
+            return BaseDirectory.CONNECTED_MANAGERS[[1]]
+
+    @staticmethod
+    def findBinderFromManager(mdlidx, binderidx):
+        """ Find another module to send the received frame """
+        if isinstance(mdlidx, str):
+            return BaseDirectory.CONNECTED_MANAGERS[[0]]
+        if isinstance(mdlidx, int):
+            return BaseDirectory.CONNECTED_MANAGERS[[1]]
+
+class BaseDealer(IDealer, IObserver):
+
+    """ TODO : Make directory facilitator """
+
+    def __init__(self):
+        self.directory = BaseDirectory()
+
+    def __repr__(self):
+        pass
+
+    def __str__(self):
+        print(self.directory)
+
+    def add(self, manager):
+        """ Add a module module in the managers dict """
+        self.directory.add(manager)
 
     def remove(self, mname):
         """ Remove a module from the managers dict """
-        BaseDealer.CONNECTED_MANAGERS.remove(mname)
-        del self.managers[mname]
+        pass
 
-    def find(self, mod):
+    def find(self, idx):
         """ Find another module to send the received frame """
-        if isinstance(mod, int):
-            # find by id
-            pass
-        if isinstance(mod, str):
-            # find by name
-            pass
-        return self.managers[mod]
+        return BaseDirectory.find(idx)
 
     def update(self, frame):
         """ Notification from a module 
@@ -152,7 +190,7 @@ class BaseDealer(IDealer, IObserver):
             dictionnary keys. 
         """
         try:
-            self.managers[frame.destAddr].action(frame)
+            self.directory.managers[frame.destAddr].action(frame)
         except Exception as e:
             print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
@@ -315,7 +353,7 @@ class BaseCommand(ICommand):
         if self.cpttype == BaseCommand.MANAGER:
             for p in self.component.providers:
                 self.component.providers[p].action(self.command)
-        # if self.cpttype == BaseCommand.PROVIDER:
-        #     for r in self.component.registries:
-        #         self.component.registries[r].action(self.command)
+        if self.cpttype == BaseCommand.PROVIDER:
+            for r in self.component.registries:
+                self.component.registries[r].action(self.command)
 

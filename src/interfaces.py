@@ -47,6 +47,24 @@ class ILoader:
         """ Reload Managers """ 
         pass
 
+class IDirectory:
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def add(self, manager):
+        """ Add Managers """ 
+        pass
+
+    @abstractmethod
+    def remove(self, mdladdr):
+        """ Remove Manager """ 
+        pass
+
+    @abstractmethod
+    def find(self, mdladdr):
+        """ Find a manager in manager dict """ 
+        pass
+
 class IDealer:
     __metaclass__ = ABCMeta
 
@@ -58,11 +76,6 @@ class IDealer:
     @abstractmethod
     def remove(self, mname):
         """ Remove Manager """ 
-        pass
-
-    @abstractmethod
-    def find(self, mname):
-        """ Find a manager in manager dict """ 
         pass
 
 class IManager:

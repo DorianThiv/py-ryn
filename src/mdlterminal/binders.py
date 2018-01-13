@@ -25,7 +25,7 @@ class TerminalBinder(BaseBinder):
 
     def action(self, data):
         """ Interactiv with an Action derived class from BaseAction """
-        if data[1] == "all":
+        if data.command == "all":
             self.read()
         else:
             #self.write(data[1])
