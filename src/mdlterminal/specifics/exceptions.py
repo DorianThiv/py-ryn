@@ -18,10 +18,9 @@ class ErrorTerminalClientDisconnect(Exception):
     def __str__(self):
         return "{}".format(self.message)
 
-class WarningTerminalWrongRequestModule(Exception):
+class TerminalWrongCommandModuleError(Exception):
 
-    """
-        WarningTerminalWrongRequestModule : 
+    """ WarningTerminalWrongRequestModule : 
         Modules commands usage :
     """
 
@@ -30,24 +29,15 @@ class WarningTerminalWrongRequestModule(Exception):
         self.message = msg
 
     def __mdlexemple(self):
-        """
-        Exemple Command:
+        """ Exemple Command:
             * [mdlexemple] -[(r|w)] {-t blah blah}
-                - r | w : read | write
-                - t : text
-        """
-
-    def __mdlconf(self):
-        """
-        Configuration Command:
-            * [mdlconf] -[(r|w)] {-t blah blah}
                 - r | w : read | write
                 - t : text
         """
 
     def __mdlmodbus(self):
         """
-        Modbus Command:
+            Modbus Command:
             * [mdlmodbus] -[(r|w)] -[(tcp|rtu)] {[-d 0 -r 0 -v 0]}
                 - tcp : TCP connection on modbus
                 - rtu : RTU connection on modbus
@@ -66,8 +56,6 @@ class WarningTerminalWrongRequestModule(Exception):
     def __str__(self):
         if self.module == "mdlexemple":
             return "{}\n{}{}".format(self.message, self.__doc__, self.__mdlexemple.__doc__)
-        elif self.module == "mdlconf":
-            return "{}\n{}{}".format(self.message, self.__doc__, self.__mdlconf.__doc__)
         elif self.module == "mdlmodbus":
             return "{}\n{}{}".format(self.message, self.__doc__, self.__mdlmodbus.__doc__)
         else:

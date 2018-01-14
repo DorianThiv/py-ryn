@@ -1,6 +1,7 @@
 
 import sys
 import threading
+import re
 
 from utils import *
 from transfert import ModuleFrameTransfert, SimpleFrameTransfert
@@ -200,6 +201,24 @@ class BaseManager(BaseSATObject, IManager, IObservable):
             self.providers[name] = instance
             self.providers[name].load(self.minprefix, self.classes)
     
+    def command(self, command):
+        """ command function has a public exposition 
+            to have provide a command line parser.
+
+            Get a module command line parser for the specific module.
+            Args:
+                * command: string
+            Returns:
+                * tuple(False, error: string)
+                * tuple(True, None)
+        """
+        splitted = command.split(" ")
+        for elem in splitted:
+            if re.match(r"mdl([a-z])+", elem) == None and elem == self.module:
+                error = "module name doesn't match"
+                return (False, error)
+        return (True, None)
+
     def register(self, observer):
         self.observers.append(observer)
     

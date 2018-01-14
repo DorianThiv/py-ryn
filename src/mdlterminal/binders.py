@@ -11,7 +11,7 @@ class TerminalBinder(BaseBinder):
         super().__init__(name, observable)
         self.server = None
         self.host = getIpAdress()
-        self.port = 38000
+        self.port = 1297
 
     def load(self):
         try:

@@ -82,7 +82,7 @@ class IManager:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def _reading_all(self):
+    def command(self, command):
         pass
 
 class IProvider:
