@@ -12,7 +12,7 @@ class ExempleBinder(BaseBinder):
         self.observable.parent.observable.status = True
         pass
 
-    def action(self, frame):
+    def execute(self, frame):
         print(frame)
 
     def read(self):

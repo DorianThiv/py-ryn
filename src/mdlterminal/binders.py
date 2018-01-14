@@ -23,7 +23,7 @@ class TerminalBinder(BaseBinder):
             print("ErrorTerminal : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
             self.socket.close()
 
-    def action(self, data):
+    def execute(self, data):
         """ Interactiv with an Action derived class from BaseAction """
         if data.command == "all":
             self.read()

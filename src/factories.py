@@ -18,9 +18,7 @@ class PackageFactory:
             raise LoadModuleError("Ligne : {}, {} : {}".format(sys.exc_info()[-1].tb_lineno, name, e))
 
 class ModuleFactory:
-
-    """ 
-        Module Factory : can load module dynamically
+    """ Module Factory : can load module dynamically
         with a prifix loader.
     """
     @staticmethod

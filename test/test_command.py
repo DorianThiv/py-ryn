@@ -1,5 +1,16 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 
+class Light:
+
+    def __init__(self):
+        self.switch = False
+
+    def turnOn(self):
+        self.switch = True
+    
+    def turnOff(self):
+        self.switch = False
+
 class ICommand:
     __metaclass__ = ABCMeta
 
@@ -7,4 +18,16 @@ class ICommand:
     def execute(self):
         pass
 
-# Create more commands :)
+class LightCommand(ICommand):
+
+    def __init__(self, light):
+        self.light = light
+
+    def execute(self):
+        self.light.turnOn()
+
+light = Light()
+print(light.switch)
+command = LightCommand(light)
+command.execute()
+print(light.switch)

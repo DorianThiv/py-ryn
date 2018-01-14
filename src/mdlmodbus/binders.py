@@ -25,7 +25,7 @@ class ModbusTcpBinder(BaseBinder):
             print("ErrorModbus : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
             self.socket.close()
 
-    def action(self, data):
+    def execute(self, data):
         if self.socket._closed != True:
             if data == "all":
                 self.read()

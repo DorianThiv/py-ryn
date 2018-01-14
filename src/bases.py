@@ -9,7 +9,7 @@ from mdlz.dhcp import *
 from mdlz.config import *
 from interfaces import ISATObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
 
-class BaseSATObject(ISATObject): 
+class BaseSATObject(ISATObject, ICommand): 
 
     def __init__(self, name, component_type, mdladdr=None):
         self.name = name
@@ -26,16 +26,16 @@ class BaseSATObject(ISATObject):
     def load(self):
         pass
 
-    def action(self, frame=None):
+    def execute(self, frame=None):
         """ 
             TODO: Call LoaderTreatAction class. it will
             contains all treatment actions.
             Will reaload module name by name.
             To reload the loader give ["config"]["module"]
         """
-        # print("Component : {}, Action :{}".format(self, frame))
-        action = BaseCommand(self, frame)
-        action.treat()
+        # print("Component : {}, execute :{}".format(self, frame))
+        execute = BaseCommand(self, frame)
+        execute.treat()
 
 
 class BaseCore(BaseSATObject, ICore):
@@ -64,7 +64,7 @@ class BaseCore(BaseSATObject, ICore):
 
     def run(self):
         self.state = BaseCore.STATE_RUN
-        self.loader.action(SimpleFrameTransfert(BaseCommand.COMMAND_ALL))
+        self.loader.execute(SimpleFrameTransfert(BaseCommand.COMMAND_ALL))
 
     def resume(self):
         self.state = BaseCore.STATE_RUN
@@ -106,14 +106,16 @@ class BaseLoader(BaseSATObject, ILoader):
 
 class BaseDirectory(IDirectory):
 
-    """ TODO : Make directory facilitator """
-
-    CONNECTED_MANAGERS = {}
+    CONNECTED_MANAGERS_BY_ADDR = {}
+    CONNECTED_MANAGERS_BY_NAME = {}
 
     def __init__(self):
         self.managers = {}
 
     def __repr__(self):
+        pass
+
+    def __iter__(self):
         pass
 
     def __str__(self):
@@ -129,68 +131,51 @@ class BaseDirectory(IDirectory):
         """ Add a module module in the managers dict """
         self.managers[manager.addr] = manager
         if manager.status == True:
-            BaseDirectory.CONNECTED_MANAGERS[(manager.name, manager.addr)] = manager
+            BaseDirectory.CONNECTED_MANAGERS_BY_NAME[manager.module] = manager
+            BaseDirectory.CONNECTED_MANAGERS_BY_ADDR[manager.addr] = manager
 
     def remove(self, addr):
         """ Remove a module from the managers dict """
         del self.managers[addr]
 
     @staticmethod
-    def findAddr(idx):
+    def find(idx):
         """ Find another module to send the received frame """
         if isinstance(idx, str):
-            return BaseDirectory.CONNECTED_MANAGERS[[0]]
-        if isinstance(idx, int):
-            return BaseDirectory.CONNECTED_MANAGERS[[1]]
-    
-    @staticmethod
-    def findName(idx):
-        """ Find another module to send the received frame """
-        if isinstance(idx, str):
-            return BaseDirectory.CONNECTED_MANAGERS[[0]]
-        if isinstance(idx, int):
-            return BaseDirectory.CONNECTED_MANAGERS[[1]]
-
-    @staticmethod
-    def findBinderFromManager(mdlidx, binderidx):
-        """ Find another module to send the received frame """
-        if isinstance(mdlidx, str):
-            return BaseDirectory.CONNECTED_MANAGERS[[0]]
-        if isinstance(mdlidx, int):
-            return BaseDirectory.CONNECTED_MANAGERS[[1]]
+            return BaseDirectory.CONNECTED_MANAGERS_BY_NAME[idx]
+        elif isinstance(idx, int):
+            return BaseDirectory.CONNECTED_MANAGERS_BY_ADDR[idx]
+        else:
+            raise Exception() # make a specific exeption
 
 class BaseDealer(IDealer, IObserver):
-
-    """ TODO : Make directory facilitator """
 
     def __init__(self):
         self.directory = BaseDirectory()
 
-    def __repr__(self):
-        pass
-
     def __str__(self):
-        print(self.directory)
+        return str(self.directory)
 
     def add(self, manager):
         """ Add a module module in the managers dict """
         self.directory.add(manager)
 
-    def remove(self, mname):
-        """ Remove a module from the managers dict """
-        pass
-
-    def find(self, idx):
-        """ Find another module to send the received frame """
-        return BaseDirectory.find(idx)
+    def remove(self, manager):
+        """ Add a module module in the managers dict """
+        self.directory.add(manager)
 
     def update(self, frame):
-        """ Notification from a module 
-            Keyword list() force to make a copy of 
-            dictionnary keys. 
+        """ Notification from a module
+
+            Transfert a frame from another module.
+            Frame description in transfert.py script 
+
+            A frame must be created by the software it's for that I must 
+            develop a frame integrity module. It will verify the a sum in the
+            frame content.
         """
         try:
-            self.directory.managers[frame.destAddr].action(frame)
+            self.directory.find(frame.destAddr).execute(frame)
         except Exception as e:
             print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
@@ -263,9 +248,9 @@ class BaseRegistry(BaseSATObject, IRegistry, IObservable):
             self.binders[name] = instance
             self.binders[name].load()
 
-    def action(self, frame):
+    def execute(self, frame):
         for b in self.binders:
-            self.binders[b].action(self.operator.decapsulate(frame))
+            self.binders[b].execute(self.operator.decapsulate(frame))
 
     def register(self, observer):
         self.observers.append(observer)
@@ -289,7 +274,7 @@ class BaseBinder(BaseSATObject, IBinder):
     def load(self):
         pass
 
-    def action(self, direction, data):
+    def execute(self, direction, data):
         print(direction, data)
 
     def read(self):
@@ -309,51 +294,35 @@ class BaseCommand(ICommand):
     
     """ Simple Commands """
 
-    LOADER = 0
-    MANAGER = 1
-    PROVIDER = 2
-    REGISTRY = 3
-    BINDER = 4
+    CORE = DHCP.IDX_TYPE_CORE
+    LOADER = DHCP.IDX_TYPE_LOADER
+    MANAGER = DHCP.IDX_TYPE_MANAGER
+    PROVIDER = DHCP.IDX_TYPE_PROVIDER
+    REGISTRY = DHCP.IDX_TYPE_REGISTRY
+    BINDER = DHCP.IDX_TYPE_BINDER
 
     def __init__(self, component, command):
         self.component = component
-        self.cpttype = self.__define_component_type()
+        self.cpttype = self.component.type
         self.command = command
-        self.cmdtype = self.__define_command_type()
 
     def treat(self):
         """ Enter point of actions """
         self.__send_request()
 
-    def __define_component_type(self):
-        if isinstance(self.component, BaseLoader):
-            return BaseCommand.LOADER
-        elif isinstance(self.component, BaseManager):
-            return BaseCommand.MANAGER
-        elif isinstance(self.component, BaseProvider):
-            return BaseCommand.PROVIDER
-        elif isinstance(self.component, BaseRegistry):
-            return BaseCommand.REGISTRY
-        elif isinstance(self.component, BaseBinder):
-            return BaseCommand.BINDER
-        else:
-            return None
-
-    def __define_command_type(self):
-        if isinstance(self.command, ModuleFrameTransfert):
-            return 1
-        elif isinstance(self.command, SimpleFrameTransfert):
-            return 0
-
     def __send_request(self):
         """ Check for a command line which specify a module """
+        if self.cpttype == BaseCommand.CORE:
+            pass
         if self.cpttype == BaseCommand.LOADER:
-            for m in list(self.component.dealer.managers):
-                self.component.dealer.managers[m].action(self.command)
+            for m in list(BaseDirectory.CONNECTED_MANAGERS_BY_NAME):
+                BaseDirectory.CONNECTED_MANAGERS_BY_NAME[m].execute(self.command)
         if self.cpttype == BaseCommand.MANAGER:
             for p in self.component.providers:
-                self.component.providers[p].action(self.command)
+                self.component.providers[p].execute(self.command)
         if self.cpttype == BaseCommand.PROVIDER:
             for r in self.component.registries:
-                self.component.registries[r].action(self.command)
+                self.component.registries[r].execute(self.command)
+
+
 

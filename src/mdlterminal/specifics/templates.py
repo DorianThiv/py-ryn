@@ -3,6 +3,7 @@
 import sys
 import threading
 
+from bases import BaseDirectory
 from mdlterminal.specifics.exceptions import *
 
 class TerminalClientModel:
@@ -123,7 +124,7 @@ class TerminalTreatResponse:
         return data
     
     def __check_module_request(self, splitted):
-        return True if splitted[0] in BaseDealer.CONNECTED_MANAGERS else False
+        return True if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME else False
 
     def __module_request(self, splitted):
         data = {}

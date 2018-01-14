@@ -96,10 +96,6 @@ class IRegistry:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def action(self, data):
-        pass
-
-    @abstractmethod
     def collect(self, data):
         pass
 
@@ -155,7 +151,7 @@ class ICommand:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def treat(self):
+    def execute(self):
         pass
 
 __all__ = ('ISATObject', 'ICore', 'IManager', 'IProvider', 'IRegistry', 'IOperator', 'IObserver', 'IObservable', 'ICommand')
