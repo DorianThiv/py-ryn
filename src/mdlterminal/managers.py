@@ -1,7 +1,7 @@
 
 import re
 
-from bases import BaseManager
+from bases import BaseManager, BaseCommand
 from factories import ModuleFactory
 		
 class TerminalManager(BaseManager):
@@ -11,11 +11,10 @@ class TerminalManager(BaseManager):
 		minprefix = "terminal"
 		name = minprefix + "-manager" 
 		super().__init__(name, minprefix, module)
+		self.usage = "mdlterminal [(-r or --read) or (-w | --write)] [(-a or --address) 0.0.0.0)] [(-t or --text) 'your text']"
 	
 	def command(self, command):
-		""" Terminal Module command :
-			* mdlterminal [(-r or --read) or (-w | --write)] [(-a or --address) 0.0.0.0)] [(-t or --text) 'your text']
-
+		""" 
 			Args:
 				* command: string
 			Returns:
@@ -24,14 +23,17 @@ class TerminalManager(BaseManager):
 		"""
 		commanddict = {}
 		splitted = command.split(" ")
-		for i in range(splitted):
-			if re.match(r"mdl([a-z])+", splitted[i]) == None and splitted[i] == self.module:
-				error = "module name doesn't match"
-				return (False, error)
-			else:
-				
-			if re.match(r"(-|-{2})+", splitted[i]) == None:
-				error = "no arguments in this command"
-				return (False, error)
-			
-		return (True, None)
+		for elem in splitted:
+			if re.match(r"mdl([a-z])+", elem) != None:
+				commanddict["module"] = elem
+			if re.match(r"(-|-{2})+(r|read)", elem) != None:
+				commanddict["command"] = BaseCommand.READ
+			if re.match(r"(-|-{2})+(w|write)", elem) != None:
+				commanddict["command"] = BaseCommand.WRITE
+			if re.match(r"(-|-{2})+(a|address|addr)", elem) != None:
+				commanddict["address"] = splitted[splitted.index(elem)+1]
+			if re.match(r"(-|-{2})+(t|text)", elem) != None:
+				commanddict["text"] = splitted[splitted.index(elem)+1]
+		if len(commanddict) == 1:
+			return (False, "no arguments detected")
+		return (True, commanddict)

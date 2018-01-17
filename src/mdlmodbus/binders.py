@@ -5,14 +5,14 @@ import threading
 
 from mdlmodbus.specifics.templates import ModbusTCPFrame, ModbusRTUFrame, ModbusThreadRead, ModbusThreadWrite
 from bases import BaseBinder
-from network import *
+from network import getIpAddress
 
 # Ayncronous modbus : TCP/IP (Modbus Ethernet) 
 class ModbusTcpBinder(BaseBinder):
     
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
-        self.host = getIpAdress()
+        self.host = getIpAddress()
         self.port = 502
 
     def load(self):

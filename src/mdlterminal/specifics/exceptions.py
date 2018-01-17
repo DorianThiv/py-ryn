@@ -24,42 +24,8 @@ class TerminalWrongCommandModuleError(Exception):
         Modules commands usage :
     """
 
-    def __init__(self, msg, module):
-        self.module = module
+    def __init__(self, msg):
         self.message = msg
 
-    def __mdlexemple(self):
-        """ Exemple Command:
-            * [mdlexemple] -[(r|w)] {-t blah blah}
-                - r | w : read | write
-                - t : text
-        """
-
-    def __mdlmodbus(self):
-        """
-            Modbus Command:
-            * [mdlmodbus] -[(r|w)] -[(tcp|rtu)] {[-d 0 -r 0 -v 0]}
-                - tcp : TCP connection on modbus
-                - rtu : RTU connection on modbus
-                - r | w : read | write
-                - d : device address
-                - r : register address 
-                - v : value of register
-        """
-
-    def __mdlunknown(self):
-        """
-        Unknown module :
-        Available modules : 
-        """
-
     def __str__(self):
-        if self.module == "mdlexemple":
-            return "{}\n{}{}".format(self.message, self.__doc__, self.__mdlexemple.__doc__)
-        elif self.module == "mdlmodbus":
-            return "{}\n{}{}".format(self.message, self.__doc__, self.__mdlmodbus.__doc__)
-        else:
-            mods = "\t"
-            for name in BaseDealer.CONNECTED_MANAGERS:
-                mods += "* " + name + "\n\t"
-            return "{}\n{}{}".format(self.message, self.__doc__, mods)
+        return "{}\n".format(self.message)

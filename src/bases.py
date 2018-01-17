@@ -16,6 +16,7 @@ class BaseSATObject(ISATObject, ICommand):
         self.name = name
         self.type = component_type
         self.addr = DHCP.getInstance(mdladdr).discover(self)
+        self.usage = ""
         print(self)
 
     def __repr__(self):
@@ -65,7 +66,7 @@ class BaseCore(BaseSATObject, ICore):
 
     def run(self):
         self.state = BaseCore.STATE_RUN
-        self.loader.execute(SimpleFrameTransfert(BaseCommand.COMMAND_ALL))
+        self.loader.execute(SimpleFrameTransfert(BaseCommand.ALL))
 
     def resume(self):
         self.state = BaseCore.STATE_RUN
@@ -309,7 +310,9 @@ class BaseCommand(ICommand):
     
     """ Internal Actions on differents componenents """
 
-    COMMAND_ALL = "all"
+    ALL = "all"
+    READ = "read"
+    WRITE = "write"
     
     """ Simple Commands """
 

@@ -1,5 +1,9 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 
+""" Maybe use this pattern and chain of resp to send
+    Data on modbus or other devices.
+"""
+
 class Light:
 
     def __init__(self):

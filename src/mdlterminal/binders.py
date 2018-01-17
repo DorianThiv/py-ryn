@@ -2,7 +2,7 @@
 import sys
 import socket
 from bases import BaseBinder
-from network import *
+from network import getIpAddress
 from mdlterminal.specifics.templates import TerminalThreadServer, TerminalThreadWrite
 
 class TerminalBinder(BaseBinder):
@@ -10,7 +10,7 @@ class TerminalBinder(BaseBinder):
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
         self.server = None
-        self.host = getIpAdress()
+        self.host = getIpAddress()
         self.port = 1297
 
     def load(self):

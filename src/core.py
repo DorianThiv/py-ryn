@@ -3,7 +3,6 @@
 
 import os
 import sys
-import threading
 
 from bases import BaseCore, BaseLoader
 

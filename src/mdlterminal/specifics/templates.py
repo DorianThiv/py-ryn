@@ -4,7 +4,8 @@ import sys
 import threading
 
 from bases import BaseDirectory
-from mdlterminal.specifics.exceptions import *
+from network import getIpAddress
+from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, ErrorTerminalClientDisconnect
 
 class TerminalClientModel:
 
@@ -70,9 +71,8 @@ class TerminalThreadServer(threading.Thread):
             self.isRunning = True
             while self.isRunning:
                 connection, addr = self.socket.accept()
-                client = TerminalClientModel(connection, addr[0], addr[1])
-                TerminalThreadServer.CLIENTS[client] = TerminalThreadRead(client.connection, self.callback)
-                TerminalThreadServer.CLIENTS[client].start()
+                TerminalThreadServer.CLIENTS[addr[0]] = TerminalThreadRead(connection, self.callback)
+                TerminalThreadServer.CLIENTS[addr[0]].start()
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.socket.close()
@@ -83,10 +83,10 @@ class TerminalThreadServer(threading.Thread):
 
 class TerminalThreadWrite(threading.Thread):
 
-    def __init__(self, data):
+    def __init__(self, connection, data):
         super().__init__()
-        self.connection = None # find in a command the connection id or default
-        self.data = str(data)
+        self.connection = connection # find in a command the connection id or default
+        self.data = str(data + "\r\n")
         self.name = self.getName()
     
     def run(self):
@@ -106,37 +106,17 @@ class TerminalTreatResponse:
 
     def treat(self, msg):
         """
-            * Command :
-            type : 0 | 1 | ...
-            src : ["binder", "registry", "operator", "provider", "module"]
-            dest-module : [..., ..., ..., ...]
-            dest-provider | binder : [tcp, rtu, ...]
-            dest-binder : [-w | -r] (read | write)
-            data : [n, .......]
+            * Command : data : [n, .......]
         """
         data = {}
         splitted = msg.split(" ")
-        if self.__check_module_request(splitted):
-            print("module request")
-            data = self.__module_request(splitted)
+        if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME:
+            treatedCommand = BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].command(msg)
+            if treatedCommand[0] == True:
+                return treatedCommand[1]
+            else:
+                TerminalThreadWrite(TerminalThreadServer.CLIENTS[getIpAddress()].connection, "[ERROR - COMMAND] : {}\r\nusage:\r\n\t* {}".format(treatedCommand[1], BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].usage)).start()
         else:
-            data = self.__unknown_request(msg)
-        return data
-    
-    def __check_module_request(self, splitted):
-        return True if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME else False
+            TerminalThreadWrite(TerminalThreadServer.CLIENTS[getIpAddress()].connection, "[WARNING - COMMAND] : '{}' command is not known.".format(msg)).start() # list of connected modules
+            
 
-    def __module_request(self, splitted):
-        data = {}
-        data["type"] = TerminalTreatResponse.MODULE_REQUEST
-        data["dest-module"] = splitted[0]
-        data["data"] = splitted[1:len(splitted)]
-        return data
-        # Call in a writer callback
-        # print("[WARNING] Ligne {} : {}".format(sys.exc_info()[-1].tb_lineno, WarningTerminalWrongRequestModule(e, splitted[0])))
-
-    def __unknown_request(self, msg):
-        data = {}
-        data["type"] = TerminalTreatResponse.UNKNOWN_REQUEST
-        data["data"] = msg
-        return data
