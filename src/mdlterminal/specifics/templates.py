@@ -2,6 +2,7 @@
 
 import sys
 import threading
+import shlex
 
 from bases import BaseDirectory
 from network import getIpAddress
@@ -45,9 +46,12 @@ class TerminalThreadRead(threading.Thread):
             print("{}".format(e))
         except UnicodeDecodeError as e:
             print("Ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
+        except Exception as e:
+            print("Ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
 
     def __check_raw_line(self, raw):
         flg = False
+        print(ord(raw))
         if "\r" not in raw.decode():
             flg = True
         return flg
@@ -109,12 +113,11 @@ class TerminalTreatResponse:
             * Command : data : [n, .......]
         """
         data = {}
-        splitted = msg.split(" ")
-        print(splitted)
+        splitted = shlex.split(msg)
         if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME:
-            treatedCommand = BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].command(msg)
+            treatedCommand = BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].command(splitted)
             if treatedCommand[0] == True:
-                return treatedCommand[1]
+                print(treatedCommand[1])
             else:
                 TerminalThreadWrite(TerminalThreadServer.CLIENTS[getIpAddress()].connection, "[ERROR - COMMAND] : {}\r\nusage:\r\n\t* {}".format(treatedCommand[1], BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].usage)).start()
         else:

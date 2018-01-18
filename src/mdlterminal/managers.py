@@ -12,9 +12,10 @@ class TerminalManager(BaseManager):
 		name = minprefix + "-manager" 
 		super().__init__(name, minprefix, module)
 		self.usage = "mdlterminal [(-r or --read) or (-w | --write)] [(-a or --address) 0.0.0.0)] [(-t or --text) 'your text']"
-	
+
 	def command(self, command):
 		""" 
+			mdlterminal -w -a 192.168.1.1 -t "Hello test"
 			Args:
 				* command: string
 			Returns:
@@ -22,8 +23,8 @@ class TerminalManager(BaseManager):
 				* tuple(False, error: string)
 		"""
 		commanddict = {}
-		splitted = command.split(" ")
-		for elem in splitted:
+		for elem in command:
+			print(elem)
 			if re.match(r"mdl([a-z])+", elem) != None:
 				commanddict["module"] = elem
 			if re.match(r"(-|-{2})+(r|read)", elem) != None:
@@ -31,9 +32,9 @@ class TerminalManager(BaseManager):
 			if re.match(r"(-|-{2})+(w|write)", elem) != None:
 				commanddict["command"] = BaseCommand.WRITE
 			if re.match(r"(-|-{2})+(a|address|addr)", elem) != None:
-				commanddict["address"] = splitted[splitted.index(elem)+1]
+				commanddict["address"] = command[command.index(elem)+1]
 			if re.match(r"(-|-{2})+(t|text)", elem) != None:
-				commanddict["text"] = splitted[splitted.index(elem)+1]
+				commanddict["text"] = command[command.index(elem)+1]
 		if len(commanddict) == 1:
 			return (False, "no arguments detected")
 		return (True, commanddict)
