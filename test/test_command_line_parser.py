@@ -40,6 +40,7 @@ for elem in splitted:
             print("json: {}".format(elem))
         elif re.match("(-|-{2})+(p|path)", elem) != None:
             print("path: {}".format(elem))
+            print("path: {}".format(splitted[splitted.index(elem)+1]))
         elif re.match("(-|-{2})+(r|read)", elem) != None:
             print("read: {}".format(elem))
         elif re.match("(-|-{2})+(w|write)", elem) != None:
@@ -49,7 +50,6 @@ for elem in splitted:
     elif re.match("(')+", elem) != None:
         print(elem)
 
-command = "mdlfile -r --json --path C:/Programs/hello.json"
 
 
 

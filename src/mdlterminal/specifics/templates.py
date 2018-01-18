@@ -110,6 +110,7 @@ class TerminalTreatResponse:
         """
         data = {}
         splitted = msg.split(" ")
+        print(splitted)
         if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME:
             treatedCommand = BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].command(msg)
             if treatedCommand[0] == True:

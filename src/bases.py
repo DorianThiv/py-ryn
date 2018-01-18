@@ -24,6 +24,9 @@ class BaseSATObject(ISATObject, ICommand):
 
     def __str__(self):
         return "__SAT_OBJECT__ = (name : {}, addr: {})".format(self.name, self.addr)
+        
+    def __del__(self):
+        pass
 
     def load(self):
         pass

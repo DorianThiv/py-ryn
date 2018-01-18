@@ -15,6 +15,10 @@ class ISATObject:
     @abstractmethod
     def load(self):
         pass
+        
+    @abstractmethod
+    def uninitialize(self):
+        pass
 
 class ICore:
     __metaclass__ = ABCMeta
