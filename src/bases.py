@@ -17,14 +17,13 @@ class BaseSATObject(ISATObject, ICommand):
         self.type = component_type
         self.addr = DHCP.getInstance(mdladdr).discover(self)
         self.usage = ""
-        print(self)
 
     def __repr__(self):
         pass
 
     def __str__(self):
         return "__SAT_OBJECT__ = (name : {}, addr: {})".format(self.name, self.addr)
-        
+
     def __del__(self):
         pass
 
@@ -44,7 +43,7 @@ class BaseSATObject(ISATObject, ICommand):
 
 
 class BaseCore(BaseSATObject, ICore):
-    
+
     STATE_SHUTDOWN = 0
     STATE_LOAD = 1
     STATE_START = 2
@@ -82,9 +81,9 @@ class BaseCore(BaseSATObject, ICore):
 
 class BaseLoader(BaseSATObject, ILoader):
     """
-		The loader enable to load all modules and 
-		give them instances to the "Dealer"
-	"""
+    The loader enable to load all modules and 
+    give them instances to the "Dealer"
+    """
     def __init__(self, name, core):
         super().__init__(name, DHCP.IDX_TYPE_LOADER)
         self.core = core
@@ -204,7 +203,7 @@ class BaseManager(BaseSATObject, IManager, IObservable):
             instance = c["class"](class_name_gen(self.minprefix, c["class"]), self)
             self.providers[name] = instance
             self.providers[name].load(self.minprefix, self.classes)
-    
+
     def command(self, command):
         """ command function has a public exposition 
             to have provide a command line parser.
@@ -225,7 +224,7 @@ class BaseManager(BaseSATObject, IManager, IObservable):
 
     def register(self, observer):
         self.observers.append(observer)
-    
+
     def unregister(self, observer):
         pass
 
@@ -277,7 +276,7 @@ class BaseRegistry(BaseSATObject, IRegistry, IObservable):
 
     def register(self, observer):
         self.observers.append(observer)
-    
+
     def unregister(self, observer):
         pass
 
@@ -285,11 +284,14 @@ class BaseRegistry(BaseSATObject, IRegistry, IObservable):
         pass
 
     def observers_update(self, data):
-        for observer in self.observers:
-            observer.update(self.operator.encapsulate(data))
+        try:
+            for observer in self.observers:
+                observer.update(self.operator.encapsulate(data))
+        except Exception as e:
+            print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))    
 
 class BaseBinder(BaseSATObject, IBinder):
-    
+
     def __init__(self, name, parent):
         self.observable = parent
         super().__init__(name, DHCP.IDX_TYPE_BINDER, self.observable.parent.observable.addr)
@@ -306,17 +308,21 @@ class BaseBinder(BaseSATObject, IBinder):
     def write(self):
         pass
 
-    def _get_event(self, data):
+    def _get_event(self, addr, msg):
+        data = {}
+        data["address"] = addr
+        data["binder"] = self
+        data["payload"] = msg
         self.observable.observers_update(data)
 
 class BaseCommand(ICommand):
-    
+
     """ Internal Actions on differents componenents """
 
     ALL = "all"
     READ = "read"
     WRITE = "write"
-    
+
     """ Simple Commands """
 
     CORE = DHCP.IDX_TYPE_CORE

@@ -2,11 +2,9 @@
 
 import sys
 import threading
-import shlex
 
-from bases import BaseDirectory
 from network import getIpAddress
-from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, ErrorTerminalClientDisconnect
+from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, ErrorTerminalClientDisconnect, TerminalWriteError
 
 class TerminalClientModel:
 
@@ -21,13 +19,14 @@ class TerminalThreadRead(threading.Thread):
 
     PACKET_SIZE = 1024
 
-    def __init__(self, connection, callback):
+    def __init__(self, connection, addr, callback):
         super().__init__()
         self.connection = connection
+        self.ip = addr[0]
+        self.port = addr[1]
         self.callback = callback
         self.name = self.getName()
         self.isRunning = False
-        self.treat = TerminalTreatResponse()
 
     def run(self):
         try:
@@ -35,24 +34,21 @@ class TerminalThreadRead(threading.Thread):
             while self.isRunning:
                 rawmsg = self.connection.recv(TerminalThreadRead.PACKET_SIZE)
                 if self.__check_raw_line(rawmsg) == True:
-                    msg = rawmsg.decode()
+                    msg = rawmsg.decode("latin1").encode("utf-8").decode()
                     if msg == "":
                         raise ErrorTerminalClientDisconnect("Client Terminal was disconnected : {}".format(self.connection))
                     else:
-                        data = self.treat.treat(msg)
-                        if data != None:
-                            self.callback(data)
+                        self.callback(self.ip, msg)
         except ErrorTerminalClientDisconnect as e:
             print("{}".format(e))
         except UnicodeDecodeError as e:
-            print("Ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
+            print("UnicodeDecodeError ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
         except Exception as e:
-            print("Ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
+            print("Exception ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
 
     def __check_raw_line(self, raw):
         flg = False
-        print(ord(raw))
-        if "\r" not in raw.decode():
+        if "\r" not in raw.decode("latin1").encode("utf-8").decode():
             flg = True
         return flg
 
@@ -75,7 +71,7 @@ class TerminalThreadServer(threading.Thread):
             self.isRunning = True
             while self.isRunning:
                 connection, addr = self.socket.accept()
-                TerminalThreadServer.CLIENTS[addr[0]] = TerminalThreadRead(connection, self.callback)
+                TerminalThreadServer.CLIENTS[addr[0]] = TerminalThreadRead(connection, addr, self.callback)
                 TerminalThreadServer.CLIENTS[addr[0]].start()
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
@@ -87,40 +83,18 @@ class TerminalThreadServer(threading.Thread):
 
 class TerminalThreadWrite(threading.Thread):
 
-    def __init__(self, connection, data):
+    def __init__(self, data, msg):
         super().__init__()
-        self.connection = connection # find in a command the connection id or default
-        self.data = str(data + "\r\n")
         self.name = self.getName()
+        self.msg = str(msg + "\r\n")
+        if data["address"] in TerminalThreadServer.CLIENTS:
+            self.connection = TerminalThreadServer.CLIENTS[data["address"]].connection
+        else:
+            raise TerminalWriteError("Not found destination address.")
     
     def run(self):
-        try: 
-            self.connection.send(self.data.encode())
+        try:
+            self.connection.send(self.msg.encode())
         except Exception as e:
             print("ErrorWrite : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
-
-class TerminalTreatResponse:
-
-    SIMPLE_REQUEST = 0
-    UNKNOWN_REQUEST = 1
-    MODULE_REQUEST = 2
-
-    def __init__(self):
-        pass
-
-    def treat(self, msg):
-        """
-            * Command : data : [n, .......]
-        """
-        data = {}
-        splitted = shlex.split(msg)
-        if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME:
-            treatedCommand = BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].command(splitted)
-            if treatedCommand[0] == True:
-                print(treatedCommand[1])
-            else:
-                TerminalThreadWrite(TerminalThreadServer.CLIENTS[getIpAddress()].connection, "[ERROR - COMMAND] : {}\r\nusage:\r\n\t* {}".format(treatedCommand[1], BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].usage)).start()
-        else:
-            TerminalThreadWrite(TerminalThreadServer.CLIENTS[getIpAddress()].connection, "[WARNING - COMMAND] : '{}' command is not known.".format(msg)).start() # list of connected modules
-            
 

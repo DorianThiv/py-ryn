@@ -1,30 +1,29 @@
 import sys
+import shlex
 
+from bases import BaseDirectory
 from interfaces import IOperator
 from transfert import ModuleFrameTransfert, SimpleFrameTransfert
+from mdlterminal.specifics.exceptions import *
 
 class TerminalOperator(IOperator):
-    
+
     def __init__(self, name):
         self.name = name
 
     def load(self):
         pass
 
-    def encapsulate(self, data):
-        """ TODO : Make a directory facilitator """
-        try:
-            __type = data['type']
-            if __type == 0:
-                f = data
-            elif __type == 1:
-                f = ModuleFrameTransfert("mdlterminal", "mdlexemple", "write", data["data"], None, "crc")
-            elif __type == 2:
-                __dest = data["dest-module"]
-                f = ModuleFrameTransfert("mdlterminal", __dest, "write", data["data"], "crc")
-            return f
-        except Exception as e:
-            print("[ERROR - ENCAPSULATE - TERMINAL] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
+    def encapsulate(self, data):    
+        splitted = shlex.split(data["payload"])
+        if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME:
+            treatedCommand = BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].command(splitted)
+            if treatedCommand[0] == True:
+                print(treatedCommand[1])
+            else:
+                raise TerminalCommandError("[ERROR - COMMAND] : {}\r\nusage:\r\n\t* {}".format(treatedCommand[1], BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].usage))
+        else:
+            raise TerminalCommandError("[WARNING - COMMAND] : '{}' command is not known.".format(data["payload"])) 
 
     def decapsulate(self, frame):
         try:
