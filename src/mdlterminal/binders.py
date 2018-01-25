@@ -45,3 +45,10 @@ class TerminalBinder(BaseBinder):
         except Exception as e:
             print("[ERROR - BINDER - WRITE] : {}".format(e))
     
+    def _get_event(self, addr, msg):
+        data = {}
+        data["address"] = addr
+        data["binder"] = self
+        data["payload"] = msg
+        self.observable.observers_update(data)    
+    

@@ -308,33 +308,28 @@ class BaseBinder(BaseSATObject, IBinder):
     def write(self):
         pass
 
-    def _get_event(self, addr, msg):
-        data = {}
-        data["address"] = addr
-        data["binder"] = self
-        data["payload"] = msg
+    def _get_event(self, msg):
         self.observable.observers_update(data)
 
 class BaseCommand(ICommand):
 
-    """ Internal Actions on differents componenents """
-
-    ALL = "all"
-    LOAD = "load"
-    READ = "read"
-    WRITE = "write"
-    START = "start"
-    RESTART = "restart"
-    SHUTDOWN = "shutdown"
-
-    """ Simple Commands """
-
+    """ Component's types """
     CORE = DHCP.IDX_TYPE_CORE
     LOADER = DHCP.IDX_TYPE_LOADER
     MANAGER = DHCP.IDX_TYPE_MANAGER
     PROVIDER = DHCP.IDX_TYPE_PROVIDER
     REGISTRY = DHCP.IDX_TYPE_REGISTRY
-    BINDER = DHCP.IDX_TYPE_BINDER
+    BINDER = DHCP.IDX_TYPE_BINDER    
+
+    """ Internal Actions on differents componenents """
+    ALL = "all"
+    LOAD = "load"
+    RELOAD = "reload"
+    READ = "read"
+    WRITE = "write"
+    START = "start"
+    RESTART = "restart"
+    SHUTDOWN = "shutdown"
 
     def __init__(self, component, command):
         self.component = component
