@@ -23,7 +23,7 @@ class TerminalOperator(IOperator):
             else:
                 raise TerminalCommandError("[ERROR - COMMAND] : {}\r\nusage:\r\n\t* {}".format(treatedCommand[1], BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].usage))
         else:
-            raise TerminalCommandError("[WARNING - COMMAND] : '{}' command is not known.".format(data["payload"])) 
+            raise TerminalCommandError("[WARNING - COMMAND] : Module '{}' not exist.".format(data["payload"])) 
 
     def decapsulate(self, frame):
         try:

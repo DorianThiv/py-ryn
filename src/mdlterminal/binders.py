@@ -10,6 +10,7 @@ class TerminalBinder(BaseBinder):
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
         self.server = None
+        self.socket = None
         self.host = getIpAddress()
         self.port = 1297
 

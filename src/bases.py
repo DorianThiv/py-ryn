@@ -320,8 +320,12 @@ class BaseCommand(ICommand):
     """ Internal Actions on differents componenents """
 
     ALL = "all"
+    LOAD = "load"
     READ = "read"
     WRITE = "write"
+    START = "start"
+    RESTART = "restart"
+    SHUTDOWN = "shutdown"
 
     """ Simple Commands """
 
