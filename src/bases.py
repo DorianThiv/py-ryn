@@ -6,8 +6,8 @@ import re
 from utils import *
 from transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from factories import PackageFactory
-from mdlz.dhcp import *
-from mdlz.config import *
+from mdlutils.dhcp import *
+from mdlutils.config import *
 from interfaces import ISATObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
 
 class BaseSATObject(ISATObject, ICommand): 
@@ -179,12 +179,19 @@ class BaseDealer(IDealer, IObserver):
             frame content.
         """
         try:
-            self.directory.find(frame.destAddr).execute(frame)
+            self.directory.find(frame.dest).execute(frame)
         except Exception as e:
             print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
 
 class BaseManager(BaseSATObject, IManager, IObservable):
+    
+    PARSE_MODULE = "module"
+    PARSE_DIRECTION = "direction"
+    PARSE_COMMAND = "command"
+    PARSE_TEXT = "text"
+    PARSE_ADDRESS = "address"
+    
     """ Manager load all components in this his module """
     def __init__(self, name, minprefix, module):
         super().__init__(name, DHCP.IDX_TYPE_MANAGER)
