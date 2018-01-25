@@ -3,17 +3,20 @@
 import sys
 import threading
 
+from bases import BaseBinder
 from network import getIpAddress
 from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, ErrorTerminalClientDisconnect, TerminalWriteError
 
-class TerminalClientModel:
+class TerminalRawModel:
 
     PACKET_SIZE = 1024
 
-    def __init__(self, connection, ip, port):
-        self.connection = connection
-        self.ip = ip
-        self.port = port
+    def __init__(self, command = None, address=None, payload=None, binder=None):
+        self.command = command
+        self.address = address
+        self.payload = payload
+        if isinstance(binder, BaseBinder):
+            self.binder = binder
 
 class TerminalThreadRead(threading.Thread):
 
@@ -83,12 +86,12 @@ class TerminalThreadServer(threading.Thread):
 
 class TerminalThreadWrite(threading.Thread):
 
-    def __init__(self, data, msg):
+    def __init__(self, data):
         super().__init__()
         self.name = self.getName()
-        self.msg = str(msg + "\r\n")
-        if data["address"] in TerminalThreadServer.CLIENTS:
-            self.connection = TerminalThreadServer.CLIENTS[data["address"]].connection
+        self.msg = str(data.payload + "\r\n")
+        if data.address in TerminalThreadServer.CLIENTS:
+            self.connection = TerminalThreadServer.CLIENTS[data.address].connection
         else:
             raise TerminalWriteError("Not found destination address.")
     

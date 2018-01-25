@@ -30,7 +30,7 @@ class TerminalManager(BaseManager):
 			if re.match(r"(-|-{2})+(r|read)", elem) != None:
 				commanddict[BaseManager.PARSE_DIRECTION] = BaseCommand.READ
 			if re.match(r"(-|-{2})+(w|write)", elem) != None:
-				commanddict[BaseManager.PARSE_COMMAND] = BaseCommand.WRITE
+				commanddict[BaseManager.PARSE_DIRECTION] = BaseCommand.WRITE
 			if re.match(r"(-|-{2})+(a|address|addr)", elem) != None:
 				commanddict[BaseManager.PARSE_ADDRESS] = command[command.index(elem)+1]
 			if re.match(r"(-|-{2})+(t|text)", elem) != None:
