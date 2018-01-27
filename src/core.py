@@ -9,11 +9,11 @@ from bases import BaseCore, BaseLoader
 def main():
     """ Main method to start server """
     core = BaseCore("core")
-    print("SAT => Initialize")
+    print("==== SAT => Initialize")
     core.start()
-    print("SAT => Run")
+    print("==== SAT => Run")
     core.run()
-    print("[PROCESS - TERMINATED] : Core stopped.")
+    print("==== SAT => Stop")
     
 if __name__ == "__main__":
     main()

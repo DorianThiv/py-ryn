@@ -2,6 +2,7 @@
 
 import sys
 import threading
+import socket
 
 from network import getIpAddress
 from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, ErrorTerminalClientDisconnect, TerminalWriteError
@@ -83,18 +84,19 @@ class TerminalThreadServer(threading.Thread):
 
 class TerminalThreadWrite(threading.Thread):
 
-    def __init__(self, data, msg):
+    def __init__(self):
         super().__init__()
+        self.__finished = threading.Event()
         self.name = self.getName()
-        self.msg = str(msg + "\r\n")
-        if data["address"] in TerminalThreadServer.CLIENTS:
-            self.connection = TerminalThreadServer.CLIENTS[data["address"]].connection
-        else:
-            raise TerminalWriteError("Not found destination address.")
+        self.newline = "\r\n"
     
     def run(self):
-        try:
-            self.connection.send(self.msg.encode())
-        except Exception as e:
-            print("ErrorWrite : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
+        connection = self.__find_connection(data)
+        connection.send(msg.encode())
+
+    def __find_connection(self, data):
+        if data["address"] in TerminalThreadServer.CLIENTS:
+            return TerminalThreadServer.CLIENTS[data["address"]].connection
+        else:
+            return None
 

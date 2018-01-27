@@ -1,6 +1,8 @@
 
 import sys
 import socket
+import threading
+import Queue
 from bases import BaseBinder
 from network import getIpAddress
 from mdlterminal.specifics.templates import TerminalThreadServer, TerminalThreadWrite
@@ -12,6 +14,9 @@ class TerminalBinder(BaseBinder):
         self.server = None
         self.host = getIpAddress()
         self.port = 1297
+        self.server = TerminalThreadServer(self.socket, self._get_event)
+        self.msg_stack = Queue.Queue(maxsize=3)
+        self.writer = TerminalThreadWrite(self.msg_stack) 
 
     def load(self):
         try:
@@ -32,15 +37,13 @@ class TerminalBinder(BaseBinder):
             pass
 
     def read(self):
-        self.server = TerminalThreadServer(self.socket, self._get_event)
         self.server.start()
         self.server.join()
         
     def write(self, data, msg):
         try:
-            termThW = TerminalThreadWrite(data, msg)
-            termThW.start()
-            termThW.join()
+            self.writer.start()
+            print(threading.enumerate())
         except Exception as e:
             print("[ERROR - BINDER - WRITE] : {}".format(e))
     

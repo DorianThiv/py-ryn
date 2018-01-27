@@ -3,5 +3,6 @@ from bases import BaseCommand
 
 class TerminalCommand(BaseCommand):
 
-    def __init__(self):
-        pass 
+    COMMAND_RUN = "run"
+    COMMAND_PAUSE = "pause"
+    COMMAND_EXIT = "exit"
