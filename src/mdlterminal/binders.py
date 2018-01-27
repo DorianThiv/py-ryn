@@ -1,22 +1,18 @@
 
 import sys
 import socket
-import threading
-import Queue
-from bases import BaseBinder
+from bases import BaseBinder, BaseCommand
 from network import getIpAddress
-from mdlterminal.specifics.templates import TerminalThreadServer, TerminalThreadWrite
+from mdlterminal.specifics.templates import TerminalThreadServer, TerminalThreadWrite, TerminalRawModel
 
 class TerminalBinder(BaseBinder):
     
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
         self.server = None
+        self.socket = None
         self.host = getIpAddress()
         self.port = 1297
-        self.server = TerminalThreadServer(self.socket, self._get_event)
-        self.msg_stack = Queue.Queue(maxsize=3)
-        self.writer = TerminalThreadWrite(self.msg_stack) 
 
     def load(self):
         try:
@@ -30,20 +26,31 @@ class TerminalBinder(BaseBinder):
 
     def execute(self, data):
         """ Interactiv with an Action derived class from BaseAction """
-        if data.command == "all":
+        # Change command.ALL execution to LOAD or INIT
+        if data.command == BaseCommand.ALL:
+            self.read()        
+        if data.command == BaseCommand.LOAD:
             self.read()
-        else:
-            #self.write(data[1])
-            pass
+        if data.command == BaseCommand.WRITE:
+            self.write()
 
     def read(self):
-        self.server.start()
-        self.server.join()
-        
-    def write(self, data, msg):
         try:
-            self.writer.start()
-            print(threading.enumerate())
+            self.server = TerminalThreadServer(self.socket, self._get_event)
+            self.server.start()
+            self.server.join()
         except Exception as e:
-            print("[ERROR - BINDER - WRITE] : {}".format(e))
+            print("[ERROR - TERMINAL_BINDER - READ] : {}".format(e))
+        
+    def write(self, data):
+        try:
+            termThW = TerminalThreadWrite(data)
+            termThW.start()
+            termThW.join()
+        except Exception as e:
+            print("[ERROR - TERMINAL_BINDER - WRITE] : {}".format(e))
+    
+    def _get_event(self, addr, msg):
+        data = TerminalRawModel(address=addr, payload=msg, binder=self)
+        self.observable.observers_update(data)    
     

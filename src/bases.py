@@ -6,8 +6,8 @@ import re
 from utils import *
 from transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from factories import PackageFactory
-from mdlz.dhcp import *
-from mdlz.config import *
+from mdlutils.dhcp import *
+from mdlutils.config import *
 from interfaces import ISATObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
 
 class BaseSATObject(ISATObject, ICommand): 
@@ -179,12 +179,19 @@ class BaseDealer(IDealer, IObserver):
             frame content.
         """
         try:
-            self.directory.find(frame.destAddr).execute(frame)
+            self.directory.find(frame.dest).execute(frame)
         except Exception as e:
             print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
 
 class BaseManager(BaseSATObject, IManager, IObservable):
+    
+    PARSE_MODULE = "module"
+    PARSE_DIRECTION = "direction"
+    PARSE_COMMAND = "command"
+    PARSE_TEXT = "text"
+    PARSE_ADDRESS = "address"
+    
     """ Manager load all components in this his module """
     def __init__(self, name, minprefix, module):
         super().__init__(name, DHCP.IDX_TYPE_MANAGER)
@@ -308,29 +315,28 @@ class BaseBinder(BaseSATObject, IBinder):
     def write(self):
         pass
 
-    def _get_event(self, addr, msg):
-        data = {}
-        data["address"] = addr
-        data["binder"] = self
-        data["payload"] = msg
+    def _get_event(self, msg):
         self.observable.observers_update(data)
 
 class BaseCommand(ICommand):
 
-    """ Internal Actions on differents componenents """
-
-    ALL = "all"
-    READ = "read"
-    WRITE = "write"
-
-    """ Simple Commands """
-
+    """ Component's types """
     CORE = DHCP.IDX_TYPE_CORE
     LOADER = DHCP.IDX_TYPE_LOADER
     MANAGER = DHCP.IDX_TYPE_MANAGER
     PROVIDER = DHCP.IDX_TYPE_PROVIDER
     REGISTRY = DHCP.IDX_TYPE_REGISTRY
-    BINDER = DHCP.IDX_TYPE_BINDER
+    BINDER = DHCP.IDX_TYPE_BINDER    
+
+    """ Internal Actions on differents componenents """
+    ALL = "all"
+    LOAD = "load"
+    RELOAD = "reload"
+    READ = "read"
+    WRITE = "write"
+    START = "start"
+    RESTART = "restart"
+    SHUTDOWN = "shutdown"
 
     def __init__(self, component, command):
         self.component = component

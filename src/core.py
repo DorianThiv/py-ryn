@@ -13,7 +13,7 @@ def main():
     core.start()
     print("==== SAT => Run")
     core.run()
-    print("==== SAT => Stop")
+    print("==== SAT => Stopped")
     
 if __name__ == "__main__":
     main()

@@ -26,15 +26,15 @@ class TerminalManager(BaseManager):
 		for elem in command:
 			print(elem)
 			if re.match(r"mdl([a-z])+", elem) != None:
-				commanddict["module"] = elem
+				commanddict[BaseManager.PARSE_MODULE] = elem
 			if re.match(r"(-|-{2})+(r|read)", elem) != None:
-				commanddict["command"] = BaseCommand.READ
+				commanddict[BaseManager.PARSE_DIRECTION] = BaseCommand.READ
 			if re.match(r"(-|-{2})+(w|write)", elem) != None:
-				commanddict["command"] = BaseCommand.WRITE
+				commanddict[BaseManager.PARSE_DIRECTION] = BaseCommand.WRITE
 			if re.match(r"(-|-{2})+(a|address|addr)", elem) != None:
-				commanddict["address"] = command[command.index(elem)+1]
+				commanddict[BaseManager.PARSE_ADDRESS] = command[command.index(elem)+1]
 			if re.match(r"(-|-{2})+(t|text)", elem) != None:
-				commanddict["text"] = command[command.index(elem)+1]
+				commanddict[BaseManager.PARSE_TEXT] = command[command.index(elem)+1]
 		if len(commanddict) == 1:
 			return (False, "no arguments detected")
 		return (True, commanddict)
