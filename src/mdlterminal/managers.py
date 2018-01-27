@@ -24,7 +24,6 @@ class TerminalManager(BaseManager):
 		"""
 		commanddict = {}
 		for elem in command:
-			print(elem)
 			if re.match(r"mdl([a-z])+", elem) != None:
 				commanddict[BaseManager.PARSE_MODULE] = elem
 			if re.match(r"(-|-{2})+(r|read)", elem) != None:

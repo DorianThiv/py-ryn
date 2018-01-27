@@ -211,7 +211,7 @@ class BaseManager(BaseSATObject, IManager, IObservable):
             self.providers[name] = instance
             self.providers[name].load(self.minprefix, self.classes)
 
-    def command(self, command):
+    def command(self, splitted):
         """ command function has a public exposition 
             to have provide a command line parser.
 
@@ -222,12 +222,13 @@ class BaseManager(BaseSATObject, IManager, IObservable):
                 * tuple(False, error: string)
                 * tuple(True, None)
         """
-        splitted = command.split(" ")
+        commanddict = {}
         for elem in splitted:
-            if re.match(r"mdl([a-z])+", elem) == None and elem == self.module:
-                error = "module name doesn't match"
-                return (False, error)
-        return (True, None)
+            if re.match(r"mdl([a-z])+", elem) != None:
+                commanddict[BaseManager.PARSE_MODULE] = elem
+                return (True, commanddict)
+            else:
+                return (False, "From BaseManager : it's not a module command")
 
     def register(self, observer):
         self.observers.append(observer)
@@ -315,7 +316,7 @@ class BaseBinder(BaseSATObject, IBinder):
     def write(self):
         pass
 
-    def _get_event(self, msg):
+    def _get_event(self, data):
         self.observable.observers_update(data)
 
 class BaseCommand(ICommand):

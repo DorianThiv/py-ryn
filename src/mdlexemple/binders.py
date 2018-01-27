@@ -8,16 +8,13 @@ class ExempleBinder(BaseBinder):
         super().__init__(name, observable)
 
     def load(self):
-        # self.read()
         self.observable.parent.observable.status = True
         pass
 
     def execute(self, frame):
-        print(frame)
+        print("[MDLEXEMPLE] : {}".format(frame))
 
     def read(self):
-        import sys
-        import os
         data = "Hello World"
         self.observable.observers_update(data)
 

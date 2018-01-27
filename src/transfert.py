@@ -26,7 +26,7 @@ class ModuleFrameTransfert:
     CALLBACK = "callback"
     LOG = "log"
 
-    def __init__(self, src, dest, command=None, payload=None, callback=None, timestamp=None, log=None):
+    def __init__(self, src, dest, command=None, payload=None, callback=None, log=None):
         self.src = src
         self.dest = dest
         self.command = command

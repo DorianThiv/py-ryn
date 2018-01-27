@@ -7,7 +7,7 @@ from mdlterminal.specifics.exceptions import *
 class TerminalRegistry(BaseRegistry):
 
     def __init__(self, name, provider):
-        super().__init__(name, TerminalOperator("terminal-operator"), provider)
+        super().__init__(name, TerminalOperator("terminal-operator", provider.observable.module), provider)
         
     def execute(self, frame):
         for b in self.binders:
@@ -17,7 +17,7 @@ class TerminalRegistry(BaseRegistry):
         try:
             for observer in self.observers:
                 decaps_data = self.operator.encapsulate(data)
-                observer.update(decaps_data, decaps_data[BaseManager.PARSE_TEXT])
+                observer.update(decaps_data)
         except TerminalCommandError as e:
             """ Get the right binder to use write command and send error """
             data.payload = e.message

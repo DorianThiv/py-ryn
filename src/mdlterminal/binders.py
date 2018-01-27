@@ -3,9 +3,11 @@ import sys
 import socket
 from bases import BaseBinder, BaseCommand
 from network import getIpAddress
-from mdlterminal.specifics.templates import TerminalThreadServer, TerminalThreadWrite, TerminalRawModel
+from mdlterminal.specifics.templates import *
 
 class TerminalBinder(BaseBinder):
+
+    """ Initialize an internal terminal to communicate with the user """
     
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
@@ -32,7 +34,7 @@ class TerminalBinder(BaseBinder):
         if data.command == BaseCommand.LOAD:
             self.read()
         if data.command == BaseCommand.WRITE:
-            self.write()
+            self.write(data)
 
     def read(self):
         try:

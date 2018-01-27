@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-import os
-import sys
-
-from bases import BaseCore, BaseLoader
+from bases import BaseCore
 
 def main():
     """ Main method to start server """
@@ -17,5 +14,4 @@ def main():
     
 if __name__ == "__main__":
     main()
-
     

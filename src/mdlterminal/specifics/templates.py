@@ -1,23 +1,35 @@
-
-
 import sys
 import threading
-import socket
 
 from bases import BaseBinder
 from network import getIpAddress
 from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, ErrorTerminalClientDisconnect, TerminalWriteError
 
-class TerminalRawModel:
+class TerminalThreadServer(threading.Thread):
 
-    PACKET_SIZE = 1024
+    CLIENTS_DIRECTORY = {}
 
-    def __init__(self, command = None, address=None, payload=None, binder=None):
-        self.command = command
-        self.address = address
-        self.payload = payload
-        if isinstance(binder, BaseBinder):
-            self.binder = binder
+    def __init__(self, socket, callback):
+        super().__init__()
+        self.socket = socket
+        self.callback = callback
+        self.isRunning = False
+        self.socket.listen(2)
+
+    def run(self):
+        try:
+            self.isRunning = True
+            while self.isRunning:
+                connection, addr = self.socket.accept()
+                TerminalThreadServer.CLIENTS_DIRECTORY[addr[0]] = TerminalThreadRead(connection, addr, self.callback)
+                TerminalThreadServer.CLIENTS_DIRECTORY[addr[0]].start()
+        except Exception as e:
+            print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
+            self.socket.close()
+    
+    def stop(self):
+        self.isRunning = False # Vrai ou faux ??!
+        self.socket.close()
 
 class TerminalThreadRead(threading.Thread):
 
@@ -59,32 +71,6 @@ class TerminalThreadRead(threading.Thread):
     def stop(self):
         self.isRunning = False
 
-class TerminalThreadServer(threading.Thread):
-
-    CLIENTS = {}
-
-    def __init__(self, socket, callback):
-        super().__init__()
-        self.socket = socket
-        self.callback = callback
-        self.isRunning = False
-        self.socket.listen(2)
-
-    def run(self):
-        try:
-            self.isRunning = True
-            while self.isRunning:
-                connection, addr = self.socket.accept()
-                TerminalThreadServer.CLIENTS[addr[0]] = TerminalThreadRead(connection, addr, self.callback)
-                TerminalThreadServer.CLIENTS[addr[0]].start()
-        except Exception as e:
-            print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
-            self.socket.close()
-    
-    def stop(self):
-        self.isRunning = False # Vrai ou faux ??!
-        self.socket.close()
-
 class TerminalThreadWrite(threading.Thread):
 
     def __init__(self, data):
@@ -94,18 +80,21 @@ class TerminalThreadWrite(threading.Thread):
         self.newline = "\r\n"
         self.data = data
         self.msg = str(data.payload + self.newline)
-        if data.address in TerminalThreadServer.CLIENTS:
-            self.connection = TerminalThreadServer.CLIENTS[data.address].connection
+        if data.address in TerminalThreadServer.CLIENTS_DIRECTORY:
+            self.connection = TerminalThreadServer.CLIENTS_DIRECTORY[data.address].connection
         else:
             raise TerminalWriteError("Not found destination address.")
     
     def run(self):
-        connection = self.__find_connection(self.data)
-        connection.send(self.msg.encode())
+        self.connection.send(self.msg.encode())
 
-    def __find_connection(self, data):
-        if data.address in TerminalThreadServer.CLIENTS:
-            return TerminalThreadServer.CLIENTS[data.address].connection
-        else:
-            return None
+class TerminalRawModel:
 
+    PACKET_SIZE = 1024
+
+    def __init__(self, command = None, address=None, payload=None, binder=None):
+        self.command = command
+        self.address = address
+        self.payload = payload
+        if isinstance(binder, BaseBinder):
+            self.binder = binder
