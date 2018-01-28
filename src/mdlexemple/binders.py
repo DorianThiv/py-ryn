@@ -9,14 +9,12 @@ class ExempleBinder(BaseBinder):
 
     def load(self):
         self.observable.parent.observable.status = True
-        pass
 
-    def execute(self, frame):
-        print("[MDLEXEMPLE] : {}".format(frame))
+    def execute(self, data):
+        print("[MDLEXEMPLE] : {}".format(data))
 
     def read(self):
-        data = "Hello World"
-        self.observable.observers_update(data)
+        pass
 
     def write(self):
         pass

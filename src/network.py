@@ -34,13 +34,18 @@ class SocketError(Exception):
         return "SocketError : {}".format(self.message)
 
 def checkIp(ip):
+	if "." not in ip:
+		raise FormatIPError("IP incorrectly formated")
 	ip_bytes = ip.split(".")
 	if len(ip_bytes) != 4:
 		raise FormatIPError("Bytes number error")
 	for byte in ip_bytes:
 		if byte == "":
 			raise FormatIPError("Bytes number error")
-		byte = int(byte)
+		try:
+			byte = int(byte)
+		except:
+			raise FormatIPError("Chars detected in IP")
 		if byte < 0 or byte > 255:
 			raise FormatIPError("Byte {} is wrong".format(byte))
 

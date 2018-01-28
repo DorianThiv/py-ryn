@@ -4,7 +4,7 @@ import socket
 import threading
 
 from mdlmodbus.specifics.templates import ModbusTCPFrame, ModbusRTUFrame, ModbusThreadRead, ModbusThreadWrite
-from bases import BaseBinder
+from bases import BaseBinder, BaseCommand
 from network import getIpAddress
 
 # Ayncronous modbus : TCP/IP (Modbus Ethernet) 
@@ -27,7 +27,7 @@ class ModbusTcpBinder(BaseBinder):
 
     def execute(self, data):
         if self.socket._closed != True:
-            if data == "all":
+            if data == BaseCommand.LOAD:
                 self.read()
             else:
                 self.write()

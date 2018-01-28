@@ -22,11 +22,11 @@ class TerminalOperator(IOperator):
                 if status is True:
                     return ModuleFrameTransfert(
                         src=self.mdlname, 
-                        dest=commandline[BaseManager.PARSE_MODULE],
+                        dest=commandline[BaseCommand.PARSE_MODULE],
                         payload=commandline
                     )
                 else:
-                    raise TerminalCommandError("[ERROR - COMMAND] : {}\r\nusage:\r\n\t* {}".format(commandline, BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].usage))
+                    raise TerminalCommandError("[WARNING - COMMAND] : {}\r\nusage:\r\n* {}".format(commandline, BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].usage))
             else:
                 raise TerminalCommandError("[WARNING - COMMAND] : Module '{}' not exist.".format(data.payload))
         else:
@@ -37,7 +37,7 @@ class TerminalOperator(IOperator):
             if isinstance(frame, SimpleFrameTransfert):
                 data = TerminalRawModel(frame.command)
             if isinstance(frame, ModuleFrameTransfert):
-                data = TerminalRawModel(frame.payload[BaseManager.PARSE_DIRECTION], frame.payload[BaseManager.PARSE_ADDRESS], frame.payload[BaseManager.PARSE_TEXT])
+                data = TerminalRawModel(frame.payload[BaseCommand.PARSE_DIRECTION], frame.payload[BaseCommand.PARSE_ADDRESS], frame.payload[BaseCommand.PARSE_TEXT])
             return data
         except Exception as e:
             print("[ERROR - DECAPSULATE - TERMINAL] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))

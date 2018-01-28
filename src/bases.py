@@ -186,12 +186,6 @@ class BaseDealer(IDealer, IObserver):
 
 class BaseManager(BaseSATObject, IManager, IObservable):
     
-    PARSE_MODULE = "module"
-    PARSE_DIRECTION = "direction"
-    PARSE_COMMAND = "command"
-    PARSE_TEXT = "text"
-    PARSE_ADDRESS = "address"
-    
     """ Manager load all components in this his module """
     def __init__(self, name, minprefix, module):
         super().__init__(name, DHCP.IDX_TYPE_MANAGER)
@@ -225,7 +219,7 @@ class BaseManager(BaseSATObject, IManager, IObservable):
         commanddict = {}
         for elem in splitted:
             if re.match(r"mdl([a-z])+", elem) != None:
-                commanddict[BaseManager.PARSE_MODULE] = elem
+                commanddict[BaseCommand.PARSE_MODULE] = elem
                 return (True, commanddict)
             else:
                 return (False, "From BaseManager : it's not a module command")
@@ -308,7 +302,7 @@ class BaseBinder(BaseSATObject, IBinder):
         pass
 
     def execute(self, direction, data):
-        print(direction, data)
+        pass
 
     def read(self):
         pass
@@ -339,16 +333,19 @@ class BaseCommand(ICommand):
     RESTART = "restart"
     SHUTDOWN = "shutdown"
 
+    """ Internal Parsed items """
+    PARSE_MODULE = "module"
+    PARSE_DIRECTION = "direction"
+    PARSE_COMMAND = "command"
+    PARSE_TEXT = "text"
+    PARSE_ADDRESS = "address"
+
     def __init__(self, component, command):
         self.component = component
         self.cpttype = self.component.type
         self.command = command
 
     def treat(self):
-        """ Enter point of actions """
-        self.__send_request()
-
-    def __send_request(self):
         """ Check for a command line which specify a module """
         if self.cpttype == BaseCommand.CORE:
             pass

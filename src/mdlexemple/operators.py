@@ -1,6 +1,7 @@
 
 from interfaces import IOperator
-from transfert import ModuleFrameTransfert
+from bases import BaseCommand
+from transfert import ModuleFrameTransfert, SimpleFrameTransfert
 
 class ExempleOperator(IOperator):
     
@@ -11,8 +12,10 @@ class ExempleOperator(IOperator):
         pass
 
     def encapsulate(self, data):
-        # return ModuleFrameTransfert()
         pass
 
     def decapsulate(self, frame):
-        return frame
+        if isinstance(frame, SimpleFrameTransfert):
+            return frame.command
+        if isinstance(frame, ModuleFrameTransfert):
+            return frame.payload[BaseCommand.PARSE_TEXT]
