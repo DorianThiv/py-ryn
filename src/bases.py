@@ -3,14 +3,15 @@ import sys
 import threading
 import re
 
+from network import *
 from utils import *
 from transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from factories import PackageFactory
 from mdlutils.dhcp import *
 from mdlutils.config import *
-from interfaces import ISATObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
+from interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IBinder, IObserver, IObservable, ICommand
 
-class BaseSATObject(ISATObject, ICommand): 
+class BaseRYNObject(IRYNObject, ICommand): 
 
     def __init__(self, name, component_type, mdladdr=None):
         self.name = name
@@ -22,7 +23,7 @@ class BaseSATObject(ISATObject, ICommand):
         pass
 
     def __str__(self):
-        return "__SAT_OBJECT__ = (name : {}, addr: {})".format(self.name, self.addr)
+        return "__RYN_OBJECT__ = (name : {}, addr: {})".format(self.name, self.addr)
 
     def __del__(self):
         pass
@@ -42,7 +43,7 @@ class BaseSATObject(ISATObject, ICommand):
         execute.treat()
 
 
-class BaseCore(BaseSATObject, ICore):
+class BaseCore(BaseRYNObject, ICore):
 
     STATE_SHUTDOWN = 0
     STATE_LOAD = 1
@@ -79,7 +80,7 @@ class BaseCore(BaseSATObject, ICore):
     def stop(self):
         self.state = BaseCore.STATE_STOP
 
-class BaseLoader(BaseSATObject, ILoader):
+class BaseLoader(BaseRYNObject, ILoader):
     """
     The loader enable to load all modules and 
     give them instances to the "Dealer"
@@ -184,7 +185,7 @@ class BaseDealer(IDealer, IObserver):
             print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
 
-class BaseManager(BaseSATObject, IManager, IObservable):
+class BaseManager(BaseRYNObject, IManager, IObservable):
     
     """ Manager load all components in this his module """
     def __init__(self, name, minprefix, module):
@@ -205,7 +206,7 @@ class BaseManager(BaseSATObject, IManager, IObservable):
             self.providers[name] = instance
             self.providers[name].load(self.minprefix, self.classes)
 
-    def command(self, splitted):
+    def command(self, command):
         """ command function has a public exposition 
             to have provide a command line parser.
 
@@ -217,12 +218,28 @@ class BaseManager(BaseSATObject, IManager, IObservable):
                 * tuple(True, None)
         """
         commanddict = {}
-        for elem in splitted:
+        for elem in command:
             if re.match(r"mdl([a-z])+", elem) != None:
                 commanddict[BaseCommand.PARSE_MODULE] = elem
-                return (True, commanddict)
-            else:
-                return (False, "From BaseManager : it's not a module command")
+            if re.match(r"(-|-{2})+(r|read)", elem) != None:
+                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.READ
+            if re.match(r"(-|-{2})+(w|write)", elem) != None:
+                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.WRITE
+            if re.match(r"(-|-{2})+(a|address|addr)", elem) != None:
+                if command.index(elem)+1 < len(command):
+                    try:
+                        checkIp(command[command.index(elem)+1])
+                        commanddict[BaseCommand.PARSE_ADDRESS] = command[command.index(elem)+1]
+                    except Exception as e:
+                        return (False, "excepted IP address : (-a x.x.x.x | --address x.x.x.x) : {}".format(e))
+                else:
+                    return (False, "excepted IP address : (-a x.x.x.x | --address x.x.x.x)")
+            if re.match(r"(-|-{2})+(t|text)", elem) != None:
+                if command.index(elem)+1 < len(command):
+                    commanddict[BaseCommand.PARSE_TEXT] = command[command.index(elem)+1]
+                else:
+                    return (False, "excepted text : (-t \"hello world\") | (--text \"hello world\")")
+        return (True, commanddict)
 
     def register(self, observer):
         self.observers.append(observer)
@@ -237,7 +254,7 @@ class BaseManager(BaseSATObject, IManager, IObservable):
         for observer in self.observers:
             observer.update(frame)
 
-class BaseProvider(BaseSATObject, IProvider, IObserver):
+class BaseProvider(BaseRYNObject, IProvider, IObserver):
 
     def __init__(self, name, parent):
         super().__init__(name, DHCP.IDX_TYPE_PROVIDER, parent.addr)
@@ -255,7 +272,7 @@ class BaseProvider(BaseSATObject, IProvider, IObserver):
         """ Update to notify the manager with a frame instance """
         self.observable.observers_update(frame)
 
-class BaseRegistry(BaseSATObject, IRegistry, IObservable):
+class BaseRegistry(BaseRYNObject, IRegistry, IObservable):
 
     def __init__(self, name, operator, parent):
         super().__init__(name, DHCP.IDX_TYPE_REGISTRY, parent.observable.addr)
@@ -292,7 +309,7 @@ class BaseRegistry(BaseSATObject, IRegistry, IObservable):
         except Exception as e:
             print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))    
 
-class BaseBinder(BaseSATObject, IBinder):
+class BaseBinder(BaseRYNObject, IBinder):
 
     def __init__(self, name, parent):
         self.observable = parent

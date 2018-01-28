@@ -1,6 +1,6 @@
-# SERVER PROTOTYPE
+# SERVER PROTOTYPE - RYN SRV
 
-This server is a prototype to manage differents data with generic managers. The server load that managers as a module.
+This server is a prototype to manage few data with generic modules.
 
 ## Getting Started
 
@@ -84,7 +84,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 * Generics Systems
 * Threading
-* Server
+* Servers
+* SMA
 * etc ...
 
 

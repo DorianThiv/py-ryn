@@ -1,9 +1,5 @@
 {
     "config": {
-        "serverName": "SAT",
-        "privateAccess": true, 
-        "asService": true,
-        "totalConnection": 5,
         "modules": [{
             "name": "mdlexemple",
             "asynchronous": false

@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+""" RYN SOFTWARE """
+
+import os
 from bases import BaseCore
 
 def main():
-    """ Main method to start server """
     core = BaseCore("core")
-    print("==== SAT => Initialize")
+    print("==== RYN => Initialize")
     core.start()
-    print("==== SAT => Run")
+    print("==== RYN => Run")
     core.run()
-    print("==== SAT => Stopped")
+    print("==== RYN => Stopped")
     
 if __name__ == "__main__":
     main()
+
+os.system("pause")
     

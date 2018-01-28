@@ -1,5 +1,5 @@
 
-from bases import BaseRegistry, BaseCommand, BaseManager
+from bases import BaseRegistry
 
 from mdlterminal.operators import TerminalOperator
 from mdlterminal.specifics.exceptions import *

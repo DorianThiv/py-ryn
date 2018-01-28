@@ -1,8 +1,9 @@
 
+""" Find interfaces of this prototype """
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-# --- SAT Object Global Interfaces
-class ISATObject:
+class IRYNObject:
     __metaclass__ = ABCMeta
 
     ref = 0 # 00000000 - FFFFFFFFF
@@ -158,4 +159,4 @@ class ICommand:
     def execute(self):
         pass
 
-__all__ = ('ISATObject', 'ICore', 'IManager', 'IProvider', 'IRegistry', 'IOperator', 'IObserver', 'IObservable', 'ICommand')
+__all__ = ('IRYNObject', 'ICore', 'IManager', 'IProvider', 'IRegistry', 'IOperator', 'IObserver', 'IObservable', 'ICommand')
