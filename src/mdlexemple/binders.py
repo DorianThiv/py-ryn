@@ -1,6 +1,6 @@
 
 import json
-from bases import BaseBinder
+from mdlutils.bases import BaseBinder
 
 class ExempleBinder(BaseBinder):
     

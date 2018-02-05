@@ -1,5 +1,5 @@
 
-from utils import JSON
+from mdlutils.utils import JSON
 
 class ModuleFrameTransfert:
 
@@ -9,7 +9,7 @@ class ModuleFrameTransfert:
     
     Serialize @param : frame to SimpleFrameTransfert :
     [src] => (int | str)
-    [dest] => (int | str)
+    [dest] => (int | str) 
     [command] => BaseCommand (actually)
     [payload] => Content known buy dest module
     [callback] => Optionnal

@@ -1,7 +1,7 @@
 
-from interfaces import IOperator
-from bases import BaseCommand
-from transfert import ModuleFrameTransfert, SimpleFrameTransfert
+from mdlutils.interfaces import IOperator
+from mdlutils.bases import BaseCommand
+from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
 
 class ExempleOperator(IOperator):
     

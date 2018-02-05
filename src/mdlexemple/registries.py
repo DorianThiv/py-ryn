@@ -1,5 +1,5 @@
 
-from bases import BaseRegistry
+from mdlutils.bases import BaseRegistry
 
 from mdlexemple.operators import ExempleOperator
 

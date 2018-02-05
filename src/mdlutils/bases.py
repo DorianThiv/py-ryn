@@ -3,13 +3,13 @@ import sys
 import threading
 import re
 
-from network import *
-from utils import *
-from transfert import ModuleFrameTransfert, SimpleFrameTransfert
-from factories import PackageFactory
+from mdlutils.utils import *
+from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
+from mdlutils.factories import PackageFactory
 from mdlutils.dhcp import *
 from mdlutils.config import *
-from interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IBinder, IObserver, IObservable, ICommand
+from mdlutils.network import *
+from mdlutils.interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IBinder, IObserver, IObservable, ICommand
 
 class BaseRYNObject(IRYNObject, ICommand): 
 
@@ -17,7 +17,7 @@ class BaseRYNObject(IRYNObject, ICommand):
         self.name = name
         self.type = component_type
         self.addr = DHCP.getInstance(mdladdr).discover(self)
-        self.usage = ""
+        self.usage = "" 
 
     def __repr__(self):
         pass
@@ -200,7 +200,7 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
         self.observers = []
 
     def load(self):
-        from factories import ModuleFactory
+        from mdlutils.factories import ModuleFactory
         self.classes = ModuleFactory.make(self.minprefix, self.module)
         for c in self.classes["providers"]:
             name = class_name_gen(self.minprefix, c["class"])

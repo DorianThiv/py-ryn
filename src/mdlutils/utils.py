@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-""" JSON Serialize an Deserialize """
+""" JSON Serialize an Deserialize """ 
 import json
 
 class JSONSerializeFormatError(Exception):

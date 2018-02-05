@@ -1,8 +1,9 @@
 
 import sys
 import socket
-from bases import BaseBinder, BaseCommand
-from network import getIpAddress
+
+from mdlutils.bases import BaseBinder, BaseCommand
+from mdlutils.network import getIpAddress
 from mdlterminal.specifics.templates import *
 
 class TerminalBinder(BaseBinder):

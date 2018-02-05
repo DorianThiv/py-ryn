@@ -1,10 +1,9 @@
 
 import re
 
-from network import *
-from bases import BaseManager, BaseCommand
-from factories import ModuleFactory
-		
+from mdlutils.bases import BaseManager, BaseCommand
+from mdlutils.factories import ModuleFactory
+
 class TerminalManager(BaseManager):
 
 	def __init__(self, mod):

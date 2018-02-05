@@ -1,9 +1,9 @@
 import sys
 import shlex
 
-from bases import BaseManager, BaseDirectory, BaseCommand
-from interfaces import IOperator
-from transfert import ModuleFrameTransfert, SimpleFrameTransfert
+from mdlutils.bases import BaseManager, BaseDirectory, BaseCommand
+from mdlutils.interfaces import IOperator
+from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from mdlterminal.specifics.exceptions import *
 from mdlterminal.specifics.templates import TerminalRawModel
 

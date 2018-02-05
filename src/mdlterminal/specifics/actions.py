@@ -1,5 +1,5 @@
 
-from bases import BaseCommand
+from mdlutils.bases import BaseCommand
 
 class TerminalCommand(BaseCommand):
 

@@ -1,7 +1,7 @@
 
 import re
-from bases import BaseManager, BaseCommand
-from factories import ModuleFactory
+from mdlutils.bases import BaseManager, BaseCommand
+from mdlutils.factories import ModuleFactory
 		
 class ExempleManager(BaseManager):
 	"""
