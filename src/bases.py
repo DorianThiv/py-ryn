@@ -188,11 +188,13 @@ class BaseDealer(IDealer, IObserver):
 class BaseManager(BaseRYNObject, IManager, IObservable):
     
     """ Manager load all components in this his module """
-    def __init__(self, name, minprefix, module):
-        super().__init__(name, DHCP.IDX_TYPE_MANAGER)
+    def __init__(self, module):
+        mod_conf = ConfigurationModule.getModuleProperties(module)
+        self.minprefix = mod_conf["prefix"]
+        self.sufix = "manager"
+        self.module = module        
+        super().__init__(self.minprefix + "-" + self.sufix, DHCP.IDX_TYPE_MANAGER)
         self.status = False
-        self.minprefix = minprefix
-        self.module = module
         self.classes = {}
         self.providers = {}
         self.observers = []

@@ -53,6 +53,8 @@ sys.path.append(path)
 
 # manager module
 mdlmanager = "mdlexemple.managers"
+# package name important to found right classes
+packages = ["mdlexemple.providers", "mdlexemple.registries", "mdlexemple.binders"]
 
 def __getmanager():
     """
@@ -68,13 +70,7 @@ def __getmanager():
                 ret = c[1]
     return ret
 
-manager = __getmanager()
-
-# package name important to found right classes
-packages = ["mdlexemple.providers", "mdlexemple.registries", "mdlexemple.binders"]
-
 def __getclasses():
-
     """
     Get classes function return all classes in this module.
     Args:
@@ -90,5 +86,5 @@ def __getclasses():
                 ret.append(c[1])
     return ret
 
-
+manager = __getmanager()
 classes = __getclasses()

@@ -2,10 +2,10 @@
     "config": {
         "modules": [{
             "name": "mdlexemple",
-            "asynchronous": false
+            "prefix": "exemple"
         }, {
             "name": "mdlterminal",
-            "asynchronous": false
+            "prefix": "terminal"
         }]
     }
 }

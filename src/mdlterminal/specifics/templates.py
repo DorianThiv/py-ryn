@@ -14,6 +14,7 @@ class TerminalThreadServer(threading.Thread):
         self.socket = socket
         self.callback = callback
         self.isRunning = False
+        self.directory = {}
         self.socket.listen(2)
 
     def run(self):
@@ -21,11 +22,20 @@ class TerminalThreadServer(threading.Thread):
             self.isRunning = True
             while self.isRunning:
                 connection, addr = self.socket.accept()
-                TerminalThreadServer.CLIENTS_DIRECTORY[addr[0]] = TerminalThreadRead(connection, addr, self.callback)
-                TerminalThreadServer.CLIENTS_DIRECTORY[addr[0]].start()
+                self.directory[addr[0]] = TerminalThreadRead(connection, addr, self.callback)
+                self.directory[addr[0]].start()
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.socket.close()
+
+    def write(self, data):
+        connection = None
+        if data.address in self.directory:
+            connection = self.directory[data.address].connection
+        else:
+            raise TerminalWriteError("Not found destination address.")
+        msg = str(data.payload + "\r\n")
+        connection.send(msg.encode())
     
     def stop(self):
         self.isRunning = False # Vrai ou faux ??!
@@ -70,23 +80,6 @@ class TerminalThreadRead(threading.Thread):
 
     def stop(self):
         self.isRunning = False
-
-class TerminalThreadWrite(threading.Thread):
-
-    def __init__(self, data):
-        super().__init__()
-        self.__finished = threading.Event()
-        self.name = self.getName()
-        self.newline = "\r\n"
-        self.data = data
-        self.msg = str(data.payload + self.newline)
-        if data.address in TerminalThreadServer.CLIENTS_DIRECTORY:
-            self.connection = TerminalThreadServer.CLIENTS_DIRECTORY[data.address].connection
-        else:
-            raise TerminalWriteError("Not found destination address.")
-    
-    def run(self):
-        self.connection.send(self.msg.encode())
 
 class TerminalRawModel:
 

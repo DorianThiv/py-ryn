@@ -46,9 +46,7 @@ class TerminalBinder(BaseBinder):
         
     def write(self, data):
         try:
-            termThW = TerminalThreadWrite(data)
-            termThW.start()
-            termThW.join()
+            self.server.write(data)
         except Exception as e:
             print("[ERROR - TERMINAL_BINDER - WRITE] : {}".format(e))
     

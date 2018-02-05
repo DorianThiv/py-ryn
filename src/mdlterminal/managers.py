@@ -8,10 +8,7 @@ from factories import ModuleFactory
 class TerminalManager(BaseManager):
 
 	def __init__(self, mod):
-		module = mod
-		minprefix = "terminal"
-		name = minprefix + "-manager" 
-		super().__init__(name, minprefix, module)
+		super().__init__(mod)
 		self.usage = "mdlterminal [(-r or --read) or (-w | --write)] [(-a or --address) 0.0.0.0)] [(-t or --text) \"your text\"]"
 
 	def command(self, command):

@@ -46,10 +46,15 @@ from mdlterminal.registries import *
 from mdlterminal.binders import *
 from mdlterminal.specifics import *
 
-""" Modules loaded """
+""" Modules __init__ """
+
+path = os.path.join(os.path.dirname(__file__))
+sys.path.append(path)
 
 # manager module
 mdlmanager = "mdlterminal.managers"
+# package name important to found right classes
+packages = ["mdlterminal.providers", "mdlterminal.registries", "mdlterminal.binders"]
 
 def __getmanager():
     """
@@ -64,11 +69,6 @@ def __getmanager():
         if c[1].__module__ == mdlmanager:
                 ret = c[1]
     return ret
-
-manager = __getmanager()
-
-# package name important to found right classes
-packages = ["mdlterminal.providers", "mdlterminal.registries", "mdlterminal.binders"]
 
 def __getclasses():
 
@@ -87,7 +87,5 @@ def __getclasses():
                 ret.append(c[1])
     return ret
 
+manager = __getmanager()
 classes = __getclasses()
-
-path = os.path.join(os.path.dirname(__file__))
-sys.path.append(path)

@@ -10,10 +10,8 @@ class ExempleManager(BaseManager):
 	"""
 	
 	def __init__(self, mod):
-		module = mod
-		minprefix = "exemple"
-		name = minprefix + "-manager"
-		super().__init__(name, minprefix, module)
+		super().__init__(mod)
+		self.usage = "mdlexemple [(-r or --read) or (-w | --write)] [(-t or --text) \"your text\"]"
 	
 	def command(self, command):
 		""" 
