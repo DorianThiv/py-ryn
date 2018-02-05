@@ -5,8 +5,20 @@ from bases import BaseBinder
 from network import getIpAddress
 from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, ErrorTerminalClientDisconnect, TerminalWriteError
 
+class TerminalRawModel:
+
+    PACKET_SIZE = 1024
+
+    def __init__(self, command = None, address=None, payload=None, binder=None):
+        self.command = command
+        self.address = address
+        self.payload = payload
+        if isinstance(binder, BaseBinder):
+            self.binder = binder
+
 class TerminalThreadServer(threading.Thread):
 
+    CONNECTIONS = 3
     CLIENTS_DIRECTORY = {}
 
     def __init__(self, socket, callback):
@@ -14,16 +26,21 @@ class TerminalThreadServer(threading.Thread):
         self.socket = socket
         self.callback = callback
         self.isRunning = False
+        self.current_connections = 0
         self.directory = {}
-        self.socket.listen(2)
+        self.socket.listen(TerminalThreadServer.CONNECTIONS)
 
     def run(self):
         try:
             self.isRunning = True
             while self.isRunning:
                 connection, addr = self.socket.accept()
-                self.directory[addr[0]] = TerminalThreadRead(connection, addr, self.callback)
-                self.directory[addr[0]].start()
+                if self.current_connections != 3:
+                    self.directory[addr[0]] = TerminalThreadRead(connection, addr, self.callback)
+                    self.directory[addr[0]].start()
+                    self.current_connections += 1
+                else:
+                    print("[ERROR - SERVER] : No more connection is allowed.")        
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.socket.close()
@@ -80,14 +97,3 @@ class TerminalThreadRead(threading.Thread):
 
     def stop(self):
         self.isRunning = False
-
-class TerminalRawModel:
-
-    PACKET_SIZE = 1024
-
-    def __init__(self, command = None, address=None, payload=None, binder=None):
-        self.command = command
-        self.address = address
-        self.payload = payload
-        if isinstance(binder, BaseBinder):
-            self.binder = binder

@@ -15,7 +15,7 @@ class ExempleManager(BaseManager):
 	
 	def command(self, command):
 		""" 
-			mdlexemple -t "Hello test"
+			mdlexemple -w -t "Hello test"
 		"""
 		status, response = super().command(command)
 		if status is False:
