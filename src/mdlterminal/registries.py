@@ -1,7 +1,5 @@
 
-from mdlutils.bases import BaseRegistry
-
-
+from bases import BaseRegistry
 from mdlterminal.specifics.exceptions import *
 
 class TerminalRegistry(BaseRegistry):

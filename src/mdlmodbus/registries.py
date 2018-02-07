@@ -1,5 +1,5 @@
 
-from mdlutils.bases import BaseRegistry
+from bases import BaseRegistry
 from mdlmodbus.operators import ModbusOperator
 
 class ModbusRegistry(BaseRegistry):

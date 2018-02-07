@@ -2,7 +2,7 @@
 import sys
 import socket
 
-from mdlutils.bases import BaseBinder, BaseCommand
+from bases import BaseBinder, BaseCommand
 from mdlutils.network import getIpAddress
 from mdlterminal.specifics.templates import *
 

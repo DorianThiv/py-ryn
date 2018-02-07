@@ -1,5 +1,5 @@
 
-from mdlutils.bases import BaseProvider
+from bases import BaseProvider
 
 class TerminalProvider(BaseProvider):
 

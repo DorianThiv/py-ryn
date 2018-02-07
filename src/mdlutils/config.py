@@ -4,7 +4,7 @@ import json
 
 class ConfigurationModule:
     
-    CONFIG_FILE = "config.json"
+    CONFIG_FILE = "files/config.json"
 
     @staticmethod
     def getConfiguration(callback=None):

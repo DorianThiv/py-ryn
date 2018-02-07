@@ -17,7 +17,7 @@ class DHCP:
     IDX_TYPE_LOADER = -1
     IDX_TYPE_MANAGER = 0
     IDX_TYPE_PROVIDER = 1
-    IDX_TYPE_REGISTRY = 2
+    IDX_TYPE_OPERATOR = 2
     IDX_TYPE_BINDER = 3
     
     NULL_ID = 0
@@ -68,7 +68,7 @@ class DHCP:
             idx = self.__greater(self.providers_ids, DHCP.MIN_PUBLIC_ID)
             self.providers_ids[idx] = component
             return idx
-        elif component.type == DHCP.IDX_TYPE_REGISTRY:
+        elif component.type == DHCP.IDX_TYPE_OPERATOR:
             if DHCP.MAX_PUBLIC_ID in self.registries_ids:
                 raise AddressOutOfRangeError("No more address for registery component")
             idx = self.__greater(self.registries_ids, DHCP.MIN_PUBLIC_ID)

@@ -1,7 +1,6 @@
 
-from mdlutils.bases import BaseCommand
 
-class TerminalCommand(BaseCommand):
+class TerminalCommand:
 
     COMMAND_RUN = "run"
     COMMAND_PAUSE = "pause"

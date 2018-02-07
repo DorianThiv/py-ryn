@@ -3,13 +3,13 @@ import sys
 import threading
 import re 
 
-from mdlutils.utils import * 
+from mdlutils.utils import *
 from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from mdlutils.factories import PackageFactory, ModuleFactory
 from mdlutils.dhcp import *
 from mdlutils.config import *
 from mdlutils.network import *
-from mdlutils.interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
+from interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
 
 class BaseRYNObject(IRYNObject, ICommand): 
 
@@ -207,6 +207,7 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
             self.childs[name].load(self.minprefix, self.classes)
 
     def command(self, command):
+        return BaseCommand.parse(command)
         """ command function has a public exposition 
             to have provide a command line parser.
 
@@ -269,7 +270,7 @@ class BaseProvider(BaseRYNObject, IProvider, IObserver):
 class BaseOperator(BaseRYNObject, IOperator, IObservable):
 
     def __init__(self, name, registry, parent):
-        super().__init__(name, DHCP.IDX_TYPE_REGISTRY, parent.observable.addr)
+        super().__init__(name, DHCP.IDX_TYPE_OPERATOR, parent.observable.addr)
         self.registry = registry
         self.observers = []
         self.parent = parent
@@ -285,7 +286,7 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
             self.childs[name].load()
 
     def execute(self, frame):
-        for b in self.binders:
+        for b in self.childs:
             self.childs[b].execute(self.decapsulate(frame))
 
     def register(self, observer):
@@ -337,7 +338,7 @@ class BaseCommand(ICommand):
     LOADER = DHCP.IDX_TYPE_LOADER
     MANAGER = DHCP.IDX_TYPE_MANAGER
     PROVIDER = DHCP.IDX_TYPE_PROVIDER
-    REGISTRY = DHCP.IDX_TYPE_REGISTRY
+    OPERATOR = DHCP.IDX_TYPE_OPERATOR
     BINDER = DHCP.IDX_TYPE_BINDER    
 
     """ Internal Actions on differents componenents """
@@ -372,6 +373,46 @@ class BaseCommand(ICommand):
         if self.cpttype in [BaseCommand.MANAGER, BaseCommand.PROVIDER]:
             for p in self.component.childs:
                 self.component.childs[p].execute(self.command)
+
+    @staticmethod
+    def parse(command):
+        """ command function has a public exposition 
+            to have provide a command line parser.
+
+            Get a module command line parser for the specific module.
+            Args:
+                * command: string
+            Returns:
+                * tuple(False, error: string)
+                * tuple(True, None)
+        """
+        commanddict = {}
+        for elem in command:
+            if re.match(r"mdl([a-z])+", elem) != None:
+                commanddict[BaseCommand.PARSE_MODULE] = elem
+            if re.match(r"(-|-{2})+(r|read)", elem) != None:
+                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.READ
+            if re.match(r"(-|-{2})+(w|write)", elem) != None:
+                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.WRITE
+            if re.match(r"(-|-{2})+(a|address|addr)", elem) != None:
+                if command.index(elem)+1 < len(command):
+                    try:
+                        checkIp(command[command.index(elem)+1])
+                        commanddict[BaseCommand.PARSE_ADDRESS] = command[command.index(elem)+1]
+                    except Exception as e:
+                        return (False, "excepted IP address : (-a x.x.x.x | --address x.x.x.x) : {}".format(e))
+                else:
+                    return (False, "excepted IP address : (-a x.x.x.x | --address x.x.x.x)")
+            if re.match(r"(-|-{2})+(t|text)", elem) != None:
+                if command.index(elem)+1 < len(command):
+                    commanddict[BaseCommand.PARSE_TEXT] = command[command.index(elem)+1]
+                else:
+                    return (False, "excepted text : (-t \"hello world\") | (--text \"hello world\")")
+        return (True, commanddict)
+
+    @staticmethod
+    def examine():
+        pass
 
 
 

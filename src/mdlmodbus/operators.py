@@ -1,7 +1,7 @@
 
 import sys
 
-from mdlutils.bases import BaseOperator
+from bases import BaseOperator
 from mdlmodbus.registries import ModbusRegistry
 
 class ModbusOperator(BaseOperator):

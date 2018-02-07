@@ -1,7 +1,7 @@
 import sys
 import threading
 
-from mdlutils.bases import BaseBinder
+from bases import BaseBinder
 from mdlutils.network import getIpAddress
 from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, ErrorTerminalClientDisconnect, TerminalWriteError
 

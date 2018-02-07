@@ -31,7 +31,7 @@
 import sys
 import threading
 
-from utils import *
+from mdlutils.utils import *
 from mdlmodbus.specifics.exceptions import *
 
 """ CRC 16 CALCULATION """

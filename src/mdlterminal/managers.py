@@ -1,7 +1,7 @@
 
 import re
 
-from mdlutils.bases import BaseManager, BaseCommand
+from bases import BaseManager, BaseCommand
 from mdlutils.factories import ModuleFactory
 
 class TerminalManager(BaseManager):

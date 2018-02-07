@@ -4,7 +4,7 @@
 """ RYN SOFTWARE """
 
 import os
-from mdlutils.bases import BaseCore
+from bases import BaseCore
 
 def main():
     core = BaseCore("core")

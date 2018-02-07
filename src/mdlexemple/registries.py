@@ -1,5 +1,5 @@
 
-from mdlutils.bases import BaseRegistry
+from bases import BaseRegistry
 
 class ExempleRegistry(BaseRegistry):
 

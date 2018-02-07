@@ -1,6 +1,5 @@
 
 import sys
-from mdlutils.bases import BaseDealer
 
 class ErrorTerminal(Exception):
 

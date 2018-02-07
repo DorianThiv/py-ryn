@@ -1,6 +1,6 @@
 
+from bases import BaseCommand, BaseOperator
 from mdlexemple.registries import ExempleRegistry
-from mdlutils.bases import BaseCommand, BaseOperator
 from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
 
 class ExempleOperator(BaseOperator):
