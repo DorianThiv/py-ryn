@@ -1,15 +1,12 @@
 
-from mdlutils.interfaces import IOperator
-from mdlutils.bases import BaseCommand
+from mdlexemple.registries import ExempleRegistry
+from mdlutils.bases import BaseCommand, BaseOperator
 from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
 
-class ExempleOperator(IOperator):
+class ExempleOperator(BaseOperator):
     
-    def __init__(self, name):
-        self.name = name
-
-    def load(self):
-        pass
+    def __init__(self, name, provider):
+        super().__init__(name, ExempleRegistry("exemple-registry"), provider)
 
     def encapsulate(self, data):
         pass

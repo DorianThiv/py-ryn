@@ -1,17 +1,21 @@
 import sys
 import shlex
 
-from mdlutils.bases import BaseManager, BaseDirectory, BaseCommand
+from mdlutils.bases import BaseManager, BaseDirectory, BaseCommand, BaseOperator
 from mdlutils.interfaces import IOperator
 from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from mdlterminal.specifics.exceptions import *
+from mdlterminal.registries import TerminalRegistry
 from mdlterminal.specifics.templates import TerminalRawModel
 
-class TerminalOperator(IOperator):
+class TerminalOperator(BaseOperator):
 
-    def __init__(self, name, mdlname):
-        self.name = name
-        self.mdlname = mdlname
+    def __init__(self, name, provider):
+        super().__init__(name, TerminalRegistry("terminal-operator"), provider)
+
+    def execute(self, frame):
+        for b in self.childs:
+            self.childs[b].execute(self.decapsulate(frame))    
 
     def encapsulate(self, data):
         splitted = self.__split_command(data)
@@ -21,7 +25,7 @@ class TerminalOperator(IOperator):
                 status, commandline = manager.command(splitted)
                 if status is True:
                     return ModuleFrameTransfert(
-                        src=self.mdlname, 
+                        src=self.module, 
                         dest=commandline[BaseCommand.PARSE_MODULE],
                         payload=commandline
                     )
@@ -48,4 +52,16 @@ class TerminalOperator(IOperator):
             return shlex.split(data.payload)
         except Exception as e:
             print("[ERROR - ENCAPSULATE - SPLITTED] : {}".format(e))
+    
+    def observers_update(self, data):
+        try:
+            for observer in self.observers:
+                decaps_data = self.encapsulate(data)
+                observer.update(decaps_data)
+        except TerminalCommandError as e:
+            """ Get the right binder to use write command and send error """
+            data.payload = e.message
+            data.binder.write(data)
+        except Exception as e:
+            print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e)) 
 

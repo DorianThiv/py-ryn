@@ -101,7 +101,11 @@ class IRegistry:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def collect(self, data):
+    def subscribe(self, name):
+        pass
+
+    @abstractmethod
+    def unsubscribe(self, name):
         pass
 
 class IOperator:

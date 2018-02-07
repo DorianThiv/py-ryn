@@ -1,16 +1,8 @@
 
-from bases import BaseRegistry
-
+from mdlutils.bases import BaseRegistry
 from mdlmodbus.operators import ModbusOperator
 
 class ModbusRegistry(BaseRegistry):
 
-    def __init__(self, name, provider):
-        super().__init__(name, ModbusOperator("modbus-operator"), provider)
-
-    def execute(self, frame):
-        b_type, payload = self.operator.decapsulate(frame)
-        if b_type == "tcp":
-            self.binders["modbus-tcp-binder"].execute(payload)
-        if b_type == "rtu": 
-            self.binders["modbus-rtu-binder"].execute(payload)
+    def __init__(self, name):
+        super().__init__(name)

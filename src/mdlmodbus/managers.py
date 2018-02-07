@@ -1,6 +1,5 @@
  
-from bases import BaseManager
-from factories import ModuleFactory
+from mdlutils.bases import BaseManager
 		
 class ModbusManager(BaseManager):
 

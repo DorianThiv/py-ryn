@@ -1,5 +1,5 @@
 
-from bases import BaseProvider
+from mdlutils.bases import BaseProvider
 
 class ModbusProvider(BaseProvider):
 

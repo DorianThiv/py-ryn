@@ -23,14 +23,14 @@ class ModuleFactory:
     """
     @staticmethod
     def make(prefix, package):
-        klasses = {"providers": [], "registries": [], "binders": []}
+        klasses = {"providers": [], "operators": [], "binders": []}
         mod = __import__(package)
         for clss in mod.classes:
             _cls = clss.__module__.split(".")
             if _cls[1] == "providers":
                 klasses["providers"].append({"name": prefix + "-provider", "class": getattr(mod, clss.__name__)})
-            if _cls[1] == "registries":
-                klasses["registries"].append({"name": prefix + "-registry", "class": getattr(mod, clss.__name__)})
+            if _cls[1] == "operators":
+                klasses["operators"].append({"name": prefix + "-operator", "class": getattr(mod, clss.__name__)})
             if _cls[1] == "binders":
                 klasses["binders"].append({"name": prefix + "-binder", "class": getattr(mod, clss.__name__)})
         return klasses

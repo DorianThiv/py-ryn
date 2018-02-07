@@ -9,7 +9,7 @@ from mdlutils.factories import PackageFactory, ModuleFactory
 from mdlutils.dhcp import *
 from mdlutils.config import *
 from mdlutils.network import *
-from mdlutils.interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IBinder, IObserver, IObservable, ICommand
+from mdlutils.interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
 
 class BaseRYNObject(IRYNObject, ICommand): 
 
@@ -195,7 +195,7 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
         super().__init__(self.minprefix + "-" + self.sufix, DHCP.IDX_TYPE_MANAGER)
         self.status = False
         self.classes = {}
-        self.providers = {}
+        self.childs = {}
         self.observers = []
 
     def load(self):
@@ -203,8 +203,8 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
         for c in self.classes["providers"]:
             name = class_name_gen(self.minprefix, c["class"])
             instance = c["class"](class_name_gen(self.minprefix, c["class"]), self)
-            self.providers[name] = instance
-            self.providers[name].load(self.minprefix, self.classes)
+            self.childs[name] = instance
+            self.childs[name].load(self.minprefix, self.classes)
 
     def command(self, command):
         """ command function has a public exposition 
@@ -244,12 +244,6 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
     def register(self, observer):
         self.observers.append(observer)
 
-    def unregister(self, observer):
-        pass
-
-    def unregister_all(self):
-        pass
-
     def observers_update(self, frame):
         for observer in self.observers:
             observer.update(frame)
@@ -259,55 +253,61 @@ class BaseProvider(BaseRYNObject, IProvider, IObserver):
     def __init__(self, name, parent):
         super().__init__(name, DHCP.IDX_TYPE_PROVIDER, parent.addr)
         self.observable = parent
-        self.registries = {}
+        self.childs = {}
 
     def load(self, minprefix, classes):
-        for c in classes["registries"]:
+        for c in classes["operators"]:
             name = class_name_gen(minprefix, c["class"])
             instance = c["class"](class_name_gen(minprefix, c["class"]), self)
-            self.registries[name] = instance
-            self.registries[name].load(minprefix, classes)
+            self.childs[name] = instance
+            self.childs[name].load(minprefix, classes)
 
     def update(self, frame):
         """ Update to notify the manager with a frame instance """
         self.observable.observers_update(frame)
 
-class BaseRegistry(BaseRYNObject, IRegistry, IObservable):
+class BaseOperator(BaseRYNObject, IOperator, IObservable):
 
-    def __init__(self, name, operator, parent):
+    def __init__(self, name, registry, parent):
         super().__init__(name, DHCP.IDX_TYPE_REGISTRY, parent.observable.addr)
-        self.operator = operator
+        self.registry = registry
         self.observers = []
         self.parent = parent
-        self.binders = {}
+        self.module = parent.observable.module
+        self.childs = {}
         self.observers.append(parent)
 
     def load(self, minprefix, classes):
         for c in classes["binders"]:
             name = class_name_gen(minprefix, c["class"])
             instance = c["class"](class_name_gen(minprefix, c["class"]), self)
-            self.binders[name] = instance
-            self.binders[name].load()
+            self.childs[name] = instance
+            self.childs[name].load()
 
     def execute(self, frame):
         for b in self.binders:
-            self.binders[b].execute(self.operator.decapsulate(frame))
+            self.childs[b].execute(self.decapsulate(frame))
 
     def register(self, observer):
         self.observers.append(observer)
 
-    def unregister(self, observer):
-        pass
-
-    def unregister_all(self):
-        pass
-
     def observers_update(self, data):
         try:
             for observer in self.observers:
-                observer.update(self.operator.encapsulate(data))
+                observer.update(self.encapsulate(data))
         except Exception as e:
-            print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))    
+            print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
+
+class BaseRegistry(IRegistry):
+     
+    def __init__(self, name):
+         self.name = name
+
+    def subscribe(self):
+        pass
+
+    def unsubscribe(self):
+        pass
 
 class BaseBinder(BaseRYNObject, IBinder):
 
@@ -369,12 +369,9 @@ class BaseCommand(ICommand):
         if self.cpttype == BaseCommand.LOADER:
             for m in list(BaseDirectory.CONNECTED_MANAGERS_BY_NAME):
                 BaseDirectory.CONNECTED_MANAGERS_BY_NAME[m].execute(self.command)
-        if self.cpttype == BaseCommand.MANAGER:
-            for p in self.component.providers:
-                self.component.providers[p].execute(self.command)
-        if self.cpttype == BaseCommand.PROVIDER:
-            for r in self.component.registries:
-                self.component.registries[r].execute(self.command)
+        if self.cpttype in [BaseCommand.MANAGER, BaseCommand.PROVIDER]:
+            for p in self.component.childs:
+                self.component.childs[p].execute(self.command)
 
 
 

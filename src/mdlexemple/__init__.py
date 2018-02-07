@@ -42,7 +42,7 @@ import inspect
 
 from mdlexemple.managers import *
 from mdlexemple.providers import *
-from mdlexemple.registries import *
+from mdlexemple.operators import *
 from mdlexemple.binders import *
 from mdlexemple.specifics import *
 
@@ -54,7 +54,7 @@ sys.path.append(path)
 # manager module
 mdlmanager = "mdlexemple.managers"
 # package name important to found right classes
-packages = ["mdlexemple.providers", "mdlexemple.registries", "mdlexemple.binders"]
+packages = ["mdlexemple.providers", "mdlexemple.operators", "mdlexemple.binders"]
 
 def __getmanager():
     """
@@ -76,7 +76,7 @@ def __getclasses():
     Args:
         * No params
     Returns:
-        list: array with few classes founded in modules : [providers, registries, binders]
+        list: array with few classes founded in modules : [providers, operators, binders]
     """
     ret = []
     clss = inspect.getmembers(sys.modules[__name__], inspect.isclass)

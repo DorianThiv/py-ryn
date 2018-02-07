@@ -5,7 +5,7 @@ import inspect
 
 from mdlmodbus.managers import *
 from mdlmodbus.providers import *
-from mdlmodbus.registries import *
+from mdlmodbus.operators import *
 from mdlmodbus.binders import *
 from mdlmodbus import specifics
 
@@ -29,7 +29,7 @@ def __getmanager():
 
 manager = __getmanager()
 
-packages = ["mdlmodbus.providers", "mdlmodbus.registries", "mdlmodbus.binders"]
+packages = ["mdlmodbus.providers", "mdlmodbus.operators", "mdlmodbus.binders"]
 
 def __getclasses():
     ret = []
