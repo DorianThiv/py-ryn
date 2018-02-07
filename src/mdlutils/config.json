@@ -3,7 +3,7 @@
         "modules": [{
             "name": "mdlexemple",
             "prefix": "exemple"
-        }, {
+        },  {
             "name": "mdlterminal",
             "prefix": "terminal"
         }]
