@@ -24,7 +24,7 @@ class TerminalThreadServer(threading.Thread):
     def __init__(self, socket, callback):
         super().__init__()
         self.socket = socket
-        self.callback = callback
+        self.bcallback = callback
         self.isRunning = False
         self.current_connections = 0
         self.directory = {}
@@ -36,7 +36,7 @@ class TerminalThreadServer(threading.Thread):
             while self.isRunning:
                 connection, addr = self.socket.accept()
                 if self.current_connections != 3:
-                    self.directory[addr[0]] = TerminalThreadRead(connection, addr, self.callback)
+                    self.directory[addr[0]] = TerminalThreadRead(connection, addr, self.scallback)
                     self.directory[addr[0]].start()
                     self.current_connections += 1
                 else:
@@ -54,6 +54,12 @@ class TerminalThreadServer(threading.Thread):
         msg = str(data.payload + "\r\n")
         connection.send(msg.encode())
     
+    def scallback(self, ip, msg):
+        if msg == -1:
+            del self.directory[ip]
+        else:
+            self.bcallback(ip, msg)
+
     def stop(self):
         self.isRunning = False # Vrai ou faux ??!
         self.socket.close()
@@ -84,6 +90,7 @@ class TerminalThreadRead(threading.Thread):
                         self.callback(self.ip, msg)
         except ErrorTerminalClientDisconnect as e:
             print("{}".format(e))
+            self.callback(self.ip, -1)
         except UnicodeDecodeError as e:
             print("UnicodeDecodeError ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
         except Exception as e:
