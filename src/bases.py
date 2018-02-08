@@ -3,13 +3,15 @@ import sys
 import threading
 import re 
 
+from interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
+
+from mdlutils.logger import Logger
 from mdlutils.utils import *
 from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from mdlutils.factories import PackageFactory, ModuleFactory
 from mdlutils.dhcp import *
 from mdlutils.config import *
 from mdlutils.network import *
-from interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
 
 class BaseRYNObject(IRYNObject, ICommand): 
 
@@ -17,6 +19,7 @@ class BaseRYNObject(IRYNObject, ICommand):
         self.name = name
         self.type = component_type
         self.addr = DHCP.getInstance(mdladdr).discover(self)
+        self.logger = Logger.getInstance()
         self.usage = "" 
 
     def __repr__(self):
@@ -54,13 +57,17 @@ class BaseCore(BaseRYNObject, ICore):
         pass
 
     def load(self):
+        self.logger.log(2, "Loading ...")
         self.state = BaseCore.STATE_LOAD
 
     def start(self):
+        self.logger.clear()
+        self.logger.log(2, "Starting ...")
         self.state = BaseCore.STATE_START
         self.loader = BaseLoader("loader", self)
 
     def run(self):
+        self.logger.log(2, "Running ...")
         self.state = BaseCore.STATE_RUN
         self.loader.execute(SimpleFrameTransfert(BaseCommand.LOAD))
 
@@ -71,6 +78,7 @@ class BaseCore(BaseRYNObject, ICore):
         self.state = BaseCore.STATE_PAUSE
 
     def stop(self):
+        self.logger.log(2, "Stopping ...")
         self.state = BaseCore.STATE_STOP
 
 class BaseLoader(BaseRYNObject, ILoader):
@@ -84,7 +92,7 @@ class BaseLoader(BaseRYNObject, ILoader):
         self.dealer = BaseDealer()
         self.managers = {}
         self.load(ConfigurationModule.getModulesNames())
-        print(self.dealer)
+        self.logger.log(2, self.dealer)
 
     def load(self, managers):
         """ 
@@ -120,9 +128,9 @@ class BaseDirectory(IDirectory):
         ret = "__DIRECTORY__ : \n"
         for mdladdr in self.managers:
             if self.managers[mdladdr].status == True:
-                ret += "= module (connected) : {}\n".format(self.managers[mdladdr])
+                ret += "\t* module (connected) : {}\n".format(self.managers[mdladdr])
             else:
-                ret += "= module (disconnected) : {}\n".format(self.managers[mdladdr])
+                ret += "\t* module (disconnected) : {}\n".format(self.managers[mdladdr])
         return ret
 
     def add(self, manager):

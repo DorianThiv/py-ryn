@@ -68,6 +68,5 @@ def getIpAddress():
 		s.close()
 		return ip
 	except OSError as e:
-		print(e)
 		if e.errno == 101:
 			return "127.0.0.1"
