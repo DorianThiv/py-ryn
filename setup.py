@@ -2,9 +2,17 @@
 
 from cx_Freeze import setup, Executable
 
+SRC_DIR = "./src/"
+
+exe = Executable(
+    script="./src/core.py",
+    targetName="ryn-server"
+)
+
 setup(
-    name = "RYN-SRV",
-    version = "0.1",
+    name = "ryn-server",
+    version = "0.020818",
+    author = "THIVOLLE Dorian",
     description = "Server Protoype",
-    executables = [Executable("./src/core.py")],
+    executables = [exe]
 )
