@@ -29,16 +29,10 @@ class BaseRYNObject(IRYNObject, ICommand):
         pass
 
     def load(self):
+        """Load Method: Load a his component """
         pass
 
     def execute(self, frame=None):
-        """ 
-            TODO: Call LoaderTreatAction class. it will
-            contains all treatment actions.
-            Will reaload module name by name.
-            To reload the loader give ["config"]["module"]
-        """
-        # print("Component : {}, execute :{}".format(self, frame))
         execute = BaseCommand(self, frame)
         execute.treat()
 
@@ -68,7 +62,7 @@ class BaseCore(BaseRYNObject, ICore):
 
     def run(self):
         self.state = BaseCore.STATE_RUN
-        self.loader.execute(SimpleFrameTransfert(BaseCommand.ALL))
+        self.loader.execute(SimpleFrameTransfert(BaseCommand.LOAD))
 
     def resume(self):
         self.state = BaseCore.STATE_RUN

@@ -61,8 +61,13 @@ def checkPort(port):
 			raise SocketError(e)
 
 def getIpAddress():
-	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	s.connect(("8.8.8.8", 80))
-	ip = s.getsockname()[0]
-	s.close()
-	return ip
+	try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		s.connect(("8.8.8.8", 80))
+		ip = s.getsockname()[0]
+		s.close()
+		return ip
+	except OSError as e:
+		print(e)
+		if e.errno == 101:
+			return "127.0.0.1"

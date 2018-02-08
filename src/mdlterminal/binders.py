@@ -30,8 +30,8 @@ class TerminalBinder(BaseBinder):
     def execute(self, data):
         """ Interactiv with an Action derived class from BaseAction """
         # Change command.ALL execution to LOAD or INIT
-        if data.command == BaseCommand.ALL:
-            self.read()        
+        # if data.command == BaseCommand.ALL:
+        #     self.read()        
         if data.command == BaseCommand.LOAD:
             self.read()
         if data.command == BaseCommand.WRITE:
@@ -42,6 +42,10 @@ class TerminalBinder(BaseBinder):
             self.server = TerminalThreadServer(self.socket, self._get_event)
             self.server.start()
             self.server.join()
+        except KeyboardInterrupt:
+            print("[WARNING - TERMINAL BINDER - READ]: KeyboardInterrupt")
+            self.server.stop()
+            self.socket.close()
         except Exception as e:
             print("[ERROR - TERMINAL_BINDER - READ] : {}".format(e))
         
