@@ -128,9 +128,9 @@ class BaseDirectory(IDirectory):
         ret = "__DIRECTORY__ : \n"
         for mdladdr in self.managers:
             if self.managers[mdladdr].status == True:
-                ret += "\t* module (connected) : {}\n".format(self.managers[mdladdr])
+                ret += "\t* module (connected) : {}".format(self.managers[mdladdr])
             else:
-                ret += "\t* module (disconnected) : {}\n".format(self.managers[mdladdr])
+                ret += "\t* module (disconnected) : {}".format(self.managers[mdladdr])
         return ret
 
     def add(self, manager):
