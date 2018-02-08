@@ -4,16 +4,22 @@
 """ RYN SOFTWARE """
 
 import os
+import sys
+
 from bases import BaseCore
 
 def main():
-    core = BaseCore("core")
-    print("==== RYN => Initialize")
-    core.start()
-    print("==== RYN => Run")
-    core.run()
-    print("==== RYN => Stopped")
-    
+    try:
+        core = BaseCore("core")
+        print("==== RYN => Initialize")
+        core.start()
+        print("==== RYN => Run")
+        core.run()
+        print("==== RYN => Stopped")
+    except KeyboardInterrupt:
+        print("[CORE] : KeyboardInterrupt")
+        sys.exit()
+        
 if __name__ == "__main__":
     main()
     

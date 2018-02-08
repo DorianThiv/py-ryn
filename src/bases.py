@@ -1,6 +1,5 @@
 
 import sys
-import threading
 import re 
 
 from interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
@@ -210,39 +209,6 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
 
     def command(self, command):
         return BaseCommand.parse(command)
-        """ command function has a public exposition 
-            to have provide a command line parser.
-
-            Get a module command line parser for the specific module.
-            Args:
-                * command: string
-            Returns:
-                * tuple(False, error: string)
-                * tuple(True, None)
-        """
-        commanddict = {}
-        for elem in command:
-            if re.match(r"mdl([a-z])+", elem) != None:
-                commanddict[BaseCommand.PARSE_MODULE] = elem
-            if re.match(r"(-|-{2})+(r|read)", elem) != None:
-                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.READ
-            if re.match(r"(-|-{2})+(w|write)", elem) != None:
-                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.WRITE
-            if re.match(r"(-|-{2})+(a|address|addr)", elem) != None:
-                if command.index(elem)+1 < len(command):
-                    try:
-                        checkIp(command[command.index(elem)+1])
-                        commanddict[BaseCommand.PARSE_ADDRESS] = command[command.index(elem)+1]
-                    except Exception as e:
-                        return (False, "excepted IP address : (-a x.x.x.x | --address x.x.x.x) : {}".format(e))
-                else:
-                    return (False, "excepted IP address : (-a x.x.x.x | --address x.x.x.x)")
-            if re.match(r"(-|-{2})+(t|text)", elem) != None:
-                if command.index(elem)+1 < len(command):
-                    commanddict[BaseCommand.PARSE_TEXT] = command[command.index(elem)+1]
-                else:
-                    return (False, "excepted text : (-t \"hello world\") | (--text \"hello world\")")
-        return (True, commanddict)
 
     def register(self, observer):
         self.observers.append(observer)
@@ -368,7 +334,7 @@ class BaseCommand(ICommand):
     def treat(self):
         """ Check for a command line which specify a module """
         if self.cpttype == BaseCommand.CORE:
-            pass
+            self.component.execute(self.command)
         if self.cpttype == BaseCommand.LOADER:
             for m in list(BaseDirectory.CONNECTED_MANAGERS_BY_NAME):
                 BaseDirectory.CONNECTED_MANAGERS_BY_NAME[m].execute(self.command)
@@ -378,8 +344,8 @@ class BaseCommand(ICommand):
 
     @staticmethod
     def parse(command):
-        """ command function has a public exposition 
-            to have provide a command line parser.
+        """ command parser function has a public exposition 
+            to have a command line parser generally for manager.
 
             Get a module command line parser for the specific module.
             Args:

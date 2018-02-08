@@ -6,7 +6,7 @@ from mdlutils.network import getIpAddress
 from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, ErrorTerminalClientDisconnect, TerminalWriteError
 
 class TerminalRawModel:
-
+    
     PACKET_SIZE = 1024
 
     def __init__(self, command = None, address=None, payload=None, binder=None):
@@ -19,15 +19,14 @@ class TerminalRawModel:
 class TerminalThreadServer(threading.Thread):
 
     CONNECTIONS = 3
-    CLIENTS_DIRECTORY = {}
 
     def __init__(self, socket, callback):
         super().__init__()
         self.socket = socket
-        self.bcallback = callback
+        self.directory = {}
         self.isRunning = False
         self.current_connections = 0
-        self.directory = {}
+        self.bcallback = callback
         self.socket.listen(TerminalThreadServer.CONNECTIONS)
 
     def run(self):
@@ -40,7 +39,7 @@ class TerminalThreadServer(threading.Thread):
                     self.directory[addr[0]].start()
                     self.current_connections += 1
                 else:
-                    print("[ERROR - SERVER] : No more connection is allowed.") 
+                    print("[ERROR - SERVER] : No more connection is allowed.")         
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.socket.close()       
@@ -52,11 +51,12 @@ class TerminalThreadServer(threading.Thread):
         else:
             raise TerminalWriteError("Not found destination address.")
         msg = str(data.payload + "\r\n")
-        connection.send(msg.encode())
+        connection.send(msg.encode("iso-8859-1"))
     
     def scallback(self, ip, msg):
         if msg == -1:
             del self.directory[ip]
+            self.current_connections -= 1
         else:
             self.bcallback(ip, msg)
 
@@ -92,7 +92,7 @@ class TerminalThreadRead(threading.Thread):
             print("{}".format(e))
             self.callback(self.ip, -1)
         except UnicodeDecodeError as e:
-            print("UnicodeDecodeError ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
+            print("UnicodeDecodeError ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))    
         except Exception as e:
             print("Exception ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
 

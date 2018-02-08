@@ -29,10 +29,7 @@ class TerminalBinder(BaseBinder):
             self.socket.close()
 
     def execute(self, data):
-        """ Interactiv with an Action derived class from BaseAction """
-        # Change command.ALL execution to LOAD or INIT
-        # if data.command == BaseCommand.ALL:
-        #     self.read()        
+        """ Interactiv with an Action derived class from BaseAction """   
         if data.command == BaseCommand.LOAD:
             self.read()
         if data.command == BaseCommand.WRITE:
@@ -45,16 +42,22 @@ class TerminalBinder(BaseBinder):
             self.server.join()
         except KeyboardInterrupt:
             print("[WARNING - TERMINAL BINDER - READ]: KeyboardInterrupt")
+            self.logger.log(1, "[WARNING - TERMINAL BINDER - READ]: KeyboardInterrupt")
             self.server.stop()
             self.socket.close()
         except Exception as e:
             print("[ERROR - TERMINAL_BINDER - READ] : {}".format(e))
+            self.logger.log(1, "[ERROR - TERMINAL_BINDER - READ] : {}".format(e))
+            self.server.stop()
+            self.socket.close()            
         
     def write(self, data):
         try:
             self.server.write(data)
         except Exception as e:
             print("[ERROR - TERMINAL_BINDER - WRITE] : {}".format(e))
+            self.server.stop()
+            self.socket.close()           
     
     def _get_event(self, addr, msg):
         data = TerminalRawModel(address=addr, payload=msg, binder=self)
