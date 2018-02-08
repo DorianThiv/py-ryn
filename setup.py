@@ -6,5 +6,5 @@ setup(
     name = "RYN-SRV",
     version = "0.1",
     description = "Server Protoype",
-    executables = [Executable("core.py")],
+    executables = [Executable("./src/core.py")],
 )
