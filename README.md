@@ -4,8 +4,44 @@ This server is a prototype to manage few data with generic modules.
 
 ## Getting Started
 
-Layers template : 
-core > loaders > managers > registries > providers > filters > binders <-- rawdata
+RYN Structure:
+ _________________________________________________________________________
+|core  |            | module     |________________________________________|
+|______|____________|____________|________________________________________|
+|                   |                                                     |
+|core --- loader ---|---managers --- providers --- operators --- binders  |
+|            |      |      |                           |                  |
+|            |      |      |                           |                  |
+|          dealer---|------+                        regisrty              |
+|            |      |_____________________________________________________|                                     
+|            |      | specifics (commands, exceptions, classes)           |
+|         directory |                                                     |
+|___________________|_____________________________________________________|
+
+* Core:
+The core is compose: core, loader, dealer, directory
+    * core: lauch the program with a simple lifecycle (start, run, stop)
+    * loader: load all module specifies in the config.json
+    * dealer: manage exanges between the modules
+    * directory: store all modules in which loaded by loader 
+
+* Modules : 
+A module provide one or many differents data. A module have a name with "mdl" before and a prefix in lower case.
+
+```
+Exemple: (name: "mdlmymodule", prefix: "mymodule")
+```
+
+In a module there are components.
+A component can be a "manager", a "provider", an "operator", a "registry" and a "binder".
+A module must have theses five components to be functionnal.
+Each components have minimum one class. 
+The class name must be in Camel Case to be correctly interpreted by RYN.
+It will be formated like this:
+
+```
+Exemple: MyModuleManager, MyModuleProvider, MyModuleOperator, MyModuleBinder
+```
 
 ### Prerequisites
 

@@ -23,22 +23,22 @@ class TerminalThreadServer(threading.Thread):
         super().__init__()
         self.socket = socket
         self.directory = {}
-        self.isRunning = False
-        self.current_connections = 0
         self.bcallback = callback
+        self.current_connections = 0
+        self.is_running = False
         self.socket.listen(TerminalThreadServer.CONNECTIONS)
 
     def run(self):
         try:
-            self.isRunning = True
-            while self.isRunning:
-                connection, addr = self.socket.accept()
+            self.is_running = True
+            while self.is_running:
+                connection, addr = self.socket.accept() # blocking in thread. Test stop with an event
                 if self.current_connections != 3:
                     self.directory[addr[0]] = TerminalThreadRead(connection, addr, self.scallback)
                     self.directory[addr[0]].start()
                     self.current_connections += 1
                 else:
-                    print("[ERROR - SERVER] : No more connection is allowed.")       
+                    print("[ERROR - SERVER] : No more connection is allowed.")
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.socket.close()       
@@ -60,7 +60,7 @@ class TerminalThreadServer(threading.Thread):
             self.bcallback(ip, msg)
 
     def stop(self):
-        self.isRunning = False # Vrai ou faux ??!
+        self.is_running = False # Vrai ou faux ??!
         self.socket.close()
 
 class TerminalThreadRead(threading.Thread):
