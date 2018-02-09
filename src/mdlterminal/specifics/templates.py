@@ -38,7 +38,7 @@ class TerminalThreadServer(threading.Thread):
                     self.directory[addr[0]].start()
                     self.current_connections += 1
                 else:
-                    print("[ERROR - SERVER] : No more connection is allowed.")         
+                    print("[ERROR - SERVER] : No more connection is allowed.")       
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.socket.close()       

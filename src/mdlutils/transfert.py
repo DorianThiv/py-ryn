@@ -57,14 +57,6 @@ class ModuleFrameTransfert:
             return ModuleFrameTransfert(frame[ModuleFrameTransfert.SRC], frame[ModuleFrameTransfert.DEST], frame[ModuleFrameTransfert.COMMAND], frame[ModuleFrameTransfert.PAYLOAD], frame[ModuleFrameTransfert.CALLBACK], frame[ModuleFrameTransfert.LOG])
         except Exception as e:
             print(e)
-
-if __name__ == "__main__":
-    from bases import BaseCommand
-    mft = ModuleFrameTransfert(1, 1, BaseCommand.ALL, [{"data": [{"choin": "hello", "choc": "olat"}]}])
-    f_mft = mft.serialize()
-    print(f_mft)
-    d_mft = ModuleFrameTransfert.deserialize(f_mft)
-    print(d_mft)
     
 class SimpleFrameTransfert:
 
