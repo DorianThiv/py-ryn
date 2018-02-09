@@ -35,7 +35,7 @@ class ModuleFrameTransfert:
         self.log = log
 
     def __str__(self):
-        return "__MODULE_FRAME__ = (|src : {} | dest : {} | command: {} | payload : {} | callback : {} | log : {}|)".format(self.src, self.dest, self.command, self.payload, self.callback, self.log)
+        return "__MODULE_FRAME__ = (src : {}, dest : {}, command: {}, payload : {}, callback : {}, log : {})".format(self.src, self.dest, self.command, self.payload, self.callback, self.log)
 
     def serialize(self):
         try:

@@ -1,16 +1,18 @@
 
+import re
 import sys
-import re 
 
-from interfaces import IRYNObject, ICore, ILoader, IDirectory, IDealer, IManager, IProvider, IRegistry, IOperator, IBinder, IObserver, IObservable, ICommand
-
-from mdlutils.logger import Logger
-from mdlutils.utils import *
-from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
-from mdlutils.factories import PackageFactory, ModuleFactory
-from mdlutils.dhcp import *
+from interfaces import (IBinder, ICommand, ICore, IDealer, IDirectory, ILoader,
+                        IManager, IObservable, IObserver, IOperator, IProvider,
+                        IRegistry, IRYNObject)
 from mdlutils.config import *
+from mdlutils.dhcp import *
+from mdlutils.factories import ModuleFactory, PackageFactory
+from mdlutils.logger import Logger
 from mdlutils.network import *
+from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
+from mdlutils.utils import *
+
 
 class BaseRYNObject(IRYNObject, ICommand): 
 
@@ -35,8 +37,7 @@ class BaseRYNObject(IRYNObject, ICommand):
         pass
 
     def execute(self, frame=None):
-        execute = BaseCommand(self, frame)
-        execute.treat()
+        BaseCommand(self, frame).treat()
 
 class BaseCore(BaseRYNObject, ICore):
 
@@ -94,14 +95,18 @@ class BaseLoader(BaseRYNObject, ILoader):
         self.logger.log(2, self.dealer)
 
     def load(self, managers):
-        """ 
-            Load all managers in a list. 
+        """ Load all managers in a list. 
             Create managers with the ManagerFactory and give them 
             at the dealer to share data. 
         """
         for manager in managers:
-            """ Load differents component in function of core state """
             self.__load_once(manager)
+
+    def execute(self, frame):
+        if frame.command == BaseCommand.LOAD:
+            BaseCommand(self, frame).treat()
+        elif frame.command == BaseCommand.SHUTDOWN:
+            print("Shutdown")
 
     def __load_once(self, manager):
         m = PackageFactory.make(manager)
@@ -201,9 +206,9 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
 
     def load(self):
         self.classes = ModuleFactory.make(self.minprefix, self.module)
-        for c in self.classes["providers"]:
-            name = class_name_gen(self.minprefix, c["class"])
-            instance = c["class"](class_name_gen(self.minprefix, c["class"]), self)
+        for c in self.classes[ModuleFactory.PROVIDERS]:
+            name = class_name_gen(self.minprefix, c[ModuleFactory.VCLASSES])
+            instance = c[ModuleFactory.VCLASSES](class_name_gen(self.minprefix, c[ModuleFactory.VCLASSES]), self)
             self.childs[name] = instance
             self.childs[name].load(self.minprefix, self.classes)
 
@@ -225,9 +230,9 @@ class BaseProvider(BaseRYNObject, IProvider, IObserver):
         self.childs = {}
 
     def load(self, minprefix, classes):
-        for c in classes["operators"]:
-            name = class_name_gen(minprefix, c["class"])
-            instance = c["class"](class_name_gen(minprefix, c["class"]), self)
+        for c in classes[ModuleFactory.OPERATORS]:
+            name = class_name_gen(minprefix, c[ModuleFactory.VCLASSES])
+            instance = c[ModuleFactory.VCLASSES](class_name_gen(minprefix, c[ModuleFactory.VCLASSES]), self)
             self.childs[name] = instance
             self.childs[name].load(minprefix, classes)
 
@@ -247,9 +252,9 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
         self.observers.append(parent)
 
     def load(self, minprefix, classes):
-        for c in classes["binders"]:
-            name = class_name_gen(minprefix, c["class"])
-            instance = c["class"](class_name_gen(minprefix, c["class"]), self)
+        for c in classes[ModuleFactory.BINDERS]:
+            name = class_name_gen(minprefix, c[ModuleFactory.VCLASSES])
+            instance = c[ModuleFactory.VCLASSES](class_name_gen(minprefix, c[ModuleFactory.VCLASSES]), self)
             self.childs[name] = instance
             self.childs[name].load()
 
@@ -310,14 +315,13 @@ class BaseCommand(ICommand):
     BINDER = DHCP.IDX_TYPE_BINDER    
 
     """ Internal Actions on differents componenents """
-    ALL = "all"
+    START = "start"
+    RESTART = "restart"
+    SHUTDOWN = "shutdown"
     LOAD = "load"
     RELOAD = "reload"
     READ = "read"
     WRITE = "write"
-    START = "start"
-    RESTART = "restart"
-    SHUTDOWN = "shutdown"
 
     """ Internal Parsed items """
     PARSE_MODULE = "module"
@@ -377,10 +381,3 @@ class BaseCommand(ICommand):
                 else:
                     return (False, "excepted text : (-t \"hello world\") | (--text \"hello world\")")
         return (True, commanddict)
-
-    @staticmethod
-    def examine():
-        pass
-
-
-

@@ -60,7 +60,7 @@ def checkPort(port):
 		except socket.error as e:
 			raise SocketError(e)
 
-def getIpAddress():
+def ipv4():
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		s.connect(("8.8.8.8", 80))
