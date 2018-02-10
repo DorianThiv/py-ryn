@@ -153,7 +153,7 @@ class IObservable:
         pass
 
     @abstractmethod
-    def observers_update(self):
+    def emit(self):
         pass
 
 class ICommand:

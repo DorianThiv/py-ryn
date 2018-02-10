@@ -9,7 +9,7 @@ class ErrorTerminal(Exception):
     def __str__(self):
         return "{}".format(self.message)
 
-class ErrorTerminalClientDisconnect(Exception):
+class TerminalClientDisconnectError(Exception):
 
     def __init__(self, msg):
         self.message = msg

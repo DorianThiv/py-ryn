@@ -2,7 +2,7 @@ import sys
 import threading
 
 from bases import BaseBinder
-from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, ErrorTerminalClientDisconnect, TerminalWriteError
+from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, TerminalClientDisconnectError, TerminalWriteError
 
 class TerminalRawModel:
     
@@ -33,12 +33,9 @@ class TerminalThreadServer(threading.Thread):
             self.is_running = True
             while self.is_running:
                 connection, addr = self.socket.accept() # blocking in thread. Test stop with an event
-                if self.current_connections != 3:
-                    self.directory[addr[0]] = TerminalThreadRead(connection, addr, self.scallback)
-                    self.directory[addr[0]].start()
-                    self.current_connections += 1
-                else:
-                    print("[ERROR - SERVER] : No more connection is allowed.")
+                self.directory[addr[0]] = TerminalThreadRead(connection, addr, self.scallback)
+                self.directory[addr[0]].start()
+                self.current_connections += 1
         except Exception as e:
             print("[ERROR - SERVER] {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.socket.close()       
@@ -84,16 +81,15 @@ class TerminalThreadRead(threading.Thread):
                 if self.__check_raw_line(rawmsg) == True:
                     msg = rawmsg.decode("latin1").encode("utf-8").decode()
                     if msg == "":
-                        raise ErrorTerminalClientDisconnect("Client Terminal was disconnected : {}".format(self.connection))
+                        raise TerminalClientDisconnectError("A Terminal was disconnected : {}".format(self.connection))
                     else:
                         self.callback(self.ip, msg)
-        except ErrorTerminalClientDisconnect as e:
-            print("{}".format(e))
-            self.callback(self.ip, -1)
+        except TerminalClientDisconnectError as e:
+            print("{}".format(e))    
         except UnicodeDecodeError as e:
             print("UnicodeDecodeError ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))    
         except Exception as e:
-            print("Exception ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
+            print("[ERROR - TERMINAL - CLIENT - READ] : {}".format(e))
 
     def __check_raw_line(self, raw):
         flg = False

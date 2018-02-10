@@ -46,10 +46,10 @@ class TerminalBinder(BaseBinder):
             self.server.stop()
             self.socket.close()
         except Exception as e:
-            print("[ERROR - TERMINAL_BINDER - READ] : {}".format(e))
-            self.logger.log(1, "[ERROR - TERMINAL_BINDER - READ] : {}".format(e))
+            print("[WARNING - TERMINAL BINDER - READ]: {}".format(e))
+            self.logger.log(1, "[WARNING - TERMINAL BINDER - READ]: {}".format(e))
             self.server.stop()
-            self.socket.close()            
+            self.socket.close()      
         
     def write(self, data):
         try:
@@ -61,5 +61,5 @@ class TerminalBinder(BaseBinder):
     
     def _get_event(self, addr, msg):
         data = TerminalRawModel(address=addr, payload=msg, binder=self)
-        self.observable.observers_update(data)    
+        self.observable.emit(data)    
     

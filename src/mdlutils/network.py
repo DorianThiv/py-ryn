@@ -49,8 +49,6 @@ def checkIp(ip):
 		if byte < 0 or byte > 255:
 			raise FormatIPError("Byte {} is wrong".format(byte))
 
-        
-
 def checkPort(port):
 	if isinstance(port, str):
 		port = int(port)

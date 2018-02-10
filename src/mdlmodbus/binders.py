@@ -59,7 +59,7 @@ class ModbusRtuBinder(BaseBinder):
         # print(crc)
         # frame.append(str(ModbusTcpBinder.high_byte(crc)))
         # frame.append(str(ModbusTcpBinder.low_byte(crc)))
-        self.observable.observers_update(data)
+        self.observable.emit(data)
 
     def write(self):
         pass

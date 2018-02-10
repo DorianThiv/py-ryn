@@ -218,7 +218,7 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
     def register(self, observer):
         self.observers.append(observer)
 
-    def observers_update(self, frame):
+    def emit(self, frame):
         for observer in self.observers:
             observer.update(frame)
 
@@ -238,7 +238,7 @@ class BaseProvider(BaseRYNObject, IProvider, IObserver):
 
     def update(self, frame):
         """ Update to notify the manager with a frame instance """
-        self.observable.observers_update(frame)
+        self.observable.emit(frame)
 
 class BaseOperator(BaseRYNObject, IOperator, IObservable):
 
@@ -265,7 +265,7 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
     def register(self, observer):
         self.observers.append(observer)
 
-    def observers_update(self, data):
+    def emit(self, data):
         try:
             for observer in self.observers:
                 observer.update(self.encapsulate(data))
@@ -302,7 +302,7 @@ class BaseBinder(BaseRYNObject, IBinder):
         pass
 
     def _get_event(self, data):
-        self.observable.observers_update(data)
+        self.observable.emit(data)
 
 class BaseCommand(ICommand):
 

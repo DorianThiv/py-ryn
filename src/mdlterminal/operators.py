@@ -52,15 +52,14 @@ class TerminalOperator(BaseOperator):
         except Exception as e:
             print("[ERROR - ENCAPSULATE - SPLITTED] : {}".format(e))
     
-    def observers_update(self, data):
+    def emit(self, data):
         try:
             for observer in self.observers:
                 decaps_data = self.encapsulate(data)
                 observer.update(decaps_data)
         except TerminalCommandError as e:
-            """ Get the right binder to use write command and send error """
             data.payload = e.message
             data.binder.write(data)
         except Exception as e:
-            print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e)) 
+            print("[ERROR - TERMINAL - OPERATOR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e)) 
 
