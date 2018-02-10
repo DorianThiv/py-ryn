@@ -1,19 +1,9 @@
 import sys
 import threading
+import shlex
 
-from bases import BaseBinder
-from mdlterminal.specifics.exceptions import TerminalWrongCommandModuleError, TerminalClientDisconnectError, TerminalWriteError
-
-class TerminalRawModel:
-    
-    PACKET_SIZE = 1024
-
-    def __init__(self, command = None, address=None, payload=None, binder=None):
-        self.command = command
-        self.address = address
-        self.payload = payload
-        if isinstance(binder, BaseBinder):
-            self.binder = binder
+from bases import BaseBinder, BaseDirectory
+from mdlterminal.specifics.exceptions import *
 
 class TerminalThreadServer(threading.Thread):
 

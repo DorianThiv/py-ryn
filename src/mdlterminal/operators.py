@@ -1,56 +1,34 @@
 import sys
-import shlex
 
-from bases import BaseManager, BaseDirectory, BaseCommand, BaseOperator
+from bases import BaseCommand, BaseOperator
 from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
-from mdlterminal.specifics.exceptions import *
+from mdlterminal.specifics.exceptions import TerminalCommandError
 from mdlterminal.registries import TerminalRegistry
-from mdlterminal.specifics.templates import TerminalRawModel
+from mdlterminal.specifics.models import DataRawModel
+from mdlterminal.specifics.operations import Operations
 
 class TerminalOperator(BaseOperator):
 
     def __init__(self, name, provider):
         super().__init__(name, TerminalRegistry("terminal-operator"), provider)
 
-    def execute(self, frame):
-        for b in self.childs:
-            self.childs[b].execute(self.decapsulate(frame))    
-
     def encapsulate(self, data):
-        splitted = self.__split_command(data)
-        if splitted != [] and splitted != None:
-            if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME:
-                manager = BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]]
-                status, commandline = manager.command(splitted)
-                if status is True:
-                    return ModuleFrameTransfert(
-                        src=self.module, 
-                        dest=commandline[BaseCommand.PARSE_MODULE],
-                        payload=commandline
-                    )
-                else:
-                    raise TerminalCommandError("[WARNING - COMMAND] : {}\r\nusage:\r\n* {}".format(commandline, BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].usage))
-            else:
-                raise TerminalCommandError("[WARNING - COMMAND] : Module '{}' not exist.".format(data.payload))
+        frame = Operations.operate(self.module, data)
+        if isinstance(ModuleFrameTransfert, frame) or isinstance(SimpleFrameTransfert, frame):
+            return frame
         else:
-            raise TerminalCommandError("[WARNING - COMMAND] : Incomprehensible command.")
+            self.logger.log(0, "Transfert cannot be done. The frame format is : '{}'".format(type(frame)))
+            raise TypeError("Transfert cannot be done. Cannot convert '{}' to 'ModuleFrameTransfert' or 'SimpleFrameTransfert'".format(type(frame)))
 
     def decapsulate(self, frame):
         try:
             if isinstance(frame, SimpleFrameTransfert):
-                data = TerminalRawModel(frame.command)
+                data = DataRawModel(frame.command)
             if isinstance(frame, ModuleFrameTransfert):
-                data = TerminalRawModel(frame.payload[BaseCommand.PARSE_DIRECTION], frame.payload[BaseCommand.PARSE_ADDRESS], frame.payload[BaseCommand.PARSE_TEXT])
+                data = DataRawModel(frame.payload[BaseCommand.PARSE_DIRECTION], frame.payload[BaseCommand.PARSE_ADDRESS], frame.payload[BaseCommand.PARSE_TEXT])
             return data
         except Exception as e:
-            print("[ERROR - DECAPSULATE - TERMINAL] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
-    
-    def __split_command(self, data):
-        """ Split a command line with shlex """
-        try:
-            return shlex.split(data.payload)
-        except Exception as e:
-            print("[ERROR - ENCAPSULATE - SPLITTED] : {}".format(e))
+            print("[ERROR - DECAPSULATE - BASE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
     
     def emit(self, data):
         try:

@@ -4,8 +4,8 @@ import socket
 
 from bases import BaseBinder, BaseCommand
 from mdlutils.network import ipv4
-from mdlterminal.specifics.templates import *
-from mdlterminal.specifics.exceptions import *
+from mdlterminal.specifics.models import DataRawModel
+from mdlterminal.specifics.classes import TerminalThreadServer
 
 class TerminalBinder(BaseBinder):
 
@@ -60,6 +60,6 @@ class TerminalBinder(BaseBinder):
             self.socket.close()           
     
     def _get_event(self, addr, msg):
-        data = TerminalRawModel(address=addr, payload=msg, binder=self)
+        data = DataRawModel(address=addr, payload=msg, binder=self)
         self.observable.emit(data)    
     
