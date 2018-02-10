@@ -14,7 +14,7 @@ class TerminalOperator(BaseOperator):
 
     def encapsulate(self, data):
         frame = Operations.operate(self.module, data)
-        if isinstance(ModuleFrameTransfert, frame) or isinstance(SimpleFrameTransfert, frame):
+        if isinstance(frame, ModuleFrameTransfert) or isinstance(frame, SimpleFrameTransfert):
             return frame
         else:
             self.logger.log(0, "Transfert cannot be done. The frame format is : '{}'".format(type(frame)))
