@@ -8,14 +8,14 @@ RYN Structure:
 
 ![alt text](./util/img/RYNstruct.PNG)
 
-#### Core:
+##### Core:
 The core is compose: core, loader, dealer, directory
     * core: lauch the program with a simple lifecycle (start, run, stop)
     * loader: load all module specifies in the config.json
     * dealer: manage exanges between the modules
     * directory: store all modules in which loaded by loader 
 
-#### Modules : 
+##### Modules : 
 A module provide one or many differents data. A module have a name with "mdl" before and a prefix in lower case.
 
 ```
@@ -59,7 +59,7 @@ The specific folder is your zone. You can create your data type and your communi
 
 ### Prerequisites
 
-#### Linux
+##### Linux
 
 ```
 Execute : ./core.py
