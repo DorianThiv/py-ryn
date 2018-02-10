@@ -1,51 +1,65 @@
-# SERVER PROTOTYPE - RYN SRV
+# RYN Server
 
-This server is a prototype to manage few data with generic modules.
+RYN is a server prototype to manage differents data with generic core.
 
 ## Getting Started
 
 RYN Structure:
- _________________________________________________________________________
-|core  |            | module     |________________________________________|
-|______|____________|____________|________________________________________|
-|                   |                                                     |
-|core --- loader ---|---managers --- providers --- operators --- binders  |
-|            |      |      |                           |                  |
-|            |      |      |                           |                  |
-|          dealer---|------+                        regisrty              |
-|            |      |_____________________________________________________|                                     
-|            |      | specifics (commands, exceptions, classes)           |
-|         directory |                                                     |
-|___________________|_____________________________________________________|
 
-* Core:
+![alt text](./util/img/RYNstruct.PNG)
+
+#### Core:
 The core is compose: core, loader, dealer, directory
     * core: lauch the program with a simple lifecycle (start, run, stop)
     * loader: load all module specifies in the config.json
     * dealer: manage exanges between the modules
     * directory: store all modules in which loaded by loader 
 
-* Modules : 
+#### Modules : 
 A module provide one or many differents data. A module have a name with "mdl" before and a prefix in lower case.
 
 ```
-Exemple: (name: "mdlmymodule", prefix: "mymodule")
+Exemple: name = "mdlmymodule", prefix = "mymodule"
 ```
 
 In a module there are components.
-A component can be a "manager", a "provider", an "operator", a "registry" and a "binder".
+There are five component type: a "manager", a "provider", an "operator", a "registry" and a "binder".
 A module must have theses five components to be functionnal.
 Each components have minimum one class. 
 The class name must be in Camel Case to be correctly interpreted by RYN.
 It will be formated like this:
 
 ```
-Exemple: MyModuleManager, MyModuleProvider, MyModuleOperator, MyModuleBinder
+Exemple: class MyModuleManager, class MyModuleProvider, class MyModuleOperator, class MyModuleRegistry, class MyModuleBinder
 ```
+
+* Manager:
+The manger is the first component of the module.
+Define self.usage, self.command() 
+
+* Provider:
+The provider is the second component of the module.
+It precise the provider you use to collect data 
+
+* Operator:
+The operator is the third component of the module.
+It make an encapsulaton and apply calcul or format on the emitted data.
+
+* Registry:
+The registry is the fourth component of the module.
+This is the brain of the module it be able to know which module have been request to subscribe from him.
+
+* Binder:
+The registry is the fifth component of the module.
+It make the binding with "specifics" folder (your development).
+
+#### Specifics Folder
+
+The specific folder is your zone. You can create your data type and your communication with the outside world.
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+#### Linux
 
 ```
 Execute : ./core.py

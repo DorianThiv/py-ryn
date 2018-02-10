@@ -322,6 +322,8 @@ class BaseCommand(ICommand):
     RELOAD = "reload"
     READ = "read"
     WRITE = "write"
+    SUBSCRIBE = "subscribe"
+    UNSUBSCRIBE = "unsubscribe"
 
     """ Internal Parsed items """
     PARSE_MODULE = "module"
@@ -366,6 +368,10 @@ class BaseCommand(ICommand):
                 commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.READ
             if re.match(r"(-|-{2})+(w|write)", elem) != None:
                 commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.WRITE
+            if re.match(r"(-|-{2})+(s|subscribe)", elem) != None:
+                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.SUBSCRIBE
+            if re.match(r"(-|-{2})+(u|unsubscribe)", elem) != None:
+                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.UNSUBSCRIBE
             if re.match(r"(-|-{2})+(a|address|addr)", elem) != None:
                 if command.index(elem)+1 < len(command):
                     try:

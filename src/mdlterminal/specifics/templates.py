@@ -85,11 +85,14 @@ class TerminalThreadRead(threading.Thread):
                     else:
                         self.callback(self.ip, msg)
         except TerminalClientDisconnectError as e:
-            print("{}".format(e))    
+            print("{}".format(e))
+            self.connection.close()  
         except UnicodeDecodeError as e:
-            print("UnicodeDecodeError ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))    
+            print("UnicodeDecodeError ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
+            self.connection.close()
         except Exception as e:
             print("[ERROR - TERMINAL - CLIENT - READ] : {}".format(e))
+            self.connection.close()
 
     def __check_raw_line(self, raw):
         flg = False
@@ -99,3 +102,4 @@ class TerminalThreadRead(threading.Thread):
 
     def stop(self):
         self.isRunning = False
+        self.connection.close()
