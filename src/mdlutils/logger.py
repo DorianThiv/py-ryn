@@ -32,7 +32,7 @@ class Logger:
         if not os.path.exists(Logger.PATH + Logger.DIRECTORY):
             os.makedirs(Logger.PATH + Logger.DIRECTORY)
         if not os.path.exists(Logger.PATH + Logger.DIRECTORY + Logger.NAME + Logger.EXT):
-            os.mknod(Logger.PATH + Logger.DIRECTORY + Logger.NAME + Logger.EXT)
+            open(Logger.PATH + Logger.DIRECTORY + Logger.NAME + Logger.EXT, "w")
 
     @staticmethod
     def getInstance():
