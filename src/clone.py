@@ -2,16 +2,8 @@ import os
 import sys
 import fnmatch
 
+from mdlutils.exceptions import ArgumentsError, PathError
 from mdlutils.config import ConfigurationModule
-
-class ArgumentsError(Exception):
-    pass
-
-class PathError(Exception):
-    pass
-
-class NameError(Exception):
-    pass
 
 if __name__ == "__main__":    
 
@@ -19,14 +11,14 @@ if __name__ == "__main__":
 
     # check command
     if len(sys.argv) != 3:
-        raise ArgumentsError()
+        raise ArgumentsError("expected 2 arguments")
     if not os.path.isdir(sys.argv[1]):
-        raise PathError()
+        raise PathError("directory '{}' doesn't exist".format(sys.argv[1]))
     for name in sys.argv[1].split('/'):
         if "mdl" in name:
             configuration = ConfigurationModule.getModuleProperties(name)
     if configuration == None:
-        raise PathError()    
+        raise PathError("path '{}' doesn't comport module".format(sys.argv[1]))    
     
     # digest names
     words = sys.argv[2].split('-')

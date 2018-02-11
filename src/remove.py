@@ -1,21 +1,13 @@
 import sys
 import os
+
+from mdlutils.exceptions import ArgumentsError, PathError
 from mdlutils.config import ConfigurationModule
 
-class ArgumentsError(Exception):
-    pass
-
-class PathError(Exception):
-    pass
-
-class NameError(Exception):
-    pass
-
-
 if len(sys.argv) != 2:
-    raise ArgumentsError()
+    raise ArgumentsError("expected 1 arguments")
 if not os.path.isdir(sys.argv[1]):
-    raise PathError()
+    raise PathError("directory '{}' doesn't exist".format(sys.argv[1]))
 
 print("[?] Are you sure to remove '{}'".format(sys.argv[1]))
 rep = input("(y or n) : ")
