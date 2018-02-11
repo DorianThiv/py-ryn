@@ -17,7 +17,7 @@ if len(sys.argv) != 2:
 if not os.path.isdir(sys.argv[1]):
     raise PathError()
 
-print("[?] Are you sure to remove this folder: {}".format(sys.argv[1]))
+print("[?] Are you sure to remove '{}'".format(sys.argv[1]))
 rep = input("(y or n) : ")
 rep = str.lower(rep)
 if rep == "n" or rep == "no":
