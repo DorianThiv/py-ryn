@@ -2,8 +2,9 @@
 
 class DataRawModel:
 
-    def __init__(self, command = None, address=None, payload=None, binder=None):
-        self.command = command
-        self.address = address
+    def __init__(self, payload=None, binder=None):
         self.payload = payload
         self.binder = binder
+        
+    def __str__(self):
+        return "{}".format(self.payload)

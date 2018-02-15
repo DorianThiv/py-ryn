@@ -23,9 +23,9 @@ class ExempleOperator(BaseOperator):
     def decapsulate(self, frame):
         try:
             if isinstance(frame, SimpleFrameTransfert):
-                data = DataRawModel(frame.command)
+                data = DataRawModel(payload=frame.command)
             if isinstance(frame, ModuleFrameTransfert):
-                data = DataRawModel(frame.payload[BaseCommand.PARSE_TEXT])
+                data = DataRawModel(payload=frame.payload[BaseCommand.PARSE_TEXT])
             return data
         except Exception as e:
             print("[ERROR - DECAPSULATE - BASE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
