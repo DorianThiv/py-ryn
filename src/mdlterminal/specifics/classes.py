@@ -15,13 +15,12 @@ class TerminalThreadServer(threading.Thread):
         self.directory = {}
         self.bcallback = callback
         self.current_connections = 0
-        self.is_running = False
         self.socket.listen(TerminalThreadServer.CONNECTIONS)
+        self._stop_event = threading.Event()
 
     def run(self):
         try:
-            self.is_running = True
-            while self.is_running:
+            while not self._stop_event.is_set():
                 connection, addr = self.socket.accept() # blocking in thread. Test stop with an event
                 self.directory[addr[0]] = TerminalThreadRead(connection, addr, self.scallback)
                 self.directory[addr[0]].start()
@@ -47,7 +46,7 @@ class TerminalThreadServer(threading.Thread):
             self.bcallback(ip, msg)
 
     def stop(self):
-        self.is_running = False # Vrai ou faux ??!
+        self._stop_event.is_set() # event stop
         self.socket.close()
 
 class TerminalThreadRead(threading.Thread):

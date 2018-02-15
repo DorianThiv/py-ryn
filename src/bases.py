@@ -100,7 +100,10 @@ class BaseLoader(BaseRYNObject, ILoader):
             at the dealer to share data. 
         """
         for manager in managers:
-            self.__load_once(manager)
+            m = PackageFactory.make(manager)
+            m.register(self.dealer)
+            m.load()
+            self.dealer.add(m)
 
     def execute(self, frame):
         if frame.command == BaseCommand.LOAD:
@@ -108,11 +111,7 @@ class BaseLoader(BaseRYNObject, ILoader):
         elif frame.command == BaseCommand.SHUTDOWN:
             print("Shutdown")
 
-    def __load_once(self, manager):
-        m = PackageFactory.make(manager)
-        m.register(self.dealer)
-        m.load()
-        self.dealer.add(m)
+    
 
 class BaseDirectory(IDirectory):
 
@@ -191,8 +190,8 @@ class BaseDealer(IDealer, IObserver):
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
 
 class BaseManager(BaseRYNObject, IManager, IObservable):
-    
     """ Manager load all components in this his module """
+    
     def __init__(self, module):
         mod_conf = ConfigurationModule.getModuleProperties(module)
         self.minprefix = mod_conf["prefix"]
@@ -273,14 +272,26 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
             print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
 
 class BaseRegistry(IRegistry):
-     
+    """ Registry can know other modules and  """
     def __init__(self, name):
-         self.name = name
+        self.name = name
+        self.directory = {}
 
-    def subscribe(self):
-        pass
+    def subscribe(self, name, command):
+        """ subscribe a module with the subscribe command """
+        if name in list(self.directory.keys()):
+            self.directory[name].put(command)
+        else:
+            self.directory[name] = queue.Queue()
+            self.directory[name].put(command)
 
-    def unsubscribe(self):
+    def unsubscribe(self, name):
+        """ Unsubscribe a module """
+        if name in self.directory:
+            del self.directory[name]
+    
+    def request(self, data):
+        """ Check for all data type which module was subscribe """
         pass
 
 class BaseBinder(BaseRYNObject, IBinder):
@@ -327,7 +338,6 @@ class BaseCommand(ICommand):
 
     """ Internal Parsed items """
     PARSE_MODULE = "module"
-    PARSE_DIRECTION = "direction"
     PARSE_COMMAND = "command"
     PARSE_TEXT = "text"
     PARSE_ADDRESS = "address"
@@ -365,13 +375,13 @@ class BaseCommand(ICommand):
             if re.match(r"mdl([a-z])+", elem) != None:
                 commanddict[BaseCommand.PARSE_MODULE] = elem
             if re.match(r"(-|-{2})+(r|read)", elem) != None:
-                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.READ
+                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.READ
             if re.match(r"(-|-{2})+(w|write)", elem) != None:
-                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.WRITE
+                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.WRITE
             if re.match(r"(-|-{2})+(s|subscribe)", elem) != None:
-                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.SUBSCRIBE
+                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.SUBSCRIBE
             if re.match(r"(-|-{2})+(u|unsubscribe)", elem) != None:
-                commanddict[BaseCommand.PARSE_DIRECTION] = BaseCommand.UNSUBSCRIBE
+                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.UNSUBSCRIBE
             if re.match(r"(-|-{2})+(a|address|addr)", elem) != None:
                 if command.index(elem)+1 < len(command):
                     try:

@@ -26,7 +26,7 @@ class TerminalManager(BaseManager):
 			commanddict = response
 			if len(commanddict) == 1:
 				return (False, "no arguments detected")
-			if BaseCommand.PARSE_DIRECTION not in commanddict:
+			if BaseCommand.PARSE_COMMAND not in commanddict:
 				return (False, "no command detected : (-r | -w) | (--read | --write)")
 			if BaseCommand.PARSE_ADDRESS not in commanddict:
 				return (False, "no destination address detected : (-a | --address x.x.x.x)")

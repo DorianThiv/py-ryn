@@ -24,6 +24,8 @@ class ExempleManager(BaseManager):
 			commanddict = response
 			if len(commanddict) == 1:
 				return (False, "no arguments detected")
+			if BaseCommand.PARSE_COMMAND not in commanddict:
+				return (False, "no command detected : (-r | -w) | (--read | --write)")			
 			if BaseCommand.PARSE_TEXT not in commanddict:
 				return (False, "no message detected : (-t \"hello world\") | (--text \"hello world\")")
 		return (True, commanddict)

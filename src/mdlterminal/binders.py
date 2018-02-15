@@ -44,12 +44,10 @@ class TerminalBinder(BaseBinder):
             print("[WARNING - TERMINAL BINDER - READ]: KeyboardInterrupt")
             self.logger.log(1, "[WARNING - TERMINAL BINDER - READ]: KeyboardInterrupt")
             self.server.stop()
-            self.socket.close()
         except Exception as e:
             print("[WARNING - TERMINAL BINDER - READ]: {}".format(e))
             self.logger.log(1, "[WARNING - TERMINAL BINDER - READ]: {}".format(e))
             self.server.stop()
-            self.socket.close()      
         
     def write(self, data):
         try:
@@ -57,7 +55,6 @@ class TerminalBinder(BaseBinder):
         except Exception as e:
             print("[ERROR - TERMINAL_BINDER - WRITE] : {}".format(e))
             self.server.stop()
-            self.socket.close()           
     
     def _get_event(self, addr, msg):
         data = DataRawModel(address=addr, payload=msg, binder=self)
