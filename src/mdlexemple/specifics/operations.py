@@ -4,6 +4,9 @@ from mdlutils.transfert import ModuleFrameTransfert
 class Operations:
 
     @staticmethod
-    def operate(module, data):
-        # return ModuleFrameTransfert(module, registries ,payload=data)
+    def operate_up(module, data):
+        return ""
+
+    @staticmethod
+    def operate_down(module, data):
         return ""

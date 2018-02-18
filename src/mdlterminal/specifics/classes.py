@@ -2,7 +2,7 @@ import sys
 import threading
 import shlex
 
-from bases import BaseBinder, BaseDirectory
+from bases import BaseBinder, BaseDirectory, BaseCommand
 from mdlterminal.specifics.exceptions import *
 
 class TerminalThreadServer(threading.Thread):
@@ -31,11 +31,13 @@ class TerminalThreadServer(threading.Thread):
 
     def write(self, data):
         connection = None
-        if data.address in self.directory:
-            connection = self.directory[data.address].connection
+        if BaseCommand.PARSE_ADDRESS in data.payload:
+            addr = data.payload[BaseCommand.PARSE_ADDRESS]
+            if addr in self.directory:
+                connection = self.directory[addr].connection
         else:
             raise TerminalWriteError("Not found destination address.")
-        msg = str(data.payload + "\r\n")
+        msg = str(data.payload[BaseCommand.PARSE_TEXT] + "\r\n")
         connection.send(msg.encode("iso-8859-1"))
     
     def scallback(self, ip, msg):

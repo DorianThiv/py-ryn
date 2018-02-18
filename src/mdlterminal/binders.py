@@ -29,11 +29,13 @@ class TerminalBinder(BaseBinder):
             self.socket.close()
 
     def execute(self, data):
-        """ Interactiv with an Action derived class from BaseAction """   
+        """ Interactiv with an Action derived class from BaseAction """ 
         if data.command == BaseCommand.LOAD:
             self.read()
         if data.command == BaseCommand.WRITE:
             self.write(data)
+        if data.command == BaseCommand.SHUTDOWN:
+            self.server.stop()
 
     def read(self):
         try:

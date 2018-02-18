@@ -13,7 +13,7 @@ class TerminalOperator(BaseOperator):
         super().__init__(name, TerminalRegistry("terminal-operator"), provider)
 
     def encapsulate(self, data):
-        frame = Operations.operate(self.module, data)
+        frame = Operations.operate_up(self.module, data)
         if isinstance(frame, ModuleFrameTransfert) or isinstance(frame, SimpleFrameTransfert):
             return frame
         else:
@@ -22,13 +22,10 @@ class TerminalOperator(BaseOperator):
 
     def decapsulate(self, frame):
         try:
-            if isinstance(frame, SimpleFrameTransfert):
-                data = DataRawModel(frame.command)
-            if isinstance(frame, ModuleFrameTransfert):
-                data = DataRawModel(frame.payload[BaseCommand.PARSE_DIRECTION], frame.payload[BaseCommand.PARSE_ADDRESS], frame.payload[BaseCommand.PARSE_TEXT])
-            return data
+            return Operations.operate_down(frame)
         except Exception as e:
             print("[ERROR - DECAPSULATE - BASE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
+            self.logger.log(0, "Transfert cannot be done. The frame format is : '{}'".format(type(frame)))
     
     def emit(self, data):
         try:
