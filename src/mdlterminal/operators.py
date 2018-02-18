@@ -26,7 +26,7 @@ class TerminalOperator(BaseOperator):
             return data
         except Exception as e:
             print("[ERROR - TERMINAL - DECAPSULATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
-            self.logger.log(0, "Transfert cannot be done. The frame format is : '{}'".format(type(frame)))
+            self.logger.log(0, "Terminal operator: Transfert cannot be done. The frame format is : '{}'".format(type(frame)))
     
     def emit(self, data):
         try:
@@ -38,4 +38,5 @@ class TerminalOperator(BaseOperator):
             data.binder.write(data)
         except Exception as e:
             print("[ERROR - TERMINAL - OPERATOR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e)) 
+            self.logger.log(0, "Terminal operator: (error: {}, data: {})".format(e, data))
 
