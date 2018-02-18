@@ -25,7 +25,7 @@ class TerminalOperator(BaseOperator):
             data = Operations.operate_down(frame)
             return data
         except Exception as e:
-            print("[ERROR - DECAPSULATE - BASE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
+            print("[ERROR - TERMINAL - DECAPSULATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.logger.log(0, "Transfert cannot be done. The frame format is : '{}'".format(type(frame)))
     
     def emit(self, data):

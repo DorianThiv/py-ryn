@@ -28,16 +28,7 @@ class TerminalBinder(BaseBinder):
             self.logger.log(0, "[TERMINAL - LOAD] {}".format(e)) 
             self.socket.close()
 
-    def execute(self, data):
-        """ Interactiv with an Action derived class from BaseAction """ 
-        if data.command == BaseCommand.LOAD:
-            self.read()
-        if data.command == BaseCommand.WRITE:
-            self.write(data)
-        if data.command == BaseCommand.SHUTDOWN:
-            self.server.stop()
-
-    def read(self):
+    def run(self):
         try:
             self.server = TerminalThreadServer(self.socket, self._get_event)
             self.server.start()
@@ -50,6 +41,9 @@ class TerminalBinder(BaseBinder):
             print("[WARNING - TERMINAL BINDER - READ]: {}".format(e))
             self.logger.log(1, "[WARNING - TERMINAL BINDER - READ]: {}".format(e))
             self.server.stop()
+
+    def read(self):
+        pass
         
     def write(self, data):
         try:

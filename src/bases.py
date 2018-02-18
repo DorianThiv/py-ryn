@@ -34,7 +34,7 @@ class BaseRYNObject(IRYNObject, ICommand):
         pass
 
     def load(self):
-        """Load Method: Load a his component """
+        """ Initializing Load Method: Load a his component """
         pass
 
     def execute(self, frame=None):
@@ -70,7 +70,7 @@ class BaseCore(BaseRYNObject, ICore):
     def run(self):
         self.logger.log(2, "Running ...")
         self.state = BaseCore.STATE_RUN
-        self.loader.execute(SimpleFrameTransfert(BaseCommand.LOAD))
+        self.loader.execute(SimpleFrameTransfert(BaseCommand.RUN))
 
     def resume(self):
         self.state = BaseCore.STATE_RUN
@@ -107,7 +107,7 @@ class BaseLoader(BaseRYNObject, ILoader):
             self.dealer.add(m)
 
     def execute(self, frame):
-        if frame.command == BaseCommand.LOAD:
+        if frame.command == BaseCommand.RUN:
             BaseCommand(self, frame).treat()
         elif frame.command == BaseCommand.SHUTDOWN:
             print("Shutdown")
@@ -259,8 +259,20 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
             self.childs[name].load()
 
     def execute(self, frame):
+        data = self.decapsulate(frame)
+        if data.command == BaseCommand.SUBSCRIBE:
+            self.registry.subscribe(data.src)
+        if data.command == BaseCommand.UNSUBSCRIBE:
+            self.registry.unsubscribe(data.src)
         for b in self.childs:
-            self.childs[b].execute(self.decapsulate(frame))
+            if data.command == BaseCommand.RUN:
+                self.childs[b].run()
+            if data.command == BaseCommand.READ:
+                self.childs[b].read()
+            if data.command == BaseCommand.WRITE:
+                self.childs[b].write(data)
+            if data.command == BaseCommand.SHUTDOWN:
+                self.childs[b].server.stop()
 
     def register(self, observer):
         self.observers.append(observer)
@@ -276,24 +288,26 @@ class BaseRegistry(IRegistry):
     """ Registry can know other modules and  """
     def __init__(self, name):
         self.name = name
-        self.directory = {}
+        self.directory = []
 
     def subscribe(self, name, command):
-        """ subscribe a module with the subscribe command """
-        if name in list(self.directory.keys()):
-            self.directory[name].put(command)
-        else:
-            self.directory[name] = queue.Queue()
-            self.directory[name].put(command)
+        """ Subscriber :
+        Args:
+            name: string (module name)
+            command: read write save etc...
+        subscribe a module with the subscribe command 
+        """
+        if not name in self.directory:
+            self.directory.append(name)
 
     def unsubscribe(self, name):
         """ Unsubscribe a module """
         if name in self.directory:
-            del self.directory[name]
+            self.directory.remove(name)
     
-    def request(self, data):
+    def get(self):
         """ Check for all data type which module was subscribe """
-        pass
+        return self.directory
 
 class BaseBinder(BaseRYNObject, IBinder):
 
@@ -302,6 +316,10 @@ class BaseBinder(BaseRYNObject, IBinder):
         super().__init__(name, DHCP.IDX_TYPE_BINDER, self.observable.parent.observable.addr)
 
     def load(self):
+        pass
+
+    def run(self):
+        """ Run Method: Run component """
         pass
 
     def execute(self, direction, data):
@@ -330,7 +348,7 @@ class BaseCommand(ICommand):
     START = "start"
     RESTART = "restart"
     SHUTDOWN = "shutdown"
-    LOAD = "load"
+    RUN = "load"
     RELOAD = "reload"
     READ = "read"
     WRITE = "write"
