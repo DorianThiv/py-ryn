@@ -56,9 +56,10 @@ class TerminalBinder(BaseBinder):
             self.server.write(data)
         except Exception as e:
             print("[ERROR - TERMINAL_BINDER - WRITE] : {}".format(e))
-            self.server.stop()
+            self.logger.log(1, "[WARNING - TERMINAL BINDER - WRITE]: {}".format(e))
     
-    def _get_event(self, addr, msg):
-        data = DataRawModel(address=addr, payload=msg, binder=self)
+    def _get_event(self, data):
+        self.logger.log(1, "Terminal event: {}".format(data))
+        data.binder = self
         self.observable.emit(data)    
     

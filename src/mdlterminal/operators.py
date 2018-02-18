@@ -22,7 +22,8 @@ class TerminalOperator(BaseOperator):
 
     def decapsulate(self, frame):
         try:
-            return Operations.operate_down(frame)
+            data = Operations.operate_down(frame)
+            return data
         except Exception as e:
             print("[ERROR - DECAPSULATE - BASE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.logger.log(0, "Transfert cannot be done. The frame format is : '{}'".format(type(frame)))

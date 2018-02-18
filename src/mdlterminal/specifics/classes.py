@@ -4,6 +4,7 @@ import shlex
 
 from bases import BaseBinder, BaseDirectory, BaseCommand
 from mdlterminal.specifics.exceptions import *
+from mdlterminal.specifics.models import DataRawModel
 
 class TerminalThreadServer(threading.Thread):
 
@@ -31,21 +32,26 @@ class TerminalThreadServer(threading.Thread):
 
     def write(self, data):
         connection = None
-        if BaseCommand.PARSE_ADDRESS in data.payload:
-            addr = data.payload[BaseCommand.PARSE_ADDRESS]
-            if addr in self.directory:
-                connection = self.directory[addr].connection
+        if data.address != None:
+            if data.address in self.directory:
+                connection = self.directory[data.address].connection
+                if isinstance(data.payload, str):
+                    msg = data.payload
+                if isinstance(data.payload, dict):
+                    msg = str(data.payload[BaseCommand.PARSE_TEXT] + "\r\n")
+                connection.send(msg.encode("iso-8859-1"))
+            else:
+                raise TerminalWriteError("Not found destination address.")
         else:
             raise TerminalWriteError("Not found destination address.")
-        msg = str(data.payload[BaseCommand.PARSE_TEXT] + "\r\n")
-        connection.send(msg.encode("iso-8859-1"))
     
     def scallback(self, ip, msg):
         if msg == -1:
             del self.directory[ip]
             self.current_connections -= 1
         else:
-            self.bcallback(ip, msg)
+            data = DataRawModel(address=ip, payload=msg)
+            self.bcallback(data)
 
     def stop(self):
         self._stop_event.is_set() # event stop

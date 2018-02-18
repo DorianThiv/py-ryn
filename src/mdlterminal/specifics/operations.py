@@ -10,7 +10,7 @@ class Operations:
 
     @staticmethod
     def operate_up(module, data):
-        splitted = Operations.__split_command(data)
+        splitted = Operations.__split_command(data.payload)
         if splitted != [] and splitted != None:
             if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME:
                 manager = BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]]
@@ -26,12 +26,16 @@ class Operations:
     
     @staticmethod
     def operate_down(frame):
-        return DataRawModel(command=frame.command, payload=frame.payload)
+        if BaseCommand.PARSE_ADDRESS in frame.payload:
+            addr = frame.payload[BaseCommand.PARSE_ADDRESS]
+            return DataRawModel(command=frame.command, address=addr, payload=frame.payload)
+        else:
+            return DataRawModel(command=frame.command, payload=frame.payload)
 
     @staticmethod
-    def __split_command(data):
+    def __split_command(command):
         """ Split a command line with shlex """
         try:
-            return shlex.split(data.payload)
+            return shlex.split(command)
         except Exception as e:
             print("[ERROR - ENCAPSULATE - SPLITTED] : {}".format(e))
