@@ -27,4 +27,7 @@ class DataRawModel:
             raise TypeError("cannot convert '{}' in 'dict' type".format(type(model)))
         return DataRawModel(model[DataRawModel.COMMAND], model[DataRawModel.PAYLOAD], model[DataRawModel.BINDER])
 
+    def __str__(self):
+        return "Address: {}, Payload: {}".format(self.address, self.payload)
+
 

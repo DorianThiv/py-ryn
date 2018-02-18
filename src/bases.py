@@ -33,7 +33,7 @@ class BaseRYNObject(IRYNObject, ICommand):
     def __del__(self):
         pass
 
-    def load(self):
+    def initialize(self):
         """ Initializing Load Method: Load a his component """
         pass
 
@@ -57,7 +57,7 @@ class BaseCore(BaseRYNObject, ICore):
     def __repr__(self):
         pass
 
-    def load(self):
+    def initialize(self):
         self.logger.log(2, "Loading ...")
         self.state = BaseCore.STATE_LOAD
 
@@ -84,7 +84,7 @@ class BaseCore(BaseRYNObject, ICore):
 
 class BaseLoader(BaseRYNObject, ILoader):
     """
-    The loader enable to load all modules and 
+    The loader enable to initialize all modules and 
     give them instances to the "Dealer"
     """
     def __init__(self, name, core):
@@ -92,10 +92,10 @@ class BaseLoader(BaseRYNObject, ILoader):
         self.core = core
         self.dealer = BaseDealer()
         self.managers = {}
-        self.load(ConfigurationModule.getModulesNames())
+        self.initialize(ConfigurationModule.getModulesNames())
         self.logger.log(2, self.dealer)
 
-    def load(self, managers):
+    def initialize(self, managers):
         """ Load all managers in a list. 
             Create managers with the ManagerFactory and give them 
             at the dealer to share data. 
@@ -103,7 +103,7 @@ class BaseLoader(BaseRYNObject, ILoader):
         for manager in managers:
             m = PackageFactory.make(manager)
             m.register(self.dealer)
-            m.load()
+            m.initialize()
             self.dealer.add(m)
 
     def execute(self, frame):
@@ -191,7 +191,7 @@ class BaseDealer(IDealer, IObserver):
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
 
 class BaseManager(BaseRYNObject, IManager, IObservable):
-    """ Manager load all components in this his module """
+    """ Manager initialize all components in this his module """
     
     def __init__(self, module):
         mod_conf = ConfigurationModule.getModuleProperties(module)
@@ -204,13 +204,13 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
         self.childs = {}
         self.observers = []
 
-    def load(self):
+    def initialize(self):
         self.classes = ModuleFactory.make(self.minprefix, self.module)
         for c in self.classes[ModuleFactory.PROVIDERS]:
             name = class_name_gen(self.minprefix, c[ModuleFactory.VCLASSES])
             instance = c[ModuleFactory.VCLASSES](class_name_gen(self.minprefix, c[ModuleFactory.VCLASSES]), self)
             self.childs[name] = instance
-            self.childs[name].load(self.minprefix, self.classes)
+            self.childs[name].initialize(self.minprefix, self.classes)
 
     def command(self, command):
         return BaseCommand.parse(command)
@@ -229,12 +229,12 @@ class BaseProvider(BaseRYNObject, IProvider, IObserver):
         self.observable = parent
         self.childs = {}
 
-    def load(self, minprefix, classes):
+    def initialize(self, minprefix, classes):
         for c in classes[ModuleFactory.OPERATORS]:
             name = class_name_gen(minprefix, c[ModuleFactory.VCLASSES])
             instance = c[ModuleFactory.VCLASSES](class_name_gen(minprefix, c[ModuleFactory.VCLASSES]), self)
             self.childs[name] = instance
-            self.childs[name].load(minprefix, classes)
+            self.childs[name].initialize(minprefix, classes)
 
     def update(self, frame):
         """ Update to notify the manager with a frame instance """
@@ -251,12 +251,12 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
         self.childs = {}
         self.observers.append(parent)
 
-    def load(self, minprefix, classes):
+    def initialize(self, minprefix, classes):
         for c in classes[ModuleFactory.BINDERS]:
             name = class_name_gen(minprefix, c[ModuleFactory.VCLASSES])
             instance = c[ModuleFactory.VCLASSES](class_name_gen(minprefix, c[ModuleFactory.VCLASSES]), self)
             self.childs[name] = instance
-            self.childs[name].load()
+            self.childs[name].initialize()
 
     def execute(self, frame):
         data = self.decapsulate(frame)
@@ -315,7 +315,7 @@ class BaseBinder(BaseRYNObject, IBinder):
         self.observable = parent
         super().__init__(name, DHCP.IDX_TYPE_BINDER, self.observable.parent.observable.addr)
 
-    def load(self):
+    def initialize(self):
         pass
 
     def run(self):
@@ -325,14 +325,12 @@ class BaseBinder(BaseRYNObject, IBinder):
     def execute(self, direction, data):
         pass
 
-    def read(self):
-        pass
+    def read(self, data):
+        self.observable.emit(data)
 
     def write(self):
         pass
-
-    def _get_event(self, data):
-        self.observable.emit(data)
+        
 
 class BaseCommand(ICommand):
 
@@ -348,7 +346,8 @@ class BaseCommand(ICommand):
     START = "start"
     RESTART = "restart"
     SHUTDOWN = "shutdown"
-    RUN = "load"
+    INITIALIZE = "initialize"
+    RUN = "run"
     RELOAD = "reload"
     READ = "read"
     WRITE = "write"

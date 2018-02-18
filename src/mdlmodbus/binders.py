@@ -15,7 +15,7 @@ class ModbusTcpBinder(BaseBinder):
         self.host = ipv4()
         self.port = 502
 
-    def load(self):
+    def initialize(self):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.host, self.port))
@@ -25,18 +25,22 @@ class ModbusTcpBinder(BaseBinder):
             print("ErrorModbus : ligne {} - {}".format(sys.exc_info()[-1].tb_lineno, e)) 
             self.socket.close()
 
-    def execute(self, data):
-        if self.socket._closed != True:
-            if data == BaseCommand.LOAD:
-                self.read()
-            else:
-                self.write()
-
-    def read(self):
-        self.thMdbR = ModbusThreadRead(self.socket, self._get_event)
+    def run(self):
+        self.thMdbR = ModbusThreadRead(self.socket, self.read)
         self.thMdbR.start()
         self.thMdbR.join()
 
+
+    def execute(self, data):
+        if self.socket._closed != True:
+            if data == BaseCommand.RUN:
+                self.run()
+            else:
+                self.write()
+
+    def read(self, data):
+        pass
+        
     def write(self):
         data = [0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x01, 0x06, 0x00, 0x05, 0x07, 0x9A]
         self.thMdbW = ModbusThreadWrite(self.socket, data)
@@ -50,7 +54,7 @@ class ModbusRtuBinder(BaseBinder):
     def __init__(self, name, observable=None):
         super().__init__(name, observable)
 
-    def load(self):
+    def initialize(self):
         pass
 
     def read(self):

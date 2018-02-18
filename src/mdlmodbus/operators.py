@@ -9,15 +9,15 @@ class ModbusOperator(BaseOperator):
     def __init__(self, name, provider):
         super().__init__(name, ModbusRegistry("modbus-registry"), provider)
 
-    def load(self):
+    def initialize(self):
         pass
 
     def execute(self, frame):
         b_type, payload = self.decapsulate(frame)
-        if b_type == "tcp":
-            self.binders["modbus-tcp-binder"].execute(payload)
-        if b_type == "rtu": 
-            self.binders["modbus-rtu-binder"].execute(payload)
+        # if b_type == "tcp":
+        #     self.binders["modbus-tcp-binder"].execute(payload)
+        # if b_type == "rtu": 
+        #     self.binders["modbus-rtu-binder"].execute(payload)
 
     def encapsulate(self, data):
         pass
