@@ -1,7 +1,6 @@
 
 import re
 import sys
-import queue
 
 from interfaces import (IBinder, ICommand, ICore, IDealer, IDirectory, ILoader,
                         IManager, IObservable, IObserver, IOperator, IProvider,
