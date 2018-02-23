@@ -5,7 +5,8 @@
                 "class": "Terminal",
                 "name": "mdlterminal",
                 "prefix": "terminal",
-                "upperprefix": "TERMINAL"
+                "upperprefix": "TERMINAL",
+                "usage": "mdlterminal [(-r or --read) or (-w | --write)] [(-a or --address) 0.0.0.0)] [(-t or --text) \"your text\"]"
             }
         ]
     }

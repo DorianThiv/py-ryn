@@ -2,8 +2,8 @@ import os
 import sys
 import fnmatch
 
-from mdlutils.exceptions import ArgumentsError, PathError
-from mdlutils.config import ConfigurationModule
+from samples.exceptions import ArgumentsError, PathError
+from samples.config import ConfigurationModule
 
 if __name__ == "__main__":    
 

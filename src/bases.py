@@ -5,13 +5,13 @@ import sys
 from interfaces import (IBinder, ICommand, ICore, IDealer, IDirectory, ILoader,
                         IManager, IObservable, IObserver, IOperator, IProvider,
                         IRegistry, IRYNObject)
-from mdlutils.config import *
-from mdlutils.dhcp import *
-from mdlutils.factories import ModuleFactory, PackageFactory
-from mdlutils.logger import Logger
-from mdlutils.network import *
-from mdlutils.transfert import ModuleFrameTransfert, SimpleFrameTransfert
-from mdlutils.utils import *
+from samples.config import *
+from samples.dhcp import *
+from samples.factories import ModuleFactory, PackageFactory
+from samples.logger import Logger
+from samples.network import *
+from samples.transfert import ModuleFrameTransfert, SimpleFrameTransfert
+from samples.utils import *
 
 
 class BaseRYNObject(IRYNObject, ICommand): 
@@ -196,7 +196,8 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
         mod_conf = ConfigurationModule.getModuleProperties(module)
         self.minprefix = mod_conf["prefix"]
         self.sufix = "manager"
-        self.module = module        
+        self.module = module     
+        self.usage = mod_conf["usage"]
         super().__init__(self.minprefix + "-" + self.sufix, DHCP.IDX_TYPE_MANAGER)
         self.status = False
         self.classes = {}
@@ -260,9 +261,9 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
     def execute(self, frame):
         data = self.decapsulate(frame)
         if data.command == BaseCommand.SUBSCRIBE:
-            self.registry.subscribe(data.src)
+            self.registry.subscribe(frame, data)
         if data.command == BaseCommand.UNSUBSCRIBE:
-            self.registry.unsubscribe(data.src)
+            self.registry.unsubscribe(frame)
         for b in self.childs:
             if data.command == BaseCommand.RUN:
                 self.childs[b].run()
@@ -270,8 +271,6 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
                 self.childs[b].read()
             if data.command == BaseCommand.WRITE:
                 self.childs[b].write(data)
-            if data.command == BaseCommand.SHUTDOWN:
-                self.childs[b].server.stop()
 
     def register(self, observer):
         self.observers.append(observer)
@@ -287,22 +286,24 @@ class BaseRegistry(IRegistry):
     """ Registry can know other modules and  """
     def __init__(self, name):
         self.name = name
-        self.directory = []
+        self.directory = {}
 
-    def subscribe(self, name, command):
+    def subscribe(self, frame, data):
         """ Subscriber :
         Args:
             name: string (module name)
             command: read write save etc...
         subscribe a module with the subscribe command 
         """
-        if not name in self.directory:
-            self.directory.append(name)
+        if not frame.src in self.directory:
+            self.directory[frame.src] = [data]
+        else:
+            self.directory[frame.src].append(data)
 
-    def unsubscribe(self, name):
+    def unsubscribe(self, frame):
         """ Unsubscribe a module """
-        if name in self.directory:
-            self.directory.remove(name)
+        if frame.src in self.directory:
+            del self.directory[frame.src]
     
     def get(self):
         """ Check for all data type which module was subscribe """

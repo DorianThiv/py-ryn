@@ -3,20 +3,21 @@ import re
 
 from bases import BaseManager
 
-from mdlutils.factories import ModuleFactory
+from samples.factories import ModuleFactory
 
-from mdlterminal.specifics.commands import TerminalSimpleCommand
+from mdlterminal.specifics.commands import TerminalBaseCommand
 
 class TerminalManager(BaseManager):
 
 	def __init__(self, mod):
 		super().__init__(mod)
-		self.usage = "mdlterminal [(-r or --read) or (-w | --write)] [(-a or --address) 0.0.0.0)] [(-t or --text) \"your text\"]"
 
 	def command(self, command):
+		""" Use inheritance to parse command and use the specific module
+		commands.py where are few commands. """
 		status, response = super().command(command)
 		if status is False:
 			return (status, response)
 		else:
-			return TerminalSimpleCommand.parse(response)
+			return TerminalBaseCommand.parse(response)
 			

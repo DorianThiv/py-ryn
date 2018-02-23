@@ -1,5 +1,5 @@
 
-from mdlutils.utils import JSON
+from samples.utils import JSON
 
 class ModuleFrameTransfert:
 

@@ -2,7 +2,7 @@
 import shlex
 
 from bases import BaseDirectory, BaseCommand
-from mdlutils.transfert import ModuleFrameTransfert
+from samples.transfert import ModuleFrameTransfert
 from mdlterminal.specifics.models import DataRawModel
 from mdlterminal.specifics.exceptions import TerminalCommandError
 

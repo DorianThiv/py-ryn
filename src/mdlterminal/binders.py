@@ -3,7 +3,7 @@ import sys
 import socket
 
 from bases import BaseBinder, BaseCommand
-from mdlutils.network import ipv4
+from samples.network import ipv4
 from mdlterminal.specifics.models import DataRawModel
 from mdlterminal.specifics.classes import TerminalThreadServer
 
