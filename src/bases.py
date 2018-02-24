@@ -130,7 +130,7 @@ class BaseDirectory(IDirectory):
     def __str__(self):
         ret = "__DIRECTORY__ : \n"
         for mdladdr in self.managers:
-            if self.managers[mdladdr].status == True:
+            if self.managers[mdladdr].status is True:
                 ret += "\t* module (connected) : {}\n".format(self.managers[mdladdr])
             else:
                 ret += "\t* module (disconnected) : {}".format(self.managers[mdladdr])
@@ -242,12 +242,13 @@ class BaseProvider(BaseRYNObject, IProvider, IObserver):
 
 class BaseOperator(BaseRYNObject, IOperator, IObservable):
 
-    def __init__(self, name, registry, parent):
+    def __init__(self, name, registry, operations, parent):
         super().__init__(name, DHCP.IDX_TYPE_OPERATOR, parent.observable.addr)
         self.registry = registry
-        self.observers = []
+        self.operations = operations
         self.parent = parent
         self.module = parent.observable.module
+        self.observers = []
         self.childs = {}
         self.observers.append(parent)
 
@@ -261,7 +262,7 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
     def execute(self, frame):
         data = self.decapsulate(frame)
         if data.command == BaseCommand.SUBSCRIBE:
-            self.registry.subscribe(frame, data)
+            self.registry.subscribe(frame)
         if data.command == BaseCommand.UNSUBSCRIBE:
             self.registry.unsubscribe(frame)
         for b in self.childs:
@@ -272,13 +273,35 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
             if data.command == BaseCommand.WRITE:
                 self.childs[b].write(data)
 
+    def encapsulate(self, data, name=None):
+        if name is None:
+            frame = self.operations.operate_up(self.module, data)
+        else:
+            frame = self.operations.operate_up(name, data)
+        if isinstance(frame, ModuleFrameTransfert) or isinstance(frame, SimpleFrameTransfert):
+            return frame
+        else:
+            self.logger.log(0, "Transfert cannot be done. The frame format is : '{}'".format(type(frame)))
+            raise TypeError("Transfert cannot be done. Cannot convert '{}' to 'ModuleFrameTransfert' or 'SimpleFrameTransfert'".format(type(frame)))
+
+    def decapsulate(self, frame):
+        try:
+            data = self.operations.operate_down(frame)
+            return data
+        except Exception as e:
+            print("[ERROR - TERMINAL - DECAPSULATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
+            self.logger.log(0, "Terminal operator: Transfert cannot be done. The frame format is : '{}'".format(type(frame)))
+    
+
     def register(self, observer):
         self.observers.append(observer)
 
     def emit(self, data):
         try:
-            for observer in self.observers:
-                observer.update(self.encapsulate(data))
+            for module in self.registry.get():
+                for observer in self.observers:
+                    observer.update(self.encapsulate(data=data, name=module))
+
         except Exception as e:
             print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
 
@@ -288,7 +311,7 @@ class BaseRegistry(IRegistry):
         self.name = name
         self.directory = {}
 
-    def subscribe(self, frame, data):
+    def subscribe(self, frame):
         """ Subscriber :
         Args:
             name: string (module name)
@@ -296,9 +319,9 @@ class BaseRegistry(IRegistry):
         subscribe a module with the subscribe command 
         """
         if not frame.src in self.directory:
-            self.directory[frame.src] = [data]
+            self.directory[frame.src] = [frame]
         else:
-            self.directory[frame.src].append(data)
+            self.directory[frame.src].append(frame)
 
     def unsubscribe(self, frame):
         """ Unsubscribe a module """

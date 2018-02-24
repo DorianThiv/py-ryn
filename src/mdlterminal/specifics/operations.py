@@ -6,11 +6,13 @@ from samples.transfert import ModuleFrameTransfert
 from mdlterminal.specifics.models import DataRawModel
 from mdlterminal.specifics.exceptions import TerminalCommandError
 
-class Operations:
+class TerminalOperations:
 
-    @staticmethod
-    def operate_up(module, data):
-        splitted = Operations.__split_command(data.payload)
+    def __init__(self):
+        pass
+
+    def operate_up(self, module, data):
+        splitted = self.__split_command(data.payload)
         if splitted != [] and splitted != None:
             if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME:
                 manager = BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]]
@@ -24,16 +26,14 @@ class Operations:
         else:
             raise TerminalCommandError("[WARNING - COMMAND] : Incomprehensible command.")
     
-    @staticmethod
-    def operate_down(frame):
+    def operate_down(self, frame):
         if BaseCommand.PARSE_ADDRESS in frame.payload:
             addr = frame.payload[BaseCommand.PARSE_ADDRESS]
             return DataRawModel(command=frame.command, address=addr, payload=frame.payload)
         else:
             return DataRawModel(command=frame.command, payload=frame.payload)
 
-    @staticmethod
-    def __split_command(command):
+    def __split_command(self, command):
         """ Split a command line with shlex """
         try:
             return shlex.split(command)

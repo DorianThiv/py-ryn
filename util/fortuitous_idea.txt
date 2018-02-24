@@ -15,3 +15,5 @@ Manager :
     * git-manager (ouuf)
     * user-manager
     * mysql-manager
+
+Give an UUID to a module and give for users
