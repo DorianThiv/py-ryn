@@ -12,9 +12,15 @@ from bases import BaseCommand
 
 class TerminalBaseCommand:
 
-    @staticmethod
-    def parse(commanddict):
-        commands = [TerminalMessageCommand(), TerminalSubscribeCommand(), TerminalUnsubscribeCommand()]
+    def __init__(self):
+        pass
+    
+    def parse(self, commanddict):
+        commands = [
+            TerminalMessageCommand(),
+            TerminalSubscribeCommand(),
+            TerminalUnsubscribeCommand()
+        ]
         if len(commanddict) == 1:
             return (False, "no arguments detected")
         if BaseCommand.PARSE_COMMAND not in commanddict:

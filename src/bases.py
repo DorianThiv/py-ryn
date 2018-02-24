@@ -109,9 +109,7 @@ class BaseLoader(BaseRYNObject, ILoader):
         if frame.command == BaseCommand.RUN:
             BaseCommand(self, frame).treat()
         elif frame.command == BaseCommand.SHUTDOWN:
-            print("Shutdown")
-
-    
+            print("Shutdown")  
 
 class BaseDirectory(IDirectory):
 
@@ -192,12 +190,13 @@ class BaseDealer(IDealer, IObserver):
 class BaseManager(BaseRYNObject, IManager, IObservable):
     """ Manager initialize all components in this his module """
     
-    def __init__(self, module):
+    def __init__(self, module, parser):
         mod_conf = ConfigurationModule.getModuleProperties(module)
         self.minprefix = mod_conf["prefix"]
         self.sufix = "manager"
         self.module = module     
         self.usage = mod_conf["usage"]
+        self.parser = parser
         super().__init__(self.minprefix + "-" + self.sufix, DHCP.IDX_TYPE_MANAGER)
         self.status = False
         self.classes = {}
@@ -213,7 +212,11 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
             self.childs[name].initialize(self.minprefix, self.classes)
 
     def command(self, command):
-        return BaseCommand.parse(command)
+        status, response = BaseCommand.parse(command)
+        if status is False:
+            return (status, response)
+        else:
+            return self.parser.parse(response)
 
     def register(self, observer):
         self.observers.append(observer)
@@ -298,12 +301,12 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
 
     def emit(self, data):
         try:
-            for module in self.registry.get():
+            for module in list(self.registry.get()):
                 for observer in self.observers:
                     observer.update(self.encapsulate(data=data, name=module))
-
         except Exception as e:
-            print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
+            # print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))*
+            pass
 
 class BaseRegistry(IRegistry):
     """ Registry can know other modules and  """
@@ -354,7 +357,6 @@ class BaseBinder(BaseRYNObject, IBinder):
     def write(self):
         pass
         
-
 class BaseCommand(ICommand):
 
     """ Component's types """

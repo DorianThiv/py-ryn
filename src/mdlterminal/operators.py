@@ -1,10 +1,8 @@
 import sys
 
-from bases import BaseCommand, BaseOperator
-from samples.transfert import ModuleFrameTransfert, SimpleFrameTransfert
+from bases import BaseOperator
 from mdlterminal.specifics.exceptions import TerminalCommandError
 from mdlterminal.registries import TerminalRegistry
-from mdlterminal.specifics.models import DataRawModel
 from mdlterminal.specifics.operations import TerminalOperations
 
 class TerminalOperator(BaseOperator):

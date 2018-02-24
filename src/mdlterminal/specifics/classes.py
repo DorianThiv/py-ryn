@@ -1,8 +1,7 @@
 import sys
 import threading
-import shlex
 
-from bases import BaseBinder, BaseDirectory, BaseCommand
+from bases import BaseCommand
 from mdlterminal.specifics.exceptions import *
 from mdlterminal.specifics.models import DataRawModel
 
