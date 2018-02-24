@@ -7,6 +7,13 @@
                 "prefix": "terminal",
                 "upperprefix": "TERMINAL",
                 "usage": "mdlterminal [(-r or --read) or (-w | --write)] [(-a or --address) 0.0.0.0)] [(-t or --text) \"your text\"]"
+            },
+            {
+                "class": "Default",
+                "name": "mdldefault",
+                "prefix": "default",
+                "upperprefix": "DEFAULT",
+                "usage": "no usage"
             }
         ]
     }

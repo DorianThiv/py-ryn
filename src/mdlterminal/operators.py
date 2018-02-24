@@ -13,9 +13,6 @@ class TerminalOperator(BaseOperator):
     def emit(self, data):
         try:
             super().emit(data)
-            for observer in self.observers:
-                decaps_data = self.encapsulate(data)
-                observer.update(decaps_data)
         except TerminalCommandError as e:
             data.payload = e.message
             data.binder.write(data)

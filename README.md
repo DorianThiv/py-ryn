@@ -1,6 +1,6 @@
 # RYN Server
 
-RYN is a server prototype to manage differents data with generic core.
+RYN is a server prototype to manage differents data with a generic core.
 
 ## Getting Started
 
@@ -9,21 +9,21 @@ RYN Structure:
 ![alt text](./util/img/RYNstruct.PNG)
 
 ##### Core:
-The core is compose: core, loader, dealer, directory
+The core is compose of: core.py, loader.py, dealer.py, directory.py
     * core: lauch the program with a simple lifecycle (start, run, stop)
     * loader: load all module specifies in the config.json
     * dealer: manage exanges between the modules
     * directory: store all modules in which loaded by loader 
 
 ##### Modules : 
-A module provide one or many differents data. A module have a name with "mdl" before and a prefix in lower case.
+A module provide one or many differents data. His name begin with "mdl" and a prefix in lower case.
 
 ```
 Exemple: name = "mdlmymodule", prefix = "mymodule"
 ```
 
 In a module there are components.
-There are five component type: a "manager", a "provider", an "operator", a "registry" and a "binder".
+There are five components types: a "manager", a "provider", an "operator", a "registry" and a "binder".
 A module must have theses five components to be functionnal.
 Each components have minimum one class. 
 The class name must be in Camel Case to be correctly interpreted by RYN.
@@ -59,29 +59,49 @@ The specific folder is your zone. You can create your data type and your communi
 
 ### Prerequisites
 
-##### Linux
+You must have a putty RAW console or a simple TCP client to connect on the server.
 
-```
-Execute : ./core.py
-```
+For begin you can clone the default module named 'mdldefault' to have a simple view on the behaviour.
+It will be write in the console a text. 
 
 ### Installing
 
-A step by step series of examples that tell you have to get a development env running
-
-Say what the step will be
+To install this server clone this project with the command: 
 
 ```
-Give the example
+git clone https://gitlab.com/DodoT/server-prototype.git ryn-server
 ```
 
-And repeat
+And 
 
 ```
-until finished
+cd ryn-server/
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+##### Linux
+
+```
+$ chmod 755 core.py clone.py remove.py
+$ ./core.py
+```
+
+##### Windows
+
+```
+Double click on 'core.py'
+```
+
+If you run core.py you will have this in the console :
+
+```
+==== RYN => Initialize
+[SUCCESS - BINDER - TERMINAL] : Connection (host: <your-ip>, port: 1297)
+==== RYN => Run
+```
+
+Open the Simple TCP console with host and port.
+This is the access point in the server for the moment.
+
 
 ## Running the tests
 

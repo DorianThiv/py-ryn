@@ -300,13 +300,12 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
         self.observers.append(observer)
 
     def emit(self, data):
-        try:
-            for module in list(self.registry.get()):
-                for observer in self.observers:
-                    observer.update(self.encapsulate(data=data, name=module))
-        except Exception as e:
-            # print("[ERROR - UPDATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))*
-            pass
+        for observer in self.observers:
+            decaps_data = self.encapsulate(data)
+            observer.update(decaps_data)
+        for module in list(self.registry.get()):
+            for observer in self.observers:
+                observer.update(self.encapsulate(data=data, name=module))
 
 class BaseRegistry(IRegistry):
     """ Registry can know other modules and  """

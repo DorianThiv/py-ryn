@@ -19,7 +19,6 @@ class ConfigurationModule:
                 "class": class_name,
                 "usage": "no usage"
             })
-            print(data)
             with open(os.path.dirname(__file__) + "/" + ConfigurationModule.CONFIG_FILE, 'w') as f:
                 json.dump(data, f, sort_keys=True, indent=4)
         except Exception as e:
