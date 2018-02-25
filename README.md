@@ -78,14 +78,21 @@ And
 cd ryn-server/
 ```
 
-##### Linux
+You can run this command to download right packages :
+
+- python 3:
+```
+pip3 install -r requirements.txt
+```
+
+#### Linux
 
 ```
 $ chmod 755 core.py clone.py remove.py
 $ ./core.py
 ```
 
-##### Windows
+#### Windows
 
 ```
 Double click on 'core.py'
