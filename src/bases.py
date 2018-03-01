@@ -2,7 +2,7 @@
 import re
 import sys
 
-from interfaces import (IBinder, ICommand, ICore, IDealer, IDirectory, ILoader,
+from interfaces import (ISaveable, IManageable, IBinder, ICommand, ICore, IDealer, IDirectory, ILoader,
                         IManager, IObservable, IObserver, IOperator, IProvider,
                         IRegistry, IRYNObject)
 from samples.config import *
@@ -187,7 +187,7 @@ class BaseDealer(IDealer, IObserver):
             print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
 
-class BaseManager(BaseRYNObject, IManager, IObservable):
+class BaseManager(BaseRYNObject, IManager, IObservable, IManageable, ISaveable):
     """ Manager initialize all components in this his module """
     
     def __init__(self, module, parser):
@@ -225,7 +225,7 @@ class BaseManager(BaseRYNObject, IManager, IObservable):
         for observer in self.observers:
             observer.update(frame)
 
-class BaseProvider(BaseRYNObject, IProvider, IObserver):
+class BaseProvider(BaseRYNObject, IProvider, IObserver, IManageable):
 
     def __init__(self, name, parent):
         super().__init__(name, DHCP.IDX_TYPE_PROVIDER, parent.addr)
@@ -357,6 +357,7 @@ class BaseBinder(BaseRYNObject, IBinder):
         pass
         
 class BaseCommand(ICommand):
+    """ Generic parse command """
 
     """ Component's types """
     CORE = DHCP.IDX_TYPE_CORE
@@ -377,12 +378,26 @@ class BaseCommand(ICommand):
     WRITE = "write"
     SUBSCRIBE = "subscribe"
     UNSUBSCRIBE = "unsubscribe"
+    ADD = "add"
+    EDIT = "edit"
+    REMOVE = "remove"
 
     """ Internal Parsed items """
     PARSE_MODULE = "module"
     PARSE_COMMAND = "command"
     PARSE_TEXT = "text"
     PARSE_ADDRESS = "address"
+    PARSE_CONNECTION = "connection"
+    PARSE_DEVICE = "device"
+    
+    PARSE_ARGUMENTS_ERROR = "no arguments detected"
+    PARSE_MODULE_ERROR = "error module"
+    PARSE_COMMAND_ERROR = "no command detected : (-r | -w | -s | -u | --add | --edit | --remove)"
+    PARSE_COMMAND_FOUND_ERROR = "no command found for : "
+    PARSE_TEXT_ERROR = "excepted text : (-t \"hello world\") | (--text \"hello world\")"
+    PARSE_ADDRESS_ERROR = "excepted IP address : (-a x.x.x.x | --address x.x.x.x)"
+    PARSE_CONNECTION_ERROR = "error connection"
+    PARSE_DEVICE_ERROR = "error device"    
 
     def __init__(self, component, command):
         self.component = component
@@ -402,7 +417,7 @@ class BaseCommand(ICommand):
 
     @staticmethod
     def parse(command):
-        """ command parser function has a public exposition 
+        """ Command parser function has a public exposition 
             to have a command line parser generally for manager.
 
             Get a module command line parser for the specific module.
@@ -430,12 +445,12 @@ class BaseCommand(ICommand):
                         checkIp(command[command.index(elem)+1])
                         commanddict[BaseCommand.PARSE_ADDRESS] = command[command.index(elem)+1]
                     except Exception as e:
-                        return (False, "excepted IP address : (-a x.x.x.x | --address x.x.x.x) : {}".format(e))
+                        return (False, "{} : {}".format(BaseCommand.PARSE_ADDRESS_ERROR, e))
                 else:
-                    return (False, "excepted IP address : (-a x.x.x.x | --address x.x.x.x)")
+                    return (False, BaseCommand.PARSE_ADDRESS_ERROR)
             if re.match(r"(-|-{2})+(t|text)", elem) != None:
                 if command.index(elem)+1 < len(command):
                     commanddict[BaseCommand.PARSE_TEXT] = command[command.index(elem)+1]
                 else:
-                    return (False, "excepted text : (-t \"hello world\") | (--text \"hello world\")")
+                    return (False, BaseCommand.PARSE_TEXT_ERROR)
         return (True, commanddict)

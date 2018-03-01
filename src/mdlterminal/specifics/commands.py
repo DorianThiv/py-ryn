@@ -22,9 +22,9 @@ class TerminalBaseCommand:
             TerminalUnsubscribeCommand()
         ]
         if len(commanddict) == 1:
-            return (False, "no arguments detected")
+            return (False, BaseCommand.PARSE_ARGUMENTS_ERROR)
         if BaseCommand.PARSE_COMMAND not in commanddict:
-            return (False, "no command detected : (-r | -w | -s | -u)")
+            return (False, BaseCommand.PARSE_COMMAND_ERROR)
         else:
             for command in commands:
                 if command.label == commanddict[BaseCommand.PARSE_COMMAND]:
@@ -37,9 +37,9 @@ class TerminalMessageCommand:
     
     def parse(self, commanddict):
         if BaseCommand.PARSE_ADDRESS not in commanddict:
-            return (False, "no destination address detected : (-a | --address x.x.x.x)")
+            return (False, BaseCommand.PARSE_ADDRESS_ERROR)
         if BaseCommand.PARSE_TEXT not in commanddict:
-            return (False, "no message detected : (-t \"hello world\") | (--text \"hello world\")")
+            return (False, BaseCommand.PARSE_TEXT_ERROR)
         return (True, commanddict)
         
 class TerminalSubscribeCommand:
@@ -49,7 +49,7 @@ class TerminalSubscribeCommand:
     
     def parse(self, commanddict):
         if BaseCommand.PARSE_ADDRESS not in commanddict:
-            return (False, "no destination address detected : (-a | --address x.x.x.x)")
+            return (False, BaseCommand.PARSE_ADDRESS_ERROR)
         return (True, commanddict)
 
 class TerminalUnsubscribeCommand:
@@ -59,5 +59,5 @@ class TerminalUnsubscribeCommand:
     
     def parse(self, commanddict):
         if BaseCommand.PARSE_ADDRESS not in commanddict:
-            return (False, "no destination address detected : (-a | --address x.x.x.x)")
+            return (False, BaseCommand.PARSE_ADDRESS_ERROR)
         return (True, commanddict)

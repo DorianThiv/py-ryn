@@ -20,15 +20,15 @@ class DefaultBaseCommand:
             DefaultMessageCommand(),
         ]
         if len(commanddict) == 1:
-            return (False, "no arguments detected")
+            return (False, BaseCommand.PARSE_ARGUMENTS_ERROR)
         if BaseCommand.PARSE_COMMAND not in commanddict:
-            return (False, "no command detected : (-w)")
+            return (False, BaseCommand.PARSE_COMMAND_ERROR)
         else:
             for command in commands:
                 if command.label == commanddict[BaseCommand.PARSE_COMMAND]:
                     return command.parse(commanddict)
                 else:
-                    return (False, "no command found for : {}".format(commanddict[BaseCommand.PARSE_COMMAND]))
+                    return (False, "{}: {}".format(BaseCommand.PARSE_COMMAND_FOUND_ERROR, commanddict[BaseCommand.PARSE_COMMAND]))
 
 class DefaultMessageCommand:
 
@@ -37,6 +37,6 @@ class DefaultMessageCommand:
     
     def parse(self, commanddict):
         if BaseCommand.PARSE_TEXT not in commanddict:
-            return (False, "no message detected : (-t \"hello world\") | (--text \"hello world\")")
+            return (False, BaseCommand.PARSE_TEXT_ERROR)
         return (True, commanddict)
         
