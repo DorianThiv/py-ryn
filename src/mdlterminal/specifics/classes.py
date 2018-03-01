@@ -87,13 +87,13 @@ class TerminalThreadRead(threading.Thread):
             print("UnicodeDecodeError ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.connection.close()
         except ConnectionResetError as e:
-            print("[ERROR - TERMINAL - CLIENT - THREADREAD] : {}".format(e))
+            print("[ERROR - TERMINAL - CLIENT - THREADREAD] ConnectionResetError : {}".format(e))
             self.connection.close()
         except ConnectionAbortedError as e:
-            print("[ERROR - TERMINAL - CLIENT - THREADREAD] : {}".format(e))
+            print("[ERROR - TERMINAL - CLIENT - THREADREAD] ConnectionAbortedError : {}".format(e))
             self.connection.close()
         except Exception as e:
-            print("[ERROR - TERMINAL - CLIENT - THREADREAD] : {}".format(e))
+            print("[ERROR - TERMINAL - CLIENT - THREADREAD] Exception : {}".format(e))
             self.connection.close()
 
     def __check_raw_line(self, raw):

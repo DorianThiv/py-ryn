@@ -49,6 +49,6 @@ class TerminalTest(unittest.TestCase):
         send_command(sock, "mdlterminal -w")
         send_command(sock, "mdlterminal -w -a {} -t \"Hello World\" ".format(TerminalTest.IP))
         send_command(sock, "mdlterminal -w -a {} -t \"\" ".format(TerminalTest.IP))
-        send_command_no_receive(sock, "mdldefault -w -t \"Hello World\"")
+        send_command(sock, "mdldefault -w -t \"Hello World\"")
 
 main()
