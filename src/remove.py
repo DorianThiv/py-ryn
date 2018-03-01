@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
+
 import sys
 import os
 
-from mdlutils.exceptions import ArgumentsError, PathError
-from mdlutils.config import ConfigurationModule
+from samples.exceptions import ArgumentsError, PathError
+from samples.config import ConfigurationModule
 
 if len(sys.argv) != 2:
     raise ArgumentsError("expected 1 arguments")

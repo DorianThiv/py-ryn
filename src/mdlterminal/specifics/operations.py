@@ -2,20 +2,23 @@
 import shlex
 
 from bases import BaseDirectory, BaseCommand
-from mdlutils.transfert import ModuleFrameTransfert
+from samples.transfert import ModuleFrameTransfert
+from mdlterminal.specifics.models import DataRawModel
 from mdlterminal.specifics.exceptions import TerminalCommandError
 
-class Operations:
+class TerminalOperations:
 
-    @staticmethod
-    def operate(module, data):
-        splitted = Operations.__split_command(data)
+    def __init__(self):
+        pass
+
+    def operate_up(self, module, data):
+        splitted = self.__split_command(data.payload)
         if splitted != [] and splitted != None:
             if splitted[0] in BaseDirectory.CONNECTED_MANAGERS_BY_NAME:
                 manager = BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]]
                 status, commandline = manager.command(splitted)
                 if status is True:
-                    return ModuleFrameTransfert(src=module, dest=commandline[BaseCommand.PARSE_MODULE], payload=commandline)
+                    return ModuleFrameTransfert(src=module, dest=commandline[BaseCommand.PARSE_MODULE], command=commandline[BaseCommand.PARSE_COMMAND], payload=commandline)
                 else:
                     raise TerminalCommandError("[WARNING - COMMAND] : {}\r\nusage:\r\n* {}".format(commandline, BaseDirectory.CONNECTED_MANAGERS_BY_NAME[splitted[0]].usage))
             else:
@@ -23,10 +26,16 @@ class Operations:
         else:
             raise TerminalCommandError("[WARNING - COMMAND] : Incomprehensible command.")
     
-    @staticmethod
-    def __split_command(data):
+    def operate_down(self, frame):
+        if BaseCommand.PARSE_ADDRESS in frame.payload:
+            addr = frame.payload[BaseCommand.PARSE_ADDRESS]
+            return DataRawModel(command=frame.command, address=addr, payload=frame.payload)
+        else:
+            return DataRawModel(command=frame.command, payload=frame.payload)
+
+    def __split_command(self, command):
         """ Split a command line with shlex """
         try:
-            return shlex.split(data.payload)
+            return shlex.split(command)
         except Exception as e:
             print("[ERROR - ENCAPSULATE - SPLITTED] : {}".format(e))

@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import fnmatch
 
-from mdlutils.exceptions import ArgumentsError, PathError
-from mdlutils.config import ConfigurationModule
+from samples.exceptions import ArgumentsError, PathError
+from samples.config import ConfigurationModule
 
 if __name__ == "__main__":    
 
@@ -11,7 +13,7 @@ if __name__ == "__main__":
 
     # check command
     if len(sys.argv) != 3:
-        raise ArgumentsError("expected 2 arguments")
+        raise ArgumentsError("expected 2 arguments: './clone.py mdlname_to_clone your_name'")
     if not os.path.isdir(sys.argv[1]):
         raise PathError("directory '{}' doesn't exist".format(sys.argv[1]))
     for name in sys.argv[1].split('/'):
@@ -51,7 +53,7 @@ if __name__ == "__main__":
                 destfiles[path.replace(configuration["prefix"], low_name)] = files[path] 
     
     for path in destfiles.keys():
-        print("cloning : {}".format(path))
+        print("[i] cloning : {}".format(path))
 
     for path in destfiles.keys():
         if not os.path.exists(os.path.dirname(path)):

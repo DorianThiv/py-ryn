@@ -7,7 +7,7 @@ import datetime
 
 class Logger:
 
-    PATH = os.path.dirname(sys.modules['__main__'].__file__) + "/mdlutils/"
+    PATH = os.path.dirname(sys.modules['__main__'].__file__) + "/samples/"
     DIRECTORY = "files/"
     NAME = "ryn"
     EXT = ".log"

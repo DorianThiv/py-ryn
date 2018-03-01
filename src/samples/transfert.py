@@ -1,5 +1,5 @@
 
-from mdlutils.utils import JSON
+from samples.utils import JSON
 
 class ModuleFrameTransfert:
 
@@ -68,6 +68,7 @@ class SimpleFrameTransfert:
 
     def __init__(self, command, callback=None, log=None):
         self.command = command
+        self.payload = []
         self.callback = callback
         self.log = log
 

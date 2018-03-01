@@ -12,10 +12,6 @@ class IRYNObject:
     @abstractmethod
     def initialize(self):
         pass
-
-    @abstractmethod
-    def load(self):
-        pass
         
     @abstractmethod
     def uninitialize(self):

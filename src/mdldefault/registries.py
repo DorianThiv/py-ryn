@@ -1,8 +1,9 @@
 
 from bases import BaseRegistry
-from mdlmodbus.operators import ModbusOperator
 
-class ModbusRegistry(BaseRegistry):
+class DefaultRegistry(BaseRegistry):
 
     def __init__(self, name):
         super().__init__(name)
+
+           

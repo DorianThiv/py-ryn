@@ -40,21 +40,21 @@ import os
 import sys
 import inspect
 
-from mdlexemple.managers import *
-from mdlexemple.providers import *
-from mdlexemple.operators import *
-from mdlexemple.binders import *
-from mdlexemple.specifics import *
+from mdldefault.managers import *
+from mdldefault.providers import *
+from mdldefault.operators import *
+from mdldefault.binders import *
+from mdldefault.specifics import *
+
+""" Modules __init__ """
 
 path = os.path.join(os.path.dirname(__file__))
 sys.path.append(path)
 
-""" Modules loaded """
-
 # manager module
-mdlmanager = "mdlexemple.managers"
+mdlmanager = "mdldefault.managers"
 # package name important to found right classes
-packages = ["mdlexemple.providers", "mdlexemple.operators", "mdlexemple.binders"]
+packages = ["mdldefault.providers", "mdldefault.operators", "mdldefault.binders"]
 
 def __getmanager():
     """
@@ -71,6 +71,7 @@ def __getmanager():
     return ret
 
 def __getclasses():
+
     """
     Get classes function return all classes in this module.
     Args:

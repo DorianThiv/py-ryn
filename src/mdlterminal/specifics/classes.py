@@ -1,9 +1,9 @@
 import sys
 import threading
-import shlex
 
-from bases import BaseBinder, BaseDirectory
+from bases import BaseCommand
 from mdlterminal.specifics.exceptions import *
+from mdlterminal.specifics.models import DataRawModel
 
 class TerminalThreadServer(threading.Thread):
 
@@ -31,19 +31,26 @@ class TerminalThreadServer(threading.Thread):
 
     def write(self, data):
         connection = None
-        if data.address in self.directory:
-            connection = self.directory[data.address].connection
+        if data.address != None:
+            if data.address in self.directory:
+                connection = self.directory[data.address].connection
+                if isinstance(data.payload, str):
+                    msg = data.payload
+                if isinstance(data.payload, dict):
+                    msg = str(data.payload[BaseCommand.PARSE_TEXT] + "\r\n")
+                connection.send(msg.encode("iso-8859-1"))
+            else:
+                raise TerminalWriteError("Not found destination address.")
         else:
             raise TerminalWriteError("Not found destination address.")
-        msg = str(data.payload + "\r\n")
-        connection.send(msg.encode("iso-8859-1"))
     
     def scallback(self, ip, msg):
         if msg == -1:
             del self.directory[ip]
             self.current_connections -= 1
         else:
-            self.bcallback(ip, msg)
+            data = DataRawModel(address=ip, payload=msg)
+            self.bcallback(data)
 
     def stop(self):
         self._stop_event.is_set() # event stop
@@ -79,8 +86,14 @@ class TerminalThreadRead(threading.Thread):
         except UnicodeDecodeError as e:
             print("UnicodeDecodeError ligne : {}, {}".format(sys.exc_info()[-1].tb_lineno, e))
             self.connection.close()
+        except ConnectionResetError as e:
+            print("[ERROR - TERMINAL - CLIENT - THREADREAD] : {}".format(e))
+            self.connection.close()
+        except ConnectionAbortedError as e:
+            print("[ERROR - TERMINAL - CLIENT - THREADREAD] : {}".format(e))
+            self.connection.close()
         except Exception as e:
-            print("[ERROR - TERMINAL - CLIENT - READ] : {}".format(e))
+            print("[ERROR - TERMINAL - CLIENT - THREADREAD] : {}".format(e))
             self.connection.close()
 
     def __check_raw_line(self, raw):

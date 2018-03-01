@@ -1,7 +1,7 @@
 
 import sys
 
-from mdlutils.exceptions import LoadModuleError
+from samples.exceptions import LoadModuleError
 
 class PackageFactory:
 
