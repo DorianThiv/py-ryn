@@ -1,4 +1,6 @@
 
+import sys
+
 from bases import BaseProvider
 from mdlterminal.operators import TerminalOperator
 from mdlterminal.registries import TerminalRegistry

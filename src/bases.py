@@ -260,7 +260,7 @@ class BaseProvider(BaseRYNObject, IProvider, IObserver, IManageable):
         decaps_data = self.operator.encapsulate(data)
         self.parent.emit(decaps_data)
         for module in list(self.registry.get()):
-            self.parent.emit(self.encapsulate(data=data, name=module))    
+            self.parent.emit(self.operator.encapsulate(data=data, name=module))    
 
 class BaseBinder(BaseRYNObject, IBinder):
 
