@@ -152,6 +152,36 @@ class IObservable:
     def emit(self):
         pass
 
+class ISaveable:
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def save(self):
+        pass
+    
+    @abstractmethod
+    def edit(self):
+        pass
+    
+    @abstractmethod
+    def remove(self):
+        pass   
+
+class IManageable:
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def add(self):
+        pass
+    
+    @abstractmethod
+    def edit(self):
+        pass
+    
+    @abstractmethod
+    def remove(self):
+        pass    
+
 class ICommand:
     __metaclass__ = ABCMeta
 
