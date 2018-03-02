@@ -1,6 +1,7 @@
 
 import re
 import sys
+import threading
 
 from interfaces import (ISaveable, IManageable, IExecutable, IObservable)
 from samples.config import *
@@ -255,13 +256,10 @@ class BaseBinder(RYNObject):
         """ Run Method: Run component """
         pass
 
-    def execute(self, direction, data):
-        pass
-
     def read(self, data):
         self.parent.emit(data)
 
-    def write(self):
+    def write(self, data):
         pass
     
 class BaseOperator:
