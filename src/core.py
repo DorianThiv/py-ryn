@@ -5,12 +5,12 @@
 
 import sys
 
-from bases import BaseCore
+from bases import Core
 
 def main():
     """ Main """
     try:
-        core = BaseCore("core")
+        core = Core("core")
         print("==== RYN => Initialize")
         core.start()
         print("==== RYN => Run")

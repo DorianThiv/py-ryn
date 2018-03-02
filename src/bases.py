@@ -2,9 +2,7 @@
 import re
 import sys
 
-from interfaces import (ISaveable, IManageable, IBinder, ICommand, ICore, IDealer, IDirectory, ILoader,
-                        IManager, IObservable, IObserver, IOperator, IProvider,
-                        IRegistry, IRYNObject)
+from interfaces import (ISaveable, IManageable, IExecutable, IObservable)
 from samples.config import *
 from samples.dhcp import *
 from samples.factories import ModuleFactory, PackageFactory
@@ -14,32 +12,29 @@ from samples.transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from samples.utils import *
 
 
-class BaseRYNObject(IRYNObject, ICommand): 
+class RYNObject(IExecutable, IObservable): 
 
     def __init__(self, name, component_type, mdladdr=None):
         self.name = name
         self.type = component_type
         self.addr = DHCP.getInstance(mdladdr).discover(self)
         self.logger = Logger.getInstance()
-        self.usage = "" 
-
-    def __repr__(self):
-        pass
 
     def __str__(self):
         return "__RYN_OBJECT__ = (name : {}, addr: {})".format(self.name, self.addr)
 
-    def __del__(self):
-        pass
-
     def initialize(self):
         """ Initializing Load Method: Load a his component """
         pass
+    
+    def uninitialize(self):
+        """ Initializing Load Method: Load a his component """
+        pass    
 
     def execute(self, frame=None):
         BaseCommand(self, frame).treat()
 
-class BaseCore(BaseRYNObject, ICore):
+class Core:
 
     STATE_SHUTDOWN = 0
     STATE_LOAD = 1
@@ -50,49 +45,35 @@ class BaseCore(BaseRYNObject, ICore):
     STATE_STOP = 6
 
     def __init__(self, name):
-        super().__init__(name, DHCP.IDX_TYPE_CORE)
-        self.state = BaseCore.STATE_SHUTDOWN
-
-    def __repr__(self):
-        pass
-
-    def initialize(self):
-        self.logger.log(2, "Loading ...")
-        self.state = BaseCore.STATE_LOAD
+        self.name = name
+        self.state = Core.STATE_SHUTDOWN
 
     def start(self):
-        self.logger.clear()
-        self.logger.log(2, "Starting ...")
-        self.state = BaseCore.STATE_START
-        self.loader = BaseLoader("loader", self)
+        self.state = Core.STATE_START
+        self.loader = Loader(self)
 
     def run(self):
-        self.logger.log(2, "Running ...")
-        self.state = BaseCore.STATE_RUN
+        self.state = Core.STATE_RUN
         self.loader.execute(SimpleFrameTransfert(BaseCommand.RUN))
 
     def resume(self):
-        self.state = BaseCore.STATE_RUN
+        self.state = Core.STATE_RUN
 
     def pause(self):
-        self.state = BaseCore.STATE_PAUSE
+        self.state = Core.STATE_PAUSE
 
     def stop(self):
-        self.logger.log(2, "Stopping ...")
-        self.state = BaseCore.STATE_STOP
+        self.state = Core.STATE_STOP
 
-class BaseLoader(BaseRYNObject, ILoader):
+class Loader(RYNObject):
+    """ The loader enable to initialize all modules and give them instances to the "Dealer"
     """
-    The loader enable to initialize all modules and 
-    give them instances to the "Dealer"
-    """
-    def __init__(self, name, core):
-        super().__init__(name, DHCP.IDX_TYPE_LOADER)
+    def __init__(self, core):
+        super().__init__("loader", DHCP.IDX_TYPE_LOADER, mdladdr=None)
         self.core = core
-        self.dealer = BaseDealer()
+        self.dealer = Dealer()
         self.managers = {}
         self.initialize(ConfigurationModule.getModulesNames())
-        self.logger.log(2, self.dealer)
 
     def initialize(self, managers):
         """ Load all managers in a list. 
@@ -101,7 +82,7 @@ class BaseLoader(BaseRYNObject, ILoader):
         """
         for manager in managers:
             m = PackageFactory.make(manager)
-            m.register(self.dealer)
+            m.dealer = self.dealer
             m.initialize()
             self.dealer.add(m)
 
@@ -111,7 +92,7 @@ class BaseLoader(BaseRYNObject, ILoader):
         elif frame.command == BaseCommand.SHUTDOWN:
             print("Shutdown")  
 
-class BaseDirectory(IDirectory):
+class Directory:
 
     CONNECTED_MANAGERS_BY_ADDR = {}
     CONNECTED_MANAGERS_BY_NAME = {}
@@ -138,8 +119,8 @@ class BaseDirectory(IDirectory):
         """ Add a module module in the managers dict """
         self.managers[manager.addr] = manager
         if manager.status == True:
-            BaseDirectory.CONNECTED_MANAGERS_BY_NAME[manager.module] = manager
-            BaseDirectory.CONNECTED_MANAGERS_BY_ADDR[manager.addr] = manager
+            Directory.CONNECTED_MANAGERS_BY_NAME[manager.module] = manager
+            Directory.CONNECTED_MANAGERS_BY_ADDR[manager.addr] = manager
 
     def remove(self, addr):
         """ Remove a module from the managers dict """
@@ -149,16 +130,16 @@ class BaseDirectory(IDirectory):
     def find(idx):
         """ Find another module to send the received frame """
         if isinstance(idx, str):
-            return BaseDirectory.CONNECTED_MANAGERS_BY_NAME[idx]
+            return Directory.CONNECTED_MANAGERS_BY_NAME[idx]
         elif isinstance(idx, int):
-            return BaseDirectory.CONNECTED_MANAGERS_BY_ADDR[idx]
+            return Directory.CONNECTED_MANAGERS_BY_ADDR[idx]
         else:
             raise Exception() # make a specific exeption
 
-class BaseDealer(IDealer, IObserver):
+class Dealer(IObservable):
 
     def __init__(self):
-        self.directory = BaseDirectory()
+        self.directory = Directory()
 
     def __str__(self):
         return str(self.directory)
@@ -171,7 +152,7 @@ class BaseDealer(IDealer, IObserver):
         """ Add a module module in the managers dict """
         self.directory.add(manager)
 
-    def update(self, frame):
+    def emit(self, frame):
         """ Notification from a module
 
             Transfert a frame from another module.
@@ -187,7 +168,7 @@ class BaseDealer(IDealer, IObserver):
             print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
 
-class BaseManager(BaseRYNObject, IManager, IObservable, IManageable, ISaveable):
+class BaseManager(RYNObject, IManageable, ISaveable):
     """ Manager initialize all components in this his module """
     
     def __init__(self, module, parser):
@@ -198,10 +179,10 @@ class BaseManager(BaseRYNObject, IManager, IObservable, IManageable, ISaveable):
         self.usage = mod_conf["usage"]
         self.parser = parser
         super().__init__(self.minprefix + "-" + self.sufix, DHCP.IDX_TYPE_MANAGER)
-        self.status = False
         self.classes = {}
         self.childs = {}
-        self.observers = []
+        self.dealer = None
+        self.status = False
 
     def initialize(self):
         self.classes = ModuleFactory.make(self.minprefix, self.module)
@@ -218,42 +199,20 @@ class BaseManager(BaseRYNObject, IManager, IObservable, IManageable, ISaveable):
         else:
             return self.parser.parse(response)
 
-    def register(self, observer):
-        self.observers.append(observer)
-
     def emit(self, frame):
-        for observer in self.observers:
-            observer.update(frame)
+        if self.dealer is not None:
+            self.dealer.emit(frame)
+        else:
+            self.logger(0, "No dealer founded in {}".format(self.name))
 
-class BaseProvider(BaseRYNObject, IProvider, IObserver, IManageable):
+class BaseProvider(RYNObject, IManageable):
 
     def __init__(self, name, parent):
         super().__init__(name, DHCP.IDX_TYPE_PROVIDER, parent.addr)
-        self.observable = parent
-        self.childs = {}
-
-    def initialize(self, minprefix, classes):
-        for c in classes[ModuleFactory.OPERATORS]:
-            name = class_name_gen(minprefix, c[ModuleFactory.VCLASSES])
-            instance = c[ModuleFactory.VCLASSES](class_name_gen(minprefix, c[ModuleFactory.VCLASSES]), self)
-            self.childs[name] = instance
-            self.childs[name].initialize(minprefix, classes)
-
-    def update(self, frame):
-        """ Update to notify the manager with a frame instance """
-        self.observable.emit(frame)
-
-class BaseOperator(BaseRYNObject, IOperator, IObservable):
-
-    def __init__(self, name, registry, operations, parent):
-        super().__init__(name, DHCP.IDX_TYPE_OPERATOR, parent.observable.addr)
-        self.registry = registry
-        self.operations = operations
         self.parent = parent
-        self.module = parent.observable.module
-        self.observers = []
         self.childs = {}
-        self.observers.append(parent)
+        self.operator = None
+        self.registry = None
 
     def initialize(self, minprefix, classes):
         for c in classes[ModuleFactory.BINDERS]:
@@ -261,9 +220,9 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
             instance = c[ModuleFactory.VCLASSES](class_name_gen(minprefix, c[ModuleFactory.VCLASSES]), self)
             self.childs[name] = instance
             self.childs[name].initialize()
-
+            
     def execute(self, frame):
-        data = self.decapsulate(frame)
+        data = self.operator.decapsulate(frame)
         if data.command == BaseCommand.SUBSCRIBE:
             self.registry.subscribe(frame)
         if data.command == BaseCommand.UNSUBSCRIBE:
@@ -275,6 +234,42 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
                 self.childs[b].read()
             if data.command == BaseCommand.WRITE:
                 self.childs[b].write(data)
+        
+    def emit(self, data):
+        """ Update to notify the manager with a frame instance """
+        decaps_data = self.operator.encapsulate(data)
+        self.parent.emit(decaps_data)
+        for module in list(self.registry.get()):
+            self.parent.emit(self.operator.encapsulate(data=data, name=module))    
+
+class BaseBinder(RYNObject):
+
+    def __init__(self, name, parent):
+        self.parent = parent
+        super().__init__(name, DHCP.IDX_TYPE_BINDER, self.parent.parent.addr)
+
+    def initialize(self):
+        pass
+
+    def run(self):
+        """ Run Method: Run component """
+        pass
+
+    def execute(self, direction, data):
+        pass
+
+    def read(self, data):
+        self.parent.emit(data)
+
+    def write(self):
+        pass
+    
+class BaseOperator:
+
+    def __init__(self, operations, parent):
+        self.module = parent.parent.module
+        self.parent = parent
+        self.operations = operations
 
     def encapsulate(self, data, name=None):
         if name is None:
@@ -293,24 +288,12 @@ class BaseOperator(BaseRYNObject, IOperator, IObservable):
             return data
         except Exception as e:
             print("[ERROR - TERMINAL - DECAPSULATE] : {} : {}".format(sys.exc_info()[-1].tb_lineno, e))
-            self.logger.log(0, "Terminal operator: Transfert cannot be done. The frame format is : '{}'".format(type(frame)))
-    
+            self.logger.log(0, "Terminal operator: Transfert cannot be done. The frame format is : '{}'".format(type(frame)))    
 
-    def register(self, observer):
-        self.observers.append(observer)
-
-    def emit(self, data):
-        for observer in self.observers:
-            decaps_data = self.encapsulate(data)
-            observer.update(decaps_data)
-        for module in list(self.registry.get()):
-            for observer in self.observers:
-                observer.update(self.encapsulate(data=data, name=module))
-
-class BaseRegistry(IRegistry):
+class BaseRegistry:
     """ Registry can know other modules and  """
-    def __init__(self, name):
-        self.name = name
+    
+    def __init__(self):
         self.directory = {}
 
     def subscribe(self, frame):
@@ -333,30 +316,8 @@ class BaseRegistry(IRegistry):
     def get(self):
         """ Check for all data type which module was subscribe """
         return self.directory
-
-class BaseBinder(BaseRYNObject, IBinder):
-
-    def __init__(self, name, parent):
-        self.observable = parent
-        super().__init__(name, DHCP.IDX_TYPE_BINDER, self.observable.parent.observable.addr)
-
-    def initialize(self):
-        pass
-
-    def run(self):
-        """ Run Method: Run component """
-        pass
-
-    def execute(self, direction, data):
-        pass
-
-    def read(self, data):
-        self.observable.emit(data)
-
-    def write(self):
-        pass
         
-class BaseCommand(ICommand):
+class BaseCommand:
     """ Generic parse command """
 
     """ Component's types """
@@ -409,8 +370,8 @@ class BaseCommand(ICommand):
         if self.cpttype == BaseCommand.CORE:
             self.component.execute(self.command)
         if self.cpttype == BaseCommand.LOADER:
-            for m in list(BaseDirectory.CONNECTED_MANAGERS_BY_NAME):
-                BaseDirectory.CONNECTED_MANAGERS_BY_NAME[m].execute(self.command)
+            for m in list(Directory.CONNECTED_MANAGERS_BY_NAME):
+                Directory.CONNECTED_MANAGERS_BY_NAME[m].execute(self.command)
         if self.cpttype in [BaseCommand.MANAGER, BaseCommand.PROVIDER]:
             for p in self.component.childs:
                 self.component.childs[p].execute(self.command)
