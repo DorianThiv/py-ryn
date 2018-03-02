@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-""" RYN SOFTWARE """
+""" RYN SERVER """
+
+__author__ = "THIVOLLE Dorian"
+__copyright__ = "Copyright 2017, RYN Server"
+__credits__ = ["THIVOLLE Dorian"]
+__license__ = ""
+__version__ = "0.01"
+__maintainer__ = "THIVOLLE Dorian"
+__email__ = "dorian_thivolle@orange.fr"
+__status__ = "Production"
 
 import sys
 

@@ -6,14 +6,11 @@ class DataRawModel:
     COMMAND = "command"
     ADDRESS = "address"
     PAYLOAD = "payload"
-    PROVIDER = "provider"
     BINDER = "binder"
 
-    def __init__(self, command=None, address=None, payload=None, binder=None, provider= None):
+    def __init__(self, command=None, address=None, payload=None, binder=None):
         self.command = command
-        self.address = address
         self.payload = payload
-        self.provider = provider
         self.binder = binder
 
     def serialize(self):

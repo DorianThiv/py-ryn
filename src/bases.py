@@ -1,7 +1,26 @@
 
+""" Bases
+
+. bases.py module
+
+Get base classes to provide a centralized source code.
+
+* RYNObject: Base object for module's components
+* Core: Kernel of the server (simple lifecycle)
+* Loader: Module loader find all modules implemented on the server
+* Dealer: Allow the communication beetween modules
+* Directory: Provide a module directory find a module by 'name' or 'address'
+* BaseManager: First component of a module
+* BaseProvider: Second componenent of a module
+* BaseBinder: Third component of a module
+* BaseOperator: Provide operations and encaps or decaps as a ModuleFrameTransfert
+* BaseRegistry: Allow a module to have subscribers and remember them
+* BaseCommand: Generic command parser for terminal commands
+
+"""
+
 import re
 import sys
-import threading
 
 from interfaces import (ISaveable, IManageable, IExecutable, IObservable)
 from samples.config import *
@@ -11,7 +30,6 @@ from samples.logger import Logger
 from samples.network import *
 from samples.transfert import ModuleFrameTransfert, SimpleFrameTransfert
 from samples.utils import *
-
 
 class RYNObject(IExecutable, IObservable): 
 
@@ -34,6 +52,9 @@ class RYNObject(IExecutable, IObservable):
 
     def execute(self, frame=None):
         BaseCommand(self, frame).treat()
+        
+    def emit(self, frame):
+        pass
 
 class Core:
 
@@ -181,8 +202,10 @@ class BaseManager(RYNObject, IManageable, ISaveable):
         self.parser = parser
         super().__init__(self.minprefix + "-" + self.sufix, DHCP.IDX_TYPE_MANAGER)
         self.classes = {}
-        self.childs = {}
+        self.childs = {}        
         self.dealer = None
+        self.operator = None
+        self.registry = None        
         self.status = False
 
     def initialize(self):
@@ -199,10 +222,38 @@ class BaseManager(RYNObject, IManageable, ISaveable):
             return (status, response)
         else:
             return self.parser.parse(response)
+    
+    def execute(self, frame):
+        data = self.operator.decapsulate(frame)
+        if data.command == BaseCommand.ADD:
+            self.add(frame)        
+        elif data.command == BaseCommand.EDIT:
+            self.edit(frame)
+        elif data.command == BaseCommand.REMOVE:
+            self.remove(frame)        
+        elif data.command == BaseCommand.SUBSCRIBE:
+            self.registry.subscribe(frame)
+        elif data.command == BaseCommand.UNSUBSCRIBE:
+            self.registry.unsubscribe(frame)
+        else:
+            for child in self.childs:
+                self.childs[child].execute(data)
+                
+    def add(self, frame):
+        print("Add provider: {}".format(frame))
+    
+    def edit(self, frame):
+        print("Edit provider: {}".format(frame))
+        
+    def remove(self, frame):
+        print("Remove provider: {}".format(frame))    
 
-    def emit(self, frame):
+    def emit(self, data):
         if self.dealer is not None:
-            self.dealer.emit(frame)
+            decaps_data = self.operator.encapsulate(data)
+            self.dealer.emit(decaps_data)
+            for module in list(self.registry.get()):
+                self.dealer.emit(self.operator.encapsulate(data=data, name=module))                
         else:
             self.logger(0, "No dealer founded in {}".format(self.name))
 
@@ -212,8 +263,6 @@ class BaseProvider(RYNObject, IManageable):
         super().__init__(name, DHCP.IDX_TYPE_PROVIDER, parent.addr)
         self.parent = parent
         self.childs = {}
-        self.operator = None
-        self.registry = None
 
     def initialize(self, minprefix, classes):
         for c in classes[ModuleFactory.BINDERS]:
@@ -222,26 +271,18 @@ class BaseProvider(RYNObject, IManageable):
             self.childs[name] = instance
             self.childs[name].initialize()
             
-    def execute(self, frame):
-        data = self.operator.decapsulate(frame)
-        if data.command == BaseCommand.SUBSCRIBE:
-            self.registry.subscribe(frame)
-        if data.command == BaseCommand.UNSUBSCRIBE:
-            self.registry.unsubscribe(frame)
+    def execute(self, data):
         for b in self.childs:
             if data.command == BaseCommand.RUN:
                 self.childs[b].run()
             if data.command == BaseCommand.READ:
                 self.childs[b].read()
             if data.command == BaseCommand.WRITE:
-                self.childs[b].write(data)
+                self.childs[b].write(data)    
         
     def emit(self, data):
         """ Update to notify the manager with a frame instance """
-        decaps_data = self.operator.encapsulate(data)
-        self.parent.emit(decaps_data)
-        for module in list(self.registry.get()):
-            self.parent.emit(self.operator.encapsulate(data=data, name=module))    
+        self.parent.emit(data)
 
 class BaseBinder(RYNObject):
 
@@ -265,7 +306,7 @@ class BaseBinder(RYNObject):
 class BaseOperator:
 
     def __init__(self, operations, parent):
-        self.module = parent.parent.module
+        self.module = parent.module
         self.parent = parent
         self.operations = operations
 
@@ -394,11 +435,17 @@ class BaseCommand:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.READ
             if re.match(r"(-|-{2})+(w|write)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.WRITE
+            if re.match(r"(-|-{2})+(add)", elem) != None:
+                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.ADD
+            if re.match(r"(-|-{2})+(edit)", elem) != None:
+                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.EDIT
+            if re.match(r"(-|-{2})+(rm|remove)", elem) != None:
+                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.REMOVE            
             if re.match(r"(-|-{2})+(s|subscribe)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.SUBSCRIBE
             if re.match(r"(-|-{2})+(u|unsubscribe)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.UNSUBSCRIBE
-            if re.match(r"(-|-{2})+(a|address|addr)", elem) != None:
+            if re.match(r"(-|-{2})+(addr|address)", elem) != None:
                 if command.index(elem)+1 < len(command):
                     try:
                         checkIp(command[command.index(elem)+1])

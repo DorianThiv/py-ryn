@@ -19,7 +19,8 @@ class TerminalBaseCommand:
         commands = [
             TerminalMessageCommand(),
             TerminalSubscribeCommand(),
-            TerminalUnsubscribeCommand()
+            TerminalUnsubscribeCommand(),
+            TerminalAddCommand()
         ]
         if len(commanddict) == 1:
             return (False, BaseCommand.PARSE_ARGUMENTS_ERROR)
@@ -60,4 +61,12 @@ class TerminalUnsubscribeCommand:
     def parse(self, commanddict):
         if BaseCommand.PARSE_ADDRESS not in commanddict:
             return (False, BaseCommand.PARSE_ADDRESS_ERROR)
+        return (True, commanddict)
+    
+class TerminalAddCommand:
+
+    def __init__(self):
+        self.label = BaseCommand.ADD
+    
+    def parse(self, commanddict):
         return (True, commanddict)
