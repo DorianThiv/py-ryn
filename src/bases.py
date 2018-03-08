@@ -1,21 +1,23 @@
 
 """ Bases
 
-. bases.py module
+    bases.py module 
+      ~
+    c[_] --> coffee mmmh
 
-Get base classes to provide a centralized source code.
+    Get base classes to provide a centralized source code.
 
-* RYNObject: Base object for module's components
-* Core: Kernel of the server (simple lifecycle)
-* Loader: Module loader find all modules implemented on the server
-* Dealer: Allow the communication beetween modules
-* Directory: Provide a module directory find a module by 'name' or 'address'
-* BaseManager: First component of a module
-* BaseProvider: Second componenent of a module
-* BaseBinder: Third component of a module
-* BaseOperator: Provide operations and encaps or decaps as a ModuleFrameTransfert
-* BaseRegistry: Allow a module to have subscribers and remember them
-* BaseCommand: Generic command parser for terminal commands
+    * RYNObject: Base object for module's components
+    * Core: Kernel of the server (simple lifecycle)
+    * Loader: Module loader find all modules implemented on the server
+    * Dealer: Allow the communication beetween modules
+    * Directory: Provide a module directory find a module by 'name' or 'address'
+    * BaseManager: First component of a module
+    * BaseProvider: Second componenent of a module
+    * BaseBinder: Third component of a module
+    * BaseOperator: Provide operations and encaps or decaps as a ModuleFrameTransfert
+    * BaseRegistry: Allow a module to have subscribers and remember them
+    * BaseCommand: Generic command parser for terminal commands
 
 """
 
@@ -33,14 +35,15 @@ from samples.utils import *
 
 class RYNObject(IExecutable, IObservable): 
 
-    def __init__(self, name, component_type, mdladdr=None):
+    def __init__(self, name, component_type, mdladdr=None, parent=None):
         self.name = name
         self.type = component_type
         self.addr = DHCP.getInstance(mdladdr).discover(self)
+        self.id = DHCP.getInstance(mdladdr).build_addr(component_type, self.addr, parent)
         self.logger = Logger.getInstance()
 
     def __str__(self):
-        return "__RYN_OBJECT__ = (name : {}, addr: {})".format(self.name, self.addr)
+        return "__RYN_OBJECT__ = (id: {}, name: {}, addr: {})".format(self.id, self.name, self.addr)
 
     def initialize(self):
         """ Initializing Load Method: Load a his component """
@@ -209,12 +212,18 @@ class BaseManager(RYNObject, IManageable, ISaveable):
         self.status = False
 
     def initialize(self):
+        """ Can be initialize for the first time like current code or 
+            without any child ?? I don't know...
+            But It must can be initilized with a save.
+            The "save" can be an image of the module.
+        """
         self.classes = ModuleFactory.make(self.minprefix, self.module)
         for c in self.classes[ModuleFactory.PROVIDERS]:
             name = class_name_gen(self.minprefix, c[ModuleFactory.VCLASSES])
             instance = c[ModuleFactory.VCLASSES](class_name_gen(self.minprefix, c[ModuleFactory.VCLASSES]), self)
             self.childs[name] = instance
             self.childs[name].initialize(self.minprefix, self.classes)
+        ConfigurationModule.saveStructureModule(self)
 
     def command(self, command):
         status, response = BaseCommand.parse(command)
@@ -260,7 +269,7 @@ class BaseManager(RYNObject, IManageable, ISaveable):
 class BaseProvider(RYNObject, IManageable):
 
     def __init__(self, name, parent):
-        super().__init__(name, DHCP.IDX_TYPE_PROVIDER, parent.addr)
+        super().__init__(name, DHCP.IDX_TYPE_PROVIDER, parent.addr, parent)
         self.parent = parent
         self.childs = {}
 
@@ -287,8 +296,8 @@ class BaseProvider(RYNObject, IManageable):
 class BaseBinder(RYNObject):
 
     def __init__(self, name, parent):
+        super().__init__(name, DHCP.IDX_TYPE_BINDER, parent.parent.addr, parent)
         self.parent = parent
-        super().__init__(name, DHCP.IDX_TYPE_BINDER, self.parent.parent.addr)
 
     def initialize(self):
         pass
@@ -431,9 +440,9 @@ class BaseCommand:
         for elem in command:
             if re.match(r"mdl([a-z])+", elem) != None:
                 commanddict[BaseCommand.PARSE_MODULE] = elem
-            if re.match(r"(-|-{2})+(r|read)", elem) != None:
+            if re.match(r"(-|-{2})+(read)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.READ
-            if re.match(r"(-|-{2})+(w|write)", elem) != None:
+            if re.match(r"(-|-{2})+(write)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.WRITE
             if re.match(r"(-|-{2})+(add)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.ADD
@@ -441,9 +450,9 @@ class BaseCommand:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.EDIT
             if re.match(r"(-|-{2})+(rm|remove)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.REMOVE            
-            if re.match(r"(-|-{2})+(s|subscribe)", elem) != None:
+            if re.match(r"(-|-{2})+(sub|subscribe)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.SUBSCRIBE
-            if re.match(r"(-|-{2})+(u|unsubscribe)", elem) != None:
+            if re.match(r"(-|-{2})+(unsub|unsubscribe)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.UNSUBSCRIBE
             if re.match(r"(-|-{2})+(addr|address)", elem) != None:
                 if command.index(elem)+1 < len(command):

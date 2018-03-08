@@ -2,6 +2,8 @@ import sys
 import os
 import json
 
+from samples.utils import JSON
+
 class ConfigurationModule:
     
     CONFIG_FILE = "files/config.json"
@@ -21,6 +23,18 @@ class ConfigurationModule:
             })
             with open(os.path.dirname(__file__) + "/" + ConfigurationModule.CONFIG_FILE, 'w') as f:
                 json.dump(data, f, sort_keys=True, indent=4)
+        except Exception as e:
+            print("[ERROR - CONFIGURATION - MODULE] : {}".format(e))
+
+    @staticmethod
+    def saveStructureModule(module, callback=None):
+        """ Save a structure of a module and reload it at the begining """
+        try:
+            with open(os.path.dirname(__file__) + "/" + ConfigurationModule.CONFIG_FILE, 'r') as f:
+                data = json.load(f)
+            data["structure"]["modules"].append({ module.__dict__ })
+            # with open(os.path.dirname(__file__) + "/" + ConfigurationModule.CONFIG_FILE, 'w') as f:
+                # json.dump(data, f, sort_keys=True, indent=4)
         except Exception as e:
             print("[ERROR - CONFIGURATION - MODULE] : {}".format(e))
     

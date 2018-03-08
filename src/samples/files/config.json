@@ -16,5 +16,8 @@
                 "usage": "no usage"
             }
         ]
+    },
+    "structure": {
+        "modules": []   
     }
 }
