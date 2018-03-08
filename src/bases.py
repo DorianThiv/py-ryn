@@ -42,8 +42,11 @@ class RYNObject(IExecutable, IObservable):
         self.id = DHCP.getInstance(mdladdr).build_addr(component_type, self.addr, parent)
         self.logger = Logger.getInstance()
 
+    def __repr__(self):
+        return "__RYN_OBJECT__ = (id: {}, name: {})".format(self.id, self.name)    
+
     def __str__(self):
-        return "__RYN_OBJECT__ = (id: {}, name: {}, addr: {})".format(self.id, self.name, self.addr)
+        return "__RYN_OBJECT__ = (id: {}, name: {})".format(self.id, self.name)
 
     def initialize(self):
         """ Initializing Load Method: Load a his component """
@@ -94,7 +97,7 @@ class Loader(RYNObject):
     """ The loader enable to initialize all modules and give them instances to the "Dealer"
     """
     def __init__(self, core):
-        super().__init__("loader", DHCP.IDX_TYPE_LOADER, mdladdr=None)
+        super().__init__("loader", DHCP.IDX_TYPE_LOADER)
         self.core = core
         self.dealer = Dealer()
         self.managers = {}
@@ -197,15 +200,18 @@ class BaseManager(RYNObject, IManageable, ISaveable):
     """ Manager initialize all components in this his module """
     
     def __init__(self, module, parser):
+        # construct
+        self.module = module
+        self.parser = parser
+        self.sufix = "manager"
+        # load from config
         mod_conf = ConfigurationModule.getModuleProperties(module)
         self.minprefix = mod_conf["prefix"]
-        self.sufix = "manager"
-        self.module = module     
         self.usage = mod_conf["usage"]
-        self.parser = parser
+        # super instance
         super().__init__(self.minprefix + "-" + self.sufix, DHCP.IDX_TYPE_MANAGER)
         self.classes = {}
-        self.childs = {}        
+        self.childs = {}  
         self.dealer = None
         self.operator = None
         self.registry = None        
@@ -223,7 +229,6 @@ class BaseManager(RYNObject, IManageable, ISaveable):
             instance = c[ModuleFactory.VCLASSES](class_name_gen(self.minprefix, c[ModuleFactory.VCLASSES]), self)
             self.childs[name] = instance
             self.childs[name].initialize(self.minprefix, self.classes)
-        ConfigurationModule.saveStructureModule(self)
 
     def command(self, command):
         status, response = BaseCommand.parse(command)

@@ -37,3 +37,4 @@ class DefaultMessageCommand:
         if BaseCommand.PARSE_TEXT not in commanddict:
             return (False, BaseCommand.PARSE_TEXT_ERROR)
         return (True, commanddict)
+

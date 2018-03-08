@@ -11,7 +11,7 @@ class TerminalManager(BaseManager):
         super().__init__(mod, TerminalBaseCommand())
         self.operator = TerminalOperator(self)
         self.registry = TerminalRegistry()
-        
+
     def emit(self, data):
         try:
             super().emit(data)

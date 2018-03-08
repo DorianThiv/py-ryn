@@ -2,10 +2,8 @@ import sys
 import os
 import json
 
-from samples.utils import JSON
-
 class ConfigurationModule:
-    
+
     CONFIG_FILE = "files/config.json"
 
     @staticmethod
@@ -30,6 +28,7 @@ class ConfigurationModule:
     def saveStructureModule(module, callback=None):
         """ Save a structure of a module and reload it at the begining """
         try:
+            print(module.__dict__)
             with open(os.path.dirname(__file__) + "/" + ConfigurationModule.CONFIG_FILE, 'r') as f:
                 data = json.load(f)
             data["structure"]["modules"].append({ module.__dict__ })
@@ -37,7 +36,7 @@ class ConfigurationModule:
                 # json.dump(data, f, sort_keys=True, indent=4)
         except Exception as e:
             print("[ERROR - CONFIGURATION - MODULE] : {}".format(e))
-    
+
     @staticmethod
     def removeModule(mdlname, callback=None):
         try:
@@ -95,7 +94,4 @@ class ConfigurationModule:
             print("[ERROR - CONFIGURATION - MODULE] : {}".format(e))
     
 if __name__ == "__main__":
-    
-    print(ConfigurationModule.getConfiguration())
-    print(ConfigurationModule.getModulesNames())
-    print(ConfigurationModule.getModuleProperties("mdlterminal"))
+    pass
