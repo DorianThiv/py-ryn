@@ -41,6 +41,8 @@ class RYNObject(IExecutable, IObservable):
         self.addr = DHCP.getInstance(mdladdr).discover(self)
         self.id = DHCP.getInstance(mdladdr).build_addr(component_type, self.addr, parent)
         self.logger = Logger.getInstance()
+        self.parent = parent
+        self.childs = {} 
 
     def __repr__(self):
         return "__RYN_OBJECT__ = (id: {}, name: {})".format(self.id, self.name)    
@@ -53,7 +55,7 @@ class RYNObject(IExecutable, IObservable):
         pass
     
     def uninitialize(self):
-        """ Initializing Load Method: Load a his component """
+        """ Uninitializing Load Method: Load a his component """
         pass    
 
     def execute(self, frame=None):
@@ -98,10 +100,12 @@ class Loader(RYNObject):
     """
     def __init__(self, core):
         super().__init__("loader", DHCP.IDX_TYPE_LOADER)
+        self.logger.clear()
         self.core = core
         self.dealer = Dealer()
         self.managers = {}
         self.initialize(ConfigurationModule.getModulesNames())
+        self.logger.log(1, self.dealer)
 
     def initialize(self, managers):
         """ Load all managers in a list. 
@@ -211,7 +215,6 @@ class BaseManager(RYNObject, IManageable, ISaveable):
         # super instance
         super().__init__(self.minprefix + "-" + self.sufix, DHCP.IDX_TYPE_MANAGER)
         self.classes = {}
-        self.childs = {}  
         self.dealer = None
         self.operator = None
         self.registry = None        
@@ -275,8 +278,6 @@ class BaseProvider(RYNObject, IManageable):
 
     def __init__(self, name, parent):
         super().__init__(name, DHCP.IDX_TYPE_PROVIDER, parent.addr, parent)
-        self.parent = parent
-        self.childs = {}
 
     def initialize(self, minprefix, classes):
         for c in classes[ModuleFactory.BINDERS]:
@@ -302,7 +303,6 @@ class BaseBinder(RYNObject):
 
     def __init__(self, name, parent):
         super().__init__(name, DHCP.IDX_TYPE_BINDER, parent.parent.addr, parent)
-        self.parent = parent
 
     def initialize(self):
         pass
@@ -445,21 +445,21 @@ class BaseCommand:
         for elem in command:
             if re.match(r"mdl([a-z])+", elem) != None:
                 commanddict[BaseCommand.PARSE_MODULE] = elem
-            if re.match(r"(-|-{2})+(read)", elem) != None:
+            if re.match(r"(-|-{2})+(\bread\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.READ
-            if re.match(r"(-|-{2})+(write)", elem) != None:
+            if re.match(r"(-|-{2})+(\bwrite\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.WRITE
-            if re.match(r"(-|-{2})+(add)", elem) != None:
+            if re.match(r"(-|-{2})+(\badd\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.ADD
-            if re.match(r"(-|-{2})+(edit)", elem) != None:
+            if re.match(r"(-|-{2})+(\bedit\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.EDIT
-            if re.match(r"(-|-{2})+(rm|remove)", elem) != None:
+            if re.match(r"(-|-{2})+(\brm\b|\bremove\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.REMOVE            
-            if re.match(r"(-|-{2})+(sub|subscribe)", elem) != None:
+            if re.match(r"(-|-{2})+(\bsub\b|\bsubscribe\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.SUBSCRIBE
-            if re.match(r"(-|-{2})+(unsub|unsubscribe)", elem) != None:
+            if re.match(r"(-|-{2})+(\bunsub\b|\bunsubscribe\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.UNSUBSCRIBE
-            if re.match(r"(-|-{2})+(addr|address)", elem) != None:
+            if re.match(r"(-|-{2})+(\baddr\b|\baddress\b)", elem) != None:
                 if command.index(elem)+1 < len(command):
                     try:
                         checkIp(command[command.index(elem)+1])
@@ -468,7 +468,7 @@ class BaseCommand:
                         return (False, "{} : {}".format(BaseCommand.PARSE_ADDRESS_ERROR, e))
                 else:
                     return (False, BaseCommand.PARSE_ADDRESS_ERROR)
-            if re.match(r"(-|-{2})+(t|text)", elem) != None:
+            if re.match(r"(-|-{2})+(\btext\b)", elem) != None:
                 if command.index(elem)+1 < len(command):
                     commanddict[BaseCommand.PARSE_TEXT] = command[command.index(elem)+1]
                 else:

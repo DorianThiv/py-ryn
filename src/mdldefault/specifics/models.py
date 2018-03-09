@@ -21,6 +21,6 @@ class DataRawModel:
         pass
 
     def __str__(self):
-        return "Address: {}, Payload: {}".format(self.address, self.payload)
+        return "Payload: {}".format(self.payload)
 
 
