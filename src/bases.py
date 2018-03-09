@@ -243,7 +243,7 @@ class BaseManager(RYNObject, IManageable, ISaveable, IObservable):
     def execute(self, frame):
         data = self.operator.decapsulate(frame)
         if data.command == BaseCommand.ADD:
-            self.add(frame)        
+            self.add(frame)
         elif data.command == BaseCommand.EDIT:
             self.edit(frame)
         elif data.command == BaseCommand.REMOVE:
@@ -403,8 +403,7 @@ class BaseCommand:
     PARSE_ADDRESS = "address"
     PARSE_CONNECTION = "connection"
     PARSE_DEVICE = "device"
-    PARSE_COMPONENT_PROVIDER = "provider"
-    PARSE_COMPONENT_BINDER = "binder"
+    PARSE_COMPONENT = "component"
     
     PARSE_ARGUMENTS_ERROR = "no arguments detected"
     PARSE_MODULE_ERROR = "error module"
@@ -413,7 +412,8 @@ class BaseCommand:
     PARSE_TEXT_ERROR = "excepted text : (-t \"hello world\") | (--text \"hello world\")"
     PARSE_ADDRESS_ERROR = "excepted IP address : (-a x.x.x.x | --address x.x.x.x)"
     PARSE_CONNECTION_ERROR = "error connection"
-    PARSE_DEVICE_ERROR = "error device"    
+    PARSE_DEVICE_ERROR = "error device"
+    PARSE_COMPONENT_ERROR = "expected component type (b)inder (p)rovider"
 
     def __init__(self):
         pass
@@ -450,7 +450,17 @@ class BaseCommand:
             if re.match(r"(-|-{2})+(\bwrite\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.WRITE
             if re.match(r"(-|-{2})+(\badd\b)", elem) != None:
-                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.ADD         
+                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.ADD
+                idx = command.index(elem)+1
+                if idx < len(command):
+                    if re.match(r"(\bp\b|\bprovider\b)", command[idx]):
+                        commanddict[BaseCommand.PARSE_COMPONENT] = command[idx]
+                    elif re.match(r"(\bb\b|\bbinder\b)", command[idx]):
+                        commanddict[BaseCommand.PARSE_COMPONENT] = command[idx]
+                    else:
+                        return (False, BaseCommand.PARSE_COMPONENT_ERROR)
+                else:
+                    return (False, BaseCommand.PARSE_COMPONENT_ERROR)
             if re.match(r"(-|-{2})+(\bedit\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.EDIT
             if re.match(r"(-|-{2})+(\brm\b|\bremove\b)", elem) != None:
@@ -474,3 +484,4 @@ class BaseCommand:
                 else:
                     return (False, BaseCommand.PARSE_TEXT_ERROR)
         return (True, commanddict)
+        
