@@ -10,12 +10,12 @@ Property label make reference to BaseCommand:
 
 from bases import BaseCommand
 
-class DefaultBaseCommand:
+class DefaultBaseCommand(BaseCommand):
 
     def __init__(self):
-        pass
+        super().__init__()
     
-    def parse(self, commanddict):
+    def check(self, commanddict):
         commands = [
             DefaultMessageCommand()
         ]
@@ -26,14 +26,14 @@ class DefaultBaseCommand:
         else:
             for command in commands:
                 if command.label == commanddict[BaseCommand.PARSE_COMMAND]:
-                    return command.parse(commanddict)
+                    return command.check(commanddict)
 
 class DefaultMessageCommand:
 
     def __init__(self):
         self.label = BaseCommand.WRITE
     
-    def parse(self, commanddict):
+    def check(self, commanddict):
         if BaseCommand.PARSE_TEXT not in commanddict:
             return (False, BaseCommand.PARSE_TEXT_ERROR)
         return (True, commanddict)

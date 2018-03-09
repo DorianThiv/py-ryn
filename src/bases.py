@@ -59,7 +59,7 @@ class RYNObject(IExecutable, IObservable):
         pass    
 
     def execute(self, frame=None):
-        BaseCommand(self, frame).treat()
+        BaseCommand.treat(self, self.type, frame)
         
     def emit(self, frame):
         pass
@@ -105,7 +105,7 @@ class Loader(RYNObject):
         self.dealer = Dealer()
         self.managers = {}
         self.initialize(ConfigurationModule.getModulesNames())
-        self.logger.log(1, self.dealer)
+        self.logger.log(2, self.dealer)
 
     def initialize(self, managers):
         """ Load all managers in a list. 
@@ -120,7 +120,7 @@ class Loader(RYNObject):
 
     def execute(self, frame):
         if frame.command == BaseCommand.RUN:
-            BaseCommand(self, frame).treat()
+            BaseCommand.treat(self, self.type, frame)
         elif frame.command == BaseCommand.SHUTDOWN:
             print("Shutdown")  
 
@@ -200,7 +200,7 @@ class Dealer(IObservable):
             print("[ERROR - NOT FOUND MODULE - /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
             print("[ERROR - NOT FOUND METHOD - IN MODULE ... /!\ MAKE EXCEPTION /!\] Ligne {}, msg: {}".format(sys.exc_info()[-1].tb_lineno, e))
 
-class BaseManager(RYNObject, IManageable, ISaveable):
+class BaseManager(RYNObject, IManageable, ISaveable, IObservable):
     """ Manager initialize all components in this his module """
     
     def __init__(self, module, parser):
@@ -234,11 +234,11 @@ class BaseManager(RYNObject, IManageable, ISaveable):
             self.childs[name].initialize(self.minprefix, self.classes)
 
     def command(self, command):
-        status, response = BaseCommand.parse(command)
+        status, response = self.parser.parse(command)
         if status is False:
             return (status, response)
         else:
-            return self.parser.parse(response)
+            return self.parser.check(response)
     
     def execute(self, frame):
         data = self.operator.decapsulate(frame)
@@ -274,7 +274,7 @@ class BaseManager(RYNObject, IManageable, ISaveable):
         else:
             self.logger(0, "No dealer founded in {}".format(self.name))
 
-class BaseProvider(RYNObject, IManageable):
+class BaseProvider(RYNObject, IManageable, IObservable):
 
     def __init__(self, name, parent):
         super().__init__(name, DHCP.IDX_TYPE_PROVIDER, parent.addr, parent)
@@ -299,7 +299,7 @@ class BaseProvider(RYNObject, IManageable):
         """ Update to notify the manager with a frame instance """
         self.parent.emit(data)
 
-class BaseBinder(RYNObject):
+class BaseBinder(RYNObject, IObservable):
 
     def __init__(self, name, parent):
         super().__init__(name, DHCP.IDX_TYPE_BINDER, parent.parent.addr, parent)
@@ -403,6 +403,8 @@ class BaseCommand:
     PARSE_ADDRESS = "address"
     PARSE_CONNECTION = "connection"
     PARSE_DEVICE = "device"
+    PARSE_COMPONENT_PROVIDER = "provider"
+    PARSE_COMPONENT_BINDER = "binder"
     
     PARSE_ARGUMENTS_ERROR = "no arguments detected"
     PARSE_MODULE_ERROR = "error module"
@@ -413,24 +415,22 @@ class BaseCommand:
     PARSE_CONNECTION_ERROR = "error connection"
     PARSE_DEVICE_ERROR = "error device"    
 
-    def __init__(self, component, command):
-        self.component = component
-        self.cpttype = self.component.type
-        self.command = command
-
-    def treat(self):
-        """ Check for a command line which specify a module """
-        if self.cpttype == BaseCommand.CORE:
-            self.component.execute(self.command)
-        if self.cpttype == BaseCommand.LOADER:
-            for m in list(Directory.CONNECTED_MANAGERS_BY_NAME):
-                Directory.CONNECTED_MANAGERS_BY_NAME[m].execute(self.command)
-        if self.cpttype in [BaseCommand.MANAGER, BaseCommand.PROVIDER]:
-            for p in self.component.childs:
-                self.component.childs[p].execute(self.command)
+    def __init__(self):
+        pass
 
     @staticmethod
-    def parse(command):
+    def treat(component, cpttype, command):
+        """ Check for a command line which specify a module """
+        if cpttype == BaseCommand.CORE:
+            component.execute(command)
+        if cpttype == BaseCommand.LOADER:
+            for m in list(Directory.CONNECTED_MANAGERS_BY_NAME):
+                Directory.CONNECTED_MANAGERS_BY_NAME[m].execute(command)
+        if cpttype in [BaseCommand.MANAGER, BaseCommand.PROVIDER]:
+            for p in component.childs:
+                component.childs[p].execute(command)
+
+    def parse(self, command):
         """ Command parser function has a public exposition 
             to have a command line parser generally for manager.
 
@@ -450,7 +450,7 @@ class BaseCommand:
             if re.match(r"(-|-{2})+(\bwrite\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.WRITE
             if re.match(r"(-|-{2})+(\badd\b)", elem) != None:
-                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.ADD
+                commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.ADD         
             if re.match(r"(-|-{2})+(\bedit\b)", elem) != None:
                 commanddict[BaseCommand.PARSE_COMMAND] = BaseCommand.EDIT
             if re.match(r"(-|-{2})+(\brm\b|\bremove\b)", elem) != None:

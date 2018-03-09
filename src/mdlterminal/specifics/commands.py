@@ -10,12 +10,12 @@ Property label make reference to BaseCommand:
 
 from bases import BaseCommand
 
-class TerminalBaseCommand:
+class TerminalBaseCommand(BaseCommand):
 
     def __init__(self):
-        pass
+        super().__init__()
     
-    def parse(self, commanddict):
+    def check(self, commanddict):
         commands = [
             TerminalMessageCommand(),
             TerminalSubscribeCommand(),
@@ -29,14 +29,14 @@ class TerminalBaseCommand:
         else:
             for command in commands:
                 if command.label == commanddict[BaseCommand.PARSE_COMMAND]:
-                    return command.parse(commanddict)
+                    return command.check(commanddict)
 
 class TerminalMessageCommand:
 
     def __init__(self):
         self.label = BaseCommand.WRITE
     
-    def parse(self, commanddict):
+    def check(self, commanddict):
         if BaseCommand.PARSE_ADDRESS not in commanddict:
             return (False, BaseCommand.PARSE_ADDRESS_ERROR)
         if BaseCommand.PARSE_TEXT not in commanddict:
@@ -48,7 +48,7 @@ class TerminalSubscribeCommand:
     def __init__(self):
         self.label = BaseCommand.SUBSCRIBE
     
-    def parse(self, commanddict):
+    def check(self, commanddict):
         if BaseCommand.PARSE_ADDRESS not in commanddict:
             return (False, BaseCommand.PARSE_ADDRESS_ERROR)
         return (True, commanddict)
@@ -58,7 +58,7 @@ class TerminalUnsubscribeCommand:
     def __init__(self):
         self.label = BaseCommand.UNSUBSCRIBE
     
-    def parse(self, commanddict):
+    def check(self, commanddict):
         if BaseCommand.PARSE_ADDRESS not in commanddict:
             return (False, BaseCommand.PARSE_ADDRESS_ERROR)
         return (True, commanddict)
@@ -68,5 +68,5 @@ class TerminalAddCommand:
     def __init__(self):
         self.label = BaseCommand.ADD
     
-    def parse(self, commanddict):
+    def check(self, commanddict):
         return (True, commanddict)
