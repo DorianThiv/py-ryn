@@ -11,8 +11,8 @@ class TerminalBinder(BaseBinder):
 
     """ Initialize an internal terminal to communicate with the user """
     
-    def __init__(self, name, observable=None):
-        super().__init__(name, observable)
+    def __init__(self, name, parent=None):
+        super().__init__(name, parent)
         self.server = None
         self.socket = None
         self.host = ipv4()
@@ -22,7 +22,7 @@ class TerminalBinder(BaseBinder):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.bind((self.host, self.port))
-            self.observable.parent.observable.status = True
+            self.parent.parent.status = True
             print("[SUCCESS - BINDER - TERMINAL] : Connection (host: {}, port: {})".format(self.host, self.port))
         except Exception as e:
             self.logger.log(0, "[TERMINAL - LOAD] {}".format(e)) 
@@ -45,7 +45,7 @@ class TerminalBinder(BaseBinder):
     def read(self, data):
         self.logger.log(2, "Terminal event: {}".format(data))
         data.binder = self
-        self.observable.emit(data) 
+        self.parent.emit(data) 
         
     def write(self, data):
         try:

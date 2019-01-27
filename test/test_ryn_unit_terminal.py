@@ -34,7 +34,7 @@ def main():
 
 class TerminalTest(unittest.TestCase):
 
-    IP = "192.168.1.17"
+    IP = "172.26.123.5"
     PORT = 1297
 
     def test_terminal_connection(self):
@@ -49,6 +49,6 @@ class TerminalTest(unittest.TestCase):
         send_command(sock, "mdlterminal -w")
         send_command(sock, "mdlterminal -w -a {} -t \"Hello World\" ".format(TerminalTest.IP))
         send_command(sock, "mdlterminal -w -a {} -t \"\" ".format(TerminalTest.IP))
-        send_command_no_receive(sock, "mdldefault -w -t \"Hello World\"")
+        send_command(sock, "mdldefault -w -t \"Hello World\"")
 
 main()

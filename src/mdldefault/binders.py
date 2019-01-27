@@ -11,22 +11,28 @@ class DefaultBinder(BaseBinder):
 
     """ Initialize an internal default to communicate with the user """
     
-    def __init__(self, name, observable=None):
-        super().__init__(name, observable)
-        self.writer = DefaultWriter(self.read)
+    def __init__(self, name, parent=None):
+        super().__init__(name, parent)
+        self.writer = DefaultWriter()
 
     def initialize(self):
-        self.observable.parent.observable.status = True
+        try:
+            self.parent.parent.status = True
+        except Exception as e:
+            self.logger.log(0, "[DEFAULT - LOAD] {}".format(e)) 
+            self.socket.close()
 
     def run(self):
         pass
 
     def read(self, data):
-        self.logger.log(2, "Read from mdldefault: {}".format(data))
-        data.binder = self
-        self.observable.emit(data) 
+        self.parent.emit(data) 
         
     def write(self, data):
-        self.writer.write(data)
+        try:
+            self.writer.write(data)
+        except Exception as e:
+            print("[ERROR - DEFAULT_BINDER - WRITE] : {}".format(e))
+            self.logger.log(1, e)
            
     

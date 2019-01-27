@@ -1,16 +1,19 @@
 import sys
-import threading
 
+from bases import BaseCommand
+from mdldefault.specifics.exceptions import *
 from mdldefault.specifics.models import DataRawModel
 
 class DefaultWriter:
 
-    def __init__(self, callback):
-        self.bcallback = callback
+    def __init__(self):
+        pass
+
+    def read(self):
+        pass
 
     def write(self, data):
-        print(data.payload)
+        print(data)
     
-    def scallback(self, text):
-        data = DataRawModel(payload=text)
-        self.bcallback(data)
+    def stop(self):
+        pass

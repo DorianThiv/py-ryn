@@ -3,6 +3,11 @@ from bases import BaseCommand
 
 class DataRawModel:
 
+    COMMAND = "command"
+    ADDRESS = "address"
+    PAYLOAD = "payload"
+    BINDER = "binder"
+
     def __init__(self, command=None, address=None, payload=None, binder=None):
         self.command = command
         self.payload = payload

@@ -1,4 +1,11 @@
 
+""" DHCP module
+
+    It provide an address generator.
+    With this module RYN will be able to ask a specific component
+    in his directory.
+"""
+
 class CoreAlreadyExistError(Exception):
     pass
 
@@ -17,8 +24,8 @@ class DHCP:
     IDX_TYPE_LOADER = -1
     IDX_TYPE_MANAGER = 0
     IDX_TYPE_PROVIDER = 1
-    IDX_TYPE_OPERATOR = 2
-    IDX_TYPE_BINDER = 3
+    IDX_TYPE_BINDER = 2
+    IDX_TYPE_OPERATOR = 3
     
     NULL_ID = 0
     CORE_ID = 1
@@ -87,4 +94,24 @@ class DHCP:
         if len(_dict) == 0:
             return _min
         return max(_dict.keys(), key=int) + 1
+
+    def build_addr(self, comp_type, addr, parent=None):
+        """ Build address for components:
+            Loader: 0.0.0
+            Manager: 1.0.0
+            Provider: 1.1.0
+            Binder: 1.1.1
+        """
+        if comp_type == DHCP.IDX_TYPE_LOADER:
+            return "0.0.0"
+        elif comp_type == DHCP.IDX_TYPE_MANAGER:
+            return "{}.0.0".format(addr)
+        elif comp_type == DHCP.IDX_TYPE_PROVIDER:
+            if parent != None:
+                return "{}.{}.0".format(parent.addr, addr)
+        elif comp_type == DHCP.IDX_TYPE_BINDER:
+            if parent != None:
+                return "{}.{}.{}".format(parent.parent.addr, parent.addr, addr)
+        return None
+
 

@@ -1,8 +1,11 @@
 
+import sys
+
 from bases import BaseProvider
 
 class DefaultProvider(BaseProvider):
 
-    def __init__(self, name, observable=None):
-        super().__init__(name, observable)
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
+
 
